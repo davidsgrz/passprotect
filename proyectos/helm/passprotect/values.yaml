@@ -1,0 +1,154 @@
+# PassProtect — Valores por defecto del Helm Chart
+# Sobreescribir con values-prod.yaml para produccion
+
+global:
+  vpsIp: "TU_IP_VPS"
+  imageRegistry: "dsegura97"
+
+# ── Vaultwarden ──
+vaultwarden:
+  image:
+    repository: dsegura97/vaultwarden-corp
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  domain: "https://vault.TU_IP_VPS.nip.io"
+  signupsAllowed: "false"
+  invitationsAllowed: "true"
+  showPasswordHint: "false"
+  sso:
+    enabled: "true"
+    clientId: "vaultwarden"
+    authority: "https://auth.TU_IP_VPS.nip.io/realms/corporativo"
+  smtp:
+    host: ""
+    from: ""
+    port: "587"
+    security: "starttls"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    size: 5Gi
+
+# ── MariaDB Vaultwarden ──
+mariadbVw:
+  image:
+    repository: dsegura97/mariadb-corp
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  database: "vaultwarden"
+  user: "vaultwarden"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  persistence:
+    size: 10Gi
+
+# ── Keycloak ──
+keycloak:
+  image:
+    repository: dsegura97/keycloak-corp
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  hostname: "auth.TU_IP_VPS.nip.io"
+  adminUser: "admin"
+  db:
+    vendor: "mariadb"
+    database: "keycloak"
+    user: "keycloak"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1536Mi
+
+# ── MariaDB Keycloak ──
+mariadbKc:
+  image:
+    repository: dsegura97/mariadb-corp
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  database: "keycloak"
+  user: "keycloak"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  persistence:
+    size: 5Gi
+
+# ── FreeIPA ──
+freeipa:
+  image:
+    repository: freeipa/freeipa-server
+    tag: "fedora-40"
+    pullPolicy: IfNotPresent
+  realm: "PASSPROTECT.LOCAL"
+  domain: "passprotect.local"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  persistence:
+    size: 5Gi
+
+# ── Dashboard ──
+dashboard:
+  image:
+    repository: dsegura97/dashboard-corp
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# ── Ingress ──
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: true
+
+# ── Monitoring ──
+monitoring:
+  audit:
+    schedule: "0 */6 * * *"
+  backup:
+    schedule: "0 3 * * *"
+    retentionDays: 30
+    persistence:
+      size: 20Gi
+
+# ── Security ──
+security:
+  podSecurityStandards:
+    vaultwarden: "restricted"
+    auth: "baseline"
+    monitoring: "restricted"
+  networkPolicies:
+    enabled: true
+  resourceQuotas:
+    enabled: true

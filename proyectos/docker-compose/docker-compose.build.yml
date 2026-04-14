@@ -1,0 +1,57 @@
+# PassProtect — Build de imagenes custom
+# Uso: docker compose -f proyectos/docker-compose/docker-compose.build.yml build
+
+services:
+  ubbase:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/base/Dockerfile
+    image: dsegura97/ubbase:latest
+
+  ubseguridad:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/seguridad/Dockerfile
+    image: dsegura97/ubseguridad:latest
+    depends_on:
+      - ubbase
+
+  vaultwarden-corp:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/vaultwarden/Dockerfile
+    image: dsegura97/vaultwarden-corp:1.0.0
+    depends_on:
+      - ubseguridad
+
+  keycloak-corp:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/keycloak/Dockerfile
+    image: dsegura97/keycloak-corp:1.0.0
+    depends_on:
+      - ubseguridad
+
+  mariadb-corp:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/mariadb/Dockerfile
+    image: dsegura97/mariadb-corp:1.0.0
+    depends_on:
+      - ubseguridad
+
+  nginx-proxy-corp:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/nginx-proxy/Dockerfile
+    image: dsegura97/nginx-proxy-corp:1.0.0
+    depends_on:
+      - ubseguridad
+
+  dashboard-corp:
+    build:
+      context: ../..
+      dockerfile: dockerfiles/dashboard/Dockerfile
+    image: dsegura97/dashboard-corp:1.0.0
+    depends_on:
+      - ubseguridad

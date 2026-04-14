@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassProtect — Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login -->
+    <div id="login-screen" class="screen">
+        <div class="login-card">
+            <div class="logo">
+                <span class="logo-icon">&#128274;</span>
+                <h1>PassProtect</h1>
+                <p>Plataforma Corporativa de Gestion de Contraseñas</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="admin / usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="cualquier valor" required>
+                </div>
+                <button type="submit" class="btn-primary">Iniciar sesion</button>
+                <p class="login-hint">Demo: <strong>admin</strong> o <strong>usuario</strong></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-screen" class="screen hidden">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon-sm">&#128274;</span>
+                <span class="brand">PassProtect</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="overview">
+                    <span>&#128200;</span> Resumen
+                </li>
+                <li class="nav-item" data-section="vault">
+                    <span>&#128273;</span> Boveda
+                </li>
+                <li class="nav-item admin-only" data-section="users">
+                    <span>&#128101;</span> Usuarios
+                </li>
+                <li class="nav-item admin-only" data-section="security">
+                    <span>&#128737;</span> Seguridad
+                </li>
+                <li class="nav-item admin-only" data-section="audit">
+                    <span>&#128203;</span> Auditoria
+                </li>
+                <li class="nav-item" data-section="settings">
+                    <span>&#9881;</span> Ajustes
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span id="user-role-badge" class="badge"></span>
+                    <span id="user-display"></span>
+                </div>
+                <button id="logout-btn" class="btn-logout">Cerrar sesion</button>
+            </div>
+        </nav>
+
+        <main class="content">
+            <!-- Resumen -->
+            <section id="section-overview" class="section">
+                <h2>Resumen del sistema</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-passwords">247</div>
+                        <div class="stat-label">Contraseñas almacenadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-users">12</div>
+                        <div class="stat-label">Usuarios activos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-orgs">3</div>
+                        <div class="stat-label">Organizaciones</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number stat-ok" id="stat-health">OK</div>
+                        <div class="stat-label">Estado del sistema</div>
+                    </div>
+                </div>
+
+                <div class="panel admin-only">
+                    <h3>Servicios</h3>
+                    <table class="table">
+                        <thead><tr><th>Servicio</th><th>Estado</th><th>Uptime</th><th>CPU</th><th>RAM</th></tr></thead>
+                        <tbody>
+                            <tr><td>Vaultwarden</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>8%</td><td>256 MB</td></tr>
+                            <tr><td>Keycloak</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>15%</td><td>1.2 GB</td></tr>
+                            <tr><td>MariaDB-VW</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>3%</td><td>384 MB</td></tr>
+                            <tr><td>MariaDB-KC</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>256 MB</td></tr>
+                            <tr><td>FreeIPA</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>5%</td><td>1.0 GB</td></tr>
+                            <tr><td>Nginx Proxy</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>64 MB</td></tr>
+                            <tr><td>Dashboard</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>32 MB</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Boveda -->
+            <section id="section-vault" class="section hidden">
+                <h2>Mi Boveda</h2>
+                <div class="vault-toolbar">
+                    <input type="text" id="vault-search" placeholder="Buscar contraseñas..." class="search-input">
+                    <button class="btn-primary btn-sm">+ Nueva entrada</button>
+                </div>
+                <div class="vault-list">
+                    <div class="vault-item"><div class="vault-icon">&#127760;</div><div class="vault-info"><strong>GitHub</strong><span>dsegura97@github.com</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+                    <div class="vault-item"><div class="vault-icon">&#9993;</div><div class="vault-info"><strong>Email Corporativo</strong><span>david@passprotect.local</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+                    <div class="vault-item"><div class="vault-icon">&#128187;</div><div class="vault-info"><strong>VPS Contabo</strong><span>root@vps.contabo.com</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+                    <div class="vault-item"><div class="vault-icon">&#128230;</div><div class="vault-info"><strong>Docker Hub</strong><span>dsegura97</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+                    <div class="vault-item"><div class="vault-icon">&#128218;</div><div class="vault-info"><strong>Campus Virtual ASIR</strong><span>david.segura@edu.es</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+                </div>
+            </section>
+
+            <!-- Usuarios (solo admin) -->
+            <section id="section-users" class="section hidden admin-only">
+                <h2>Gestion de Usuarios</h2>
+                <table class="table">
+                    <thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>2FA</th><th>Ultimo acceso</th><th>Estado</th></tr></thead>
+                    <tbody>
+                        <tr><td>dsegura</td><td>dsegura@passprotect.local</td><td><span class="badge badge-admin">Admin</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 2 min</td><td><span class="status-ok">Activo</span></td></tr>
+                        <tr><td>fparra</td><td>fparra@passprotect.local</td><td><span class="badge badge-admin">Admin</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 1h</td><td><span class="status-ok">Activo</span></td></tr>
+                        <tr><td>mgarcia</td><td>mgarcia@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 3h</td><td><span class="status-ok">Activo</span></td></tr>
+                        <tr><td>jlopez</td><td>jlopez@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-warn">Pendiente</span></td><td>Hace 2d</td><td><span class="status-ok">Activo</span></td></tr>
+                        <tr><td>aruiz</td><td>aruiz@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 5d</td><td><span class="status-warn">Inactivo</span></td></tr>
+                    </tbody>
+                </table>
+                <p class="info-text">Fuente: FreeIPA (LDAP, solo lectura) + Keycloak (SSO + 2FA)</p>
+            </section>
+
+            <!-- Seguridad (solo admin) -->
+            <section id="section-security" class="section hidden admin-only">
+                <h2>Panel de Seguridad</h2>
+                <div class="stats-grid">
+                    <div class="stat-card stat-green"><div class="stat-number">0</div><div class="stat-label">Amenazas criticas</div></div>
+                    <div class="stat-card stat-yellow"><div class="stat-number">3</div><div class="stat-label">Intentos SQLi bloqueados</div></div>
+                    <div class="stat-card stat-green"><div class="stat-number">47</div><div class="stat-label">Reglas ModSecurity activas</div></div>
+                    <div class="stat-card stat-green"><div class="stat-number">2</div><div class="stat-label">IPs baneadas (Fail2ban)</div></div>
+                </div>
+                <div class="panel">
+                    <h3>Mitigaciones activas</h3>
+                    <div class="security-list">
+                        <div class="sec-item sec-ok"><span>&#10003;</span> ModSecurity + OWASP CRS (WAF)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> Rate limiting (5r/s login, 2r/s admin)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> Fail2ban (3 jails: login, admin, SQLi)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> MariaDB hardened (STRICT mode, local_infile=0)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> Pod Security Standards (restricted)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> NetworkPolicies (deny-all default)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> TLS 1.2/1.3 (certificados autofirmados)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> 2FA obligatorio (TOTP via Keycloak)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> Security headers (CSP, HSTS, X-Frame)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> Non-root containers + read-only FS</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Auditoria (solo admin) -->
+            <section id="section-audit" class="section hidden admin-only">
+                <h2>Logs de Auditoria</h2>
+                <div class="log-viewer">
+                    <div class="log-line"><span class="log-time">2026-04-14 20:45:12</span> <span class="log-ok">[INFO]</span> Login exitoso: dsegura desde 192.168.1.10</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 20:42:08</span> <span class="log-warn">[WARN]</span> Intento SQLi bloqueado: UNION SELECT desde 45.33.12.88 — baneado 24h</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 20:38:55</span> <span class="log-ok">[INFO]</span> Backup completado: vaultwarden-20260414-030000.sql.gz</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 20:35:22</span> <span class="log-ok">[INFO]</span> Login exitoso: fparra desde 192.168.1.15</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 20:30:10</span> <span class="log-warn">[WARN]</span> 3 intentos fallidos desde 203.0.113.42 — baneado 1h</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 20:15:00</span> <span class="log-ok">[INFO]</span> Security audit completado: 0 vulnerabilidades criticas</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 18:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via FreeIPA sync</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 12:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 03:00:15</span> <span class="log-ok">[INFO]</span> Backup diario completado</div>
+                </div>
+            </section>
+
+            <!-- Ajustes -->
+            <section id="section-settings" class="section hidden">
+                <h2>Ajustes</h2>
+                <div class="panel">
+                    <h3>Mi cuenta</h3>
+                    <p><strong>Usuario:</strong> <span id="settings-user"></span></p>
+                    <p><strong>Rol:</strong> <span id="settings-role"></span></p>
+                    <p><strong>2FA:</strong> TOTP activo</p>
+                    <p><strong>Autenticacion:</strong> Keycloak OIDC + FreeIPA LDAP</p>
+                </div>
+                <div class="panel admin-only">
+                    <h3>Infraestructura</h3>
+                    <p><strong>VPS:</strong> Contabo VPS S (4 vCPU, 8 GB RAM)</p>
+                    <p><strong>Orquestador:</strong> MicroK8s 1.30</p>
+                    <p><strong>Registry:</strong> Docker Hub (dsegura97)</p>
+                    <p><strong>Namespaces:</strong> vaultwarden, auth, monitoring</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
