@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vaultwarden
+  labels:
+    app.kubernetes.io/part-of: passprotect
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auth
+  labels:
+    app.kubernetes.io/part-of: passprotect
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/part-of: passprotect

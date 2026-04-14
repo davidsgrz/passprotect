@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  labels:
+    app: vaultwarden
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.vaultwarden.replicas }}
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      securityContext:
+        {{- include "passprotect.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: vaultwarden
+          image: "{{ .Values.vaultwarden.image.repository }}:{{ .Values.vaultwarden.image.tag }}"
+          imagePullPolicy: {{ .Values.vaultwarden.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 3012
+              name: websocket
+          env:
+            - name: DOMAIN
+              value: {{ .Values.vaultwarden.domain | quote }}
+            - name: SIGNUPS_ALLOWED
+              value: {{ .Values.vaultwarden.signupsAllowed | quote }}
+            - name: INVITATIONS_ALLOWED
+              value: {{ .Values.vaultwarden.invitationsAllowed | quote }}
+            - name: SHOW_PASSWORD_HINT
+              value: {{ .Values.vaultwarden.showPasswordHint | quote }}
+            - name: SSO_ENABLED
+              value: {{ .Values.vaultwarden.sso.enabled | quote }}
+            - name: SSO_CLIENT_ID
+              value: {{ .Values.vaultwarden.sso.clientId | quote }}
+            - name: SSO_AUTHORITY
+              value: {{ .Values.vaultwarden.sso.authority | quote }}
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: admin-token
+            - name: DATABASE_URL
+              value: "mysql://{{ .Values.mariadbVw.user }}:$(DB_PASSWORD)@mariadb-vw:3306/{{ .Values.mariadbVw.database }}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: db-password
+            - name: SSO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: sso-client-secret
+          securityContext:
+            {{- include "passprotect.containerSecurityContext" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.vaultwarden.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /root/logs
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultwarden-data
+        - name: tmp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: vaultwarden
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: websocket
+      port: 3012
+      targetPort: 3012
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-vw
+  namespace: vaultwarden
+  labels:
+    app: mariadb-vw
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb-vw
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mariadb-vw
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadbVw.image.repository }}:{{ .Values.mariadbVw.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadbVw.image.pullPolicy }}
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: db-root-password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mariadbVw.database | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.mariadbVw.user | quote }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: db-password
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [SETUID, SETGID, DAC_OVERRIDE]
+          resources:
+            {{- toYaml .Values.mariadbVw.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: logs
+              mountPath: /var/log/mysql
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb-vw
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-vw
+  namespace: vaultwarden
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: mariadb-vw
+  ports:
+    - port: 3306
+      targetPort: 3306

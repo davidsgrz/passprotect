@@ -1,0 +1,274 @@
+# Keycloak Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: auth
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: keycloak
+          image: dsegura97/keycloak-corp:1.0.0
+          args: ["start-dev"]
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9000
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: keycloak-config
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: "admin"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: admin-password
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-password
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /root/logs
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: auth
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: metrics
+      port: 9000
+      targetPort: 9000
+---
+# MariaDB para Keycloak
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-kc
+  namespace: auth
+  labels:
+    app: mariadb-kc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb-kc
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mariadb-kc
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mariadb
+          image: dsegura97/mariadb-corp:1.0.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-root-password
+            - name: MYSQL_DATABASE
+              value: "keycloak"
+            - name: MYSQL_USER
+              value: "keycloak"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-password
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [SETUID, SETGID, DAC_OVERRIDE]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: logs
+              mountPath: /var/log/mysql
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb-kc
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-kc
+  namespace: auth
+spec:
+  selector:
+    app: mariadb-kc
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+# FreeIPA StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: freeipa
+  namespace: auth
+  labels:
+    app: freeipa
+spec:
+  serviceName: freeipa
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeipa
+  template:
+    metadata:
+      labels:
+        app: freeipa
+    spec:
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: freeipa
+          image: freeipa/freeipa-server:fedora-40
+          command:
+            - /bin/bash
+            - -c
+            - |
+              ipa-server-install --unattended \
+                --realm=PASSPROTECT.LOCAL \
+                --domain=passprotect.local \
+                --ds-password=$(IPA_DS_PASSWORD) \
+                --admin-password=$(IPA_ADMIN_PASSWORD) \
+                --no-ntp --setup-dns --no-forwarders
+          env:
+            - name: IPA_SERVER_HOSTNAME
+              value: "ipa.passprotect.local"
+            - name: IPA_DS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: freeipa-secrets
+                  key: ds-password
+            - name: IPA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: freeipa-secrets
+                  key: admin-password
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 389
+            - containerPort: 636
+            - containerPort: 88
+            - containerPort: 464
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: freeipa-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: freeipa
+  namespace: auth
+spec:
+  selector:
+    app: freeipa
+  ports:
+    - name: ldap
+      port: 389
+      targetPort: 389
+    - name: ldaps
+      port: 636
+      targetPort: 636
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443

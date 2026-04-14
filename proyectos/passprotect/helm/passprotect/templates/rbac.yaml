@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vaultwarden-sa
+  namespace: vaultwarden
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: keycloak-sa
+  namespace: auth
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitoring-sa
+  namespace: monitoring
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: monitoring-reader
+  namespace: vaultwarden
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "endpoints"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: monitoring-reader
+  namespace: auth
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "endpoints"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitoring-read-vw
+  namespace: vaultwarden
+subjects:
+  - kind: ServiceAccount
+    name: monitoring-sa
+    namespace: monitoring
+roleRef:
+  kind: Role
+  name: monitoring-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitoring-read-auth
+  namespace: auth
+subjects:
+  - kind: ServiceAccount
+    name: monitoring-sa
+    namespace: monitoring
+roleRef:
+  kind: Role
+  name: monitoring-reader
+  apiGroup: rbac.authorization.k8s.io

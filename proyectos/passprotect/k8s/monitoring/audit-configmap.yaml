@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-config
+  namespace: monitoring
+data:
+  audit-schedule: "0 */6 * * *"
+  backup-schedule: "0 3 * * *"
+  backup-retention-days: "30"
+  log-max-size: "5242880"

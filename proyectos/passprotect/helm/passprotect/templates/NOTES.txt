@@ -1,0 +1,28 @@
+=============================================
+  PassProtect desplegado correctamente!
+=============================================
+
+Vaultwarden:  https://{{ include "passprotect.vwDomain" . }}
+Keycloak:     https://{{ include "passprotect.kcDomain" . }}
+
+Pasos post-instalacion:
+
+1. Configurar Keycloak (realm, cliente OIDC, 2FA):
+   bash proyectos/passprotect/scripts/setup/configure-keycloak.sh
+
+2. Configurar FreeIPA (usuarios LDAP):
+   bash proyectos/passprotect/scripts/setup/configure-freeipa.sh
+
+3. Verificar despliegue:
+   bash proyectos/passprotect/scripts/setup/verify-deployment.sh
+
+4. Ejecutar auditoria de seguridad:
+   bash proyectos/passprotect/scripts/setup/security-audit.sh
+
+Credenciales admin de Keycloak:
+  Usuario: {{ .Values.keycloak.adminUser }}
+  Password: (almacenado en secret keycloak-secrets)
+
+Para ver los secrets:
+  kubectl get secret vaultwarden-secrets -n vaultwarden -o yaml
+  kubectl get secret keycloak-secrets -n auth -o yaml

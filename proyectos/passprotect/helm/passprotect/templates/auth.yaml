@@ -1,0 +1,252 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: auth
+  labels:
+    app: keycloak
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.keycloak.replicas }}
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      securityContext:
+        {{- include "passprotect.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: keycloak
+          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
+          imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          args: ["start-dev"]
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9000
+              name: metrics
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.adminUser | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: admin-password
+            - name: KC_DB
+              value: {{ .Values.keycloak.db.vendor | quote }}
+            - name: KC_DB_URL
+              value: "jdbc:mariadb://mariadb-kc:3306/{{ .Values.keycloak.db.database }}"
+            - name: KC_DB_USERNAME
+              value: {{ .Values.keycloak.db.user | quote }}
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-password
+            - name: KC_HOSTNAME
+              value: {{ .Values.keycloak.hostname | quote }}
+            - name: KC_PROXY
+              value: "edge"
+          securityContext:
+            {{- include "passprotect.containerSecurityContext" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /root/logs
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: auth
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: metrics
+      port: 9000
+      targetPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-kc
+  namespace: auth
+  labels:
+    app: mariadb-kc
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb-kc
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mariadb-kc
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mariadb
+          image: "{{ .Values.mariadbKc.image.repository }}:{{ .Values.mariadbKc.image.tag }}"
+          imagePullPolicy: {{ .Values.mariadbKc.image.pullPolicy }}
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-root-password
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mariadbKc.database | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.mariadbKc.user | quote }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secrets
+                  key: db-password
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [SETUID, SETGID, DAC_OVERRIDE]
+          resources:
+            {{- toYaml .Values.mariadbKc.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: logs
+              mountPath: /var/log/mysql
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb-kc
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-kc
+  namespace: auth
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: mariadb-kc
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: freeipa
+  namespace: auth
+  labels:
+    app: freeipa
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  serviceName: freeipa
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeipa
+  template:
+    metadata:
+      labels:
+        app: freeipa
+    spec:
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: freeipa
+          image: "{{ .Values.freeipa.image.repository }}:{{ .Values.freeipa.image.tag }}"
+          imagePullPolicy: {{ .Values.freeipa.image.pullPolicy }}
+          env:
+            - name: IPA_SERVER_HOSTNAME
+              value: "ipa.passprotect.local"
+            - name: IPA_DS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: freeipa-secrets
+                  key: ds-password
+            - name: IPA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: freeipa-secrets
+                  key: admin-password
+          ports:
+            - containerPort: 389
+            - containerPort: 636
+            - containerPort: 80
+            - containerPort: 443
+          resources:
+            {{- toYaml .Values.freeipa.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: freeipa-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: freeipa
+  namespace: auth
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: freeipa
+  ports:
+    - name: ldap
+      port: 389
+    - name: ldaps
+      port: 636
+    - name: http
+      port: 80
+    - name: https
+      port: 443

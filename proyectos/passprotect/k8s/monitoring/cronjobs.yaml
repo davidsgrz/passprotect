@@ -1,0 +1,105 @@
+# Auditoria de seguridad cada 6 horas
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: security-audit
+  namespace: monitoring
+spec:
+  schedule: "0 */6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: audit
+              image: dsegura97/ubseguridad:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  echo "=== Auditoria PassProtect $(date) ==="
+                  echo "--- Pods en ejecucion ---"
+                  echo "--- Logs de seguridad ---"
+                  cat /root/logs/security_audit.log 2>/dev/null | tail -100
+                  echo "=== Fin auditoria ==="
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+          restartPolicy: OnFailure
+---
+# Backup diario a las 3 AM
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vaultwarden-backup
+  namespace: monitoring
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: dsegura97/mariadb-corp:1.0.0
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  BACKUP_FILE="/backup/vaultwarden-$(date +%Y%m%d-%H%M%S).sql.gz"
+                  echo "[$(date)] Iniciando backup..."
+                  mysqldump -h mariadb-vw.vaultwarden.svc.cluster.local \
+                    -u "${DB_VW_USER}" -p"${DB_VW_PASSWORD}" \
+                    "${DB_VW_NAME}" | gzip > "$BACKUP_FILE"
+                  echo "[$(date)] Backup completado: $BACKUP_FILE"
+                  # Eliminar backups de mas de 30 dias
+                  find /backup -name "*.sql.gz" -mtime +30 -delete
+                  echo "[$(date)] Limpieza de backups antiguos completada"
+              env:
+                - name: DB_VW_USER
+                  value: "vaultwarden"
+                - name: DB_VW_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: vaultwarden-secrets
+                      key: db-password
+                - name: DB_VW_NAME
+                  value: "vaultwarden"
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup-storage

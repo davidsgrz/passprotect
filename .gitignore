@@ -1,0 +1,29 @@
+# Configuración con secretos
+config.env
+values-prod.yaml
+.env
+
+# Claves privadas
+*.pem
+*.key
+id_rsa
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Logs y reportes
+*.log
+sqli-report.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

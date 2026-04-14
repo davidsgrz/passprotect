@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: security-audit
+  namespace: monitoring
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.monitoring.audit.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            {{- include "passprotect.podSecurityContext" . | nindent 12 }}
+          containers:
+            - name: audit
+              image: "{{ .Values.global.imageRegistry }}/ubseguridad:latest"
+              command: ["/bin/bash", "-c", "echo '=== Auditoria $(date) ===' && cat /root/logs/security_audit.log 2>/dev/null | tail -100"]
+              securityContext:
+                {{- include "passprotect.containerSecurityContext" . | nindent 16 }}
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vaultwarden-backup
+  namespace: monitoring
+  labels:
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.monitoring.backup.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            {{- include "passprotect.podSecurityContext" . | nindent 12 }}
+          containers:
+            - name: backup
+              image: "{{ .Values.mariadbVw.image.repository }}:{{ .Values.mariadbVw.image.tag }}"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  BACKUP_FILE="/backup/vaultwarden-$(date +%Y%m%d-%H%M%S).sql.gz"
+                  mysqldump -h mariadb-vw.vaultwarden.svc.cluster.local \
+                    -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" \
+                    "${MYSQL_DATABASE}" | gzip > "$BACKUP_FILE"
+                  find /backup -name "*.sql.gz" -mtime +{{ .Values.monitoring.backup.retentionDays }} -delete
+              env:
+                - name: MYSQL_USER
+                  value: {{ .Values.mariadbVw.user | quote }}
+                - name: MYSQL_DATABASE
+                  value: {{ .Values.mariadbVw.database | quote }}
+                - name: MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: vaultwarden-secrets
+                      key: db-password
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup-storage

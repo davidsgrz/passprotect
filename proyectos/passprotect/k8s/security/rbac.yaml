@@ -1,0 +1,80 @@
+# ServiceAccount para Vaultwarden — sin permisos elevados
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vaultwarden-sa
+  namespace: vaultwarden
+automountServiceAccountToken: false
+---
+# ServiceAccount para Keycloak
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: keycloak-sa
+  namespace: auth
+automountServiceAccountToken: false
+---
+# ServiceAccount para monitoring/backups
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitoring-sa
+  namespace: monitoring
+automountServiceAccountToken: false
+---
+# Role para monitoring — solo lectura de pods y logs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: monitoring-reader
+  namespace: vaultwarden
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["services", "endpoints"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: monitoring-reader
+  namespace: auth
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["services", "endpoints"]
+    verbs: ["get", "list"]
+---
+# RoleBinding — monitoring-sa puede leer pods en vaultwarden namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitoring-read-vw
+  namespace: vaultwarden
+subjects:
+  - kind: ServiceAccount
+    name: monitoring-sa
+    namespace: monitoring
+roleRef:
+  kind: Role
+  name: monitoring-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# RoleBinding — monitoring-sa puede leer pods en auth namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitoring-read-auth
+  namespace: auth
+subjects:
+  - kind: ServiceAccount
+    name: monitoring-sa
+    namespace: monitoring
+roleRef:
+  kind: Role
+  name: monitoring-reader
+  apiGroup: rbac.authorization.k8s.io

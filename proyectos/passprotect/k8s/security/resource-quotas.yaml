@@ -1,0 +1,76 @@
+# ResourceQuota para vaultwarden namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: vaultwarden-quota
+  namespace: vaultwarden
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 3Gi
+    pods: "10"
+    persistentvolumeclaims: "5"
+---
+# LimitRange para vaultwarden namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: vaultwarden-limits
+  namespace: vaultwarden
+spec:
+  limits:
+    - default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      type: Container
+---
+# ResourceQuota para auth namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: auth-quota
+  namespace: auth
+spec:
+  hard:
+    requests.cpu: "1500m"
+    requests.memory: 2Gi
+    limits.cpu: "3"
+    limits.memory: 5Gi
+    pods: "10"
+    persistentvolumeclaims: "5"
+---
+# LimitRange para auth namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: auth-limits
+  namespace: auth
+spec:
+  limits:
+    - default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      type: Container
+---
+# ResourceQuota para monitoring namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: monitoring-quota
+  namespace: monitoring
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: 512Mi
+    limits.cpu: "1"
+    limits.memory: 1Gi
+    pods: "5"
+    persistentvolumeclaims: "3"
