@@ -1,0 +1,35 @@
+# PodDisruptionBudgets — garantizan minimo 1 pod activo en mantenimiento
+# Aplica a servicios sin estado con replicas: 2
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vaultwarden-pdb
+  namespace: vaultwarden
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: vaultwarden
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: keycloak-pdb
+  namespace: auth
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: keycloak
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dashboard-pdb
+  namespace: monitoring
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: dashboard

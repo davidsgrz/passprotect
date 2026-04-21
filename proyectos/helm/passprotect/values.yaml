@@ -11,7 +11,7 @@ vaultwarden:
     repository: dsegura97/vaultwarden-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 1
+  replicas: 2
   domain: "https://vault.TU_IP_VPS.nip.io"
   signupsAllowed: "false"
   invitationsAllowed: "true"
@@ -59,7 +59,7 @@ keycloak:
     repository: dsegura97/keycloak-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 1
+  replicas: 2
   hostname: "auth.TU_IP_VPS.nip.io"
   adminUser: "admin"
   db:
@@ -116,7 +116,7 @@ dashboard:
     repository: dsegura97/dashboard-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 1
+  replicas: 2
   resources:
     requests:
       cpu: 50m

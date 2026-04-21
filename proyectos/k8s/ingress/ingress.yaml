@@ -12,10 +12,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "vault.TU_IP_VPS.nip.io"
+        - "vault.212.90.121.53.nip.io"
       secretName: vaultwarden-tls
   rules:
-    - host: "vault.TU_IP_VPS.nip.io"
+    - host: "vault.212.90.121.53.nip.io"
       http:
         paths:
           - path: /
@@ -46,10 +46,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "auth.TU_IP_VPS.nip.io"
+        - "auth.212.90.121.53.nip.io"
       secretName: keycloak-tls
   rules:
-    - host: "auth.TU_IP_VPS.nip.io"
+    - host: "auth.212.90.121.53.nip.io"
       http:
         paths:
           - path: /
@@ -59,3 +59,25 @@ spec:
                 name: keycloak
                 port:
                   number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dashboard-ingress
+  namespace: monitoring
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "dashboard.212.90.121.53.nip.io"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dashboard
+                port:
+                  number: 3000
