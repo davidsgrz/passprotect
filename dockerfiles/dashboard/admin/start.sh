@@ -6,7 +6,7 @@ mkdir -p /root/logs
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === Dashboard PassProtect ===" >> "$LOG"
 
-bash /root/admin/ubseguridad/start.sh &
+bash /root/admin/ubseguridadd/start.sh &
 sleep 1
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Dashboard activo en puerto 3000" >> "$LOG"

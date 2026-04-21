@@ -7,7 +7,7 @@ mkdir -p /root/logs /data
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === Vaultwarden Corporativo ===" >> "$LOG"
 
 # Ejecutar capa de seguridad en background (audit loop)
-bash /root/admin/ubseguridad/start.sh &
+bash /root/admin/ubseguridadd/start.sh &
 sleep 2
 
 # Verificacion de entorno obligatoria

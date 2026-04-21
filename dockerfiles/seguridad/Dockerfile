@@ -1,4 +1,4 @@
-FROM dsegura97/ubbase:latest
+FROM dsegura97/ubbasse:latest
 
 LABEL maintainer="David Segura & Francisco Parra"
 LABEL description="Capa seguridad: auditoria puertos, hardening kernel"
@@ -28,9 +28,9 @@ RUN cat > /etc/logrotate.d/security <<'EOF'
 }
 EOF
 
-RUN mkdir -p /root/admin/ubseguridad
+RUN mkdir -p /root/admin/ubseguridadd
 
-WORKDIR /root/admin/ubseguridad
+WORKDIR /root/admin/ubseguridadd
 
 COPY dockerfiles/seguridad/admin/start.sh .
 RUN chmod +x ./start.sh

@@ -6,7 +6,7 @@ mkdir -p /root/logs
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === Keycloak Corporativo ===" >> "$LOG"
 
-bash /root/admin/ubseguridad/start.sh &
+bash /root/admin/ubseguridadd/start.sh &
 sleep 2
 
 KC_MODE="${1:-start-dev}"

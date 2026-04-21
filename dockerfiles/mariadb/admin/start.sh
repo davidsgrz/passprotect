@@ -7,7 +7,7 @@ chown mysql:mysql /var/log/mysql
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === MariaDB hardened ===" >> "$LOG"
 
-bash /root/admin/ubseguridad/start.sh &
+bash /root/admin/ubseguridadd/start.sh &
 sleep 1
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] DB: ${MYSQL_DATABASE:-unset}" >> "$LOG"
