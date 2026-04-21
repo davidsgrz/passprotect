@@ -13,7 +13,7 @@ fi
 
 source "$CONFIG_FILE"
 
-KC_URL="https://auth.${VPS_IP}.nip.io"
+KC_URL="https://auth.passprotect.es"
 REALM="corporativo"
 
 echo "=== PassProtect — Configuracion de Keycloak ==="

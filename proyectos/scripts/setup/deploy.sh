@@ -33,20 +33,20 @@ global:
   imageRegistry: "dsegura97"
 
 vaultwarden:
-  domain: "https://vault.${VPS_IP}.nip.io"
+  domain: "https://vault.passprotect.es"
   adminToken: "${VW_ADMIN_TOKEN}"
   sso:
     enabled: "true"
     clientId: "${SSO_CLIENT_ID}"
     clientSecret: "${SSO_CLIENT_SECRET}"
-    authority: "https://auth.${VPS_IP}.nip.io/realms/corporativo"
+    authority: "https://auth.passprotect.es/realms/corporativo"
 
 mariadbVw:
   rootPassword: "${DB_VW_ROOT_PASSWORD}"
   password: "${DB_VW_PASSWORD}"
 
 keycloak:
-  hostname: "auth.${VPS_IP}.nip.io"
+  hostname: "auth.passprotect.es"
   adminPassword: "${KC_ADMIN_PASSWORD}"
 
 mariadbKc:

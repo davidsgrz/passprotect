@@ -48,43 +48,39 @@ microk8s enable ingress
 microk8s enable storage
 microk8s enable helm3
 microk8s enable metrics-server
+microk8s enable cert-manager
 
 # Alias kubectl y helm
 echo "[6/8] Configurando aliases..."
 snap alias microk8s.kubectl kubectl
 snap alias microk8s.helm3 helm
 
-# Generar certificados autofirmados
-echo "[7/8] Generando certificados TLS autofirmados..."
-CERT_DIR="/etc/letsencrypt/live/selfsigned"
-mkdir -p "$CERT_DIR"
+# Aplicar ClusterIssuers Let's Encrypt
+echo "[7/8] Configurando cert-manager con Let's Encrypt..."
 
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
-VPS_IP="${VPS_IP:-127.0.0.1}"
+LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-admin@passprotect.es}"
 
-openssl req -x509 -nodes -days 365 \
-    -newkey rsa:2048 \
-    -keyout "$CERT_DIR/privkey.pem" \
-    -out "$CERT_DIR/fullchain.pem" \
-    -subj "/CN=*.${VPS_IP}.nip.io" \
-    -addext "subjectAltName=DNS:vault.${VPS_IP}.nip.io,DNS:auth.${VPS_IP}.nip.io"
-
-# Crear secrets TLS en K8s
+# Crear namespaces
 microk8s kubectl create namespace vaultwarden --dry-run=client -o yaml | microk8s kubectl apply -f -
 microk8s kubectl create namespace auth --dry-run=client -o yaml | microk8s kubectl apply -f -
 microk8s kubectl create namespace monitoring --dry-run=client -o yaml | microk8s kubectl apply -f -
 
-microk8s kubectl create secret tls vaultwarden-tls \
-    --cert="$CERT_DIR/fullchain.pem" \
-    --key="$CERT_DIR/privkey.pem" \
-    -n vaultwarden --dry-run=client -o yaml | microk8s kubectl apply -f -
+# Esperar a que cert-manager este listo
+echo "Esperando cert-manager..."
+microk8s kubectl wait --for=condition=Available deployment/cert-manager \
+    -n cert-manager --timeout=120s 2>/dev/null || true
+microk8s kubectl wait --for=condition=Available deployment/cert-manager-webhook \
+    -n cert-manager --timeout=120s 2>/dev/null || true
 
-microk8s kubectl create secret tls keycloak-tls \
-    --cert="$CERT_DIR/fullchain.pem" \
-    --key="$CERT_DIR/privkey.pem" \
-    -n auth --dry-run=client -o yaml | microk8s kubectl apply -f -
+# Aplicar ClusterIssuers con email real
+sed "s/CAMBIAR_EMAIL/${LETSENCRYPT_EMAIL}/g" \
+    "$PROJECT_DIR/proyectos/k8s/ingress/cert-manager.yaml" | \
+    microk8s kubectl apply -f -
+
+echo "ClusterIssuers Let's Encrypt creados"
 
 # Firewall basico
 echo "[8/8] Configurando UFW..."

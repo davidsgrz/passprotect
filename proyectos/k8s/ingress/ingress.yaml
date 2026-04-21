@@ -4,6 +4,7 @@ metadata:
   name: vaultwarden-ingress
   namespace: vaultwarden
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "128m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
@@ -12,10 +13,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "vault.212.90.121.53.nip.io"
+        - "vault.passprotect.es"
       secretName: vaultwarden-tls
   rules:
-    - host: "vault.212.90.121.53.nip.io"
+    - host: "vault.passprotect.es"
       http:
         paths:
           - path: /
@@ -39,6 +40,7 @@ metadata:
   name: keycloak-ingress
   namespace: auth
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
@@ -46,10 +48,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - "auth.212.90.121.53.nip.io"
+        - "auth.passprotect.es"
       secretName: keycloak-tls
   rules:
-    - host: "auth.212.90.121.53.nip.io"
+    - host: "auth.passprotect.es"
       http:
         paths:
           - path: /
@@ -66,12 +68,17 @@ metadata:
   name: dashboard-ingress
   namespace: monitoring
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - "dashboard.passprotect.es"
+      secretName: dashboard-tls
   rules:
-    - host: "dashboard.212.90.121.53.nip.io"
+    - host: "dashboard.passprotect.es"
       http:
         paths:
           - path: /
