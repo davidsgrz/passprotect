@@ -1,4 +1,4 @@
-# Keycloak Deployment
+# ── Keycloak — 2 replicas (sin estado) ──
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,11 +11,17 @@ spec:
   selector:
     matchLabels:
       app: keycloak
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
         app: keycloak
     spec:
+      priorityClassName: high-priority
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -68,14 +74,18 @@ spec:
             httpGet:
               path: /health/live
               port: 8080
-            initialDelaySeconds: 120
-            periodSeconds: 30
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health/ready
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 2
+            timeoutSeconds: 3
       volumes:
         - name: tmp
           emptyDir: {}
@@ -98,26 +108,27 @@ spec:
       port: 9000
       targetPort: 9000
 ---
-# MariaDB para Keycloak
+# ── MariaDB Keycloak — StatefulSet (1 replica, reinicio rapido) ──
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mariadb-kc
   namespace: auth
   labels:
     app: mariadb-kc
 spec:
+  serviceName: mariadb-kc
   replicas: 1
   selector:
     matchLabels:
       app: mariadb-kc
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: mariadb-kc
     spec:
+      priorityClassName: db-priority
+      terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
@@ -161,12 +172,37 @@ spec:
               mountPath: /var/lib/mysql
             - name: logs
               mountPath: /var/log/mysql
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD} --silent"
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' --silent"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 2
+            timeoutSeconds: 3
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: mariadb-kc
         - name: logs
           emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 5Gi
 ---
 apiVersion: v1
 kind: Service
@@ -179,8 +215,9 @@ spec:
   ports:
     - port: 3306
       targetPort: 3306
+  clusterIP: None
 ---
-# FreeIPA StatefulSet
+# ── FreeIPA — StatefulSet (LDAP, no escala horizontalmente) ──
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -199,6 +236,8 @@ spec:
       labels:
         app: freeipa
     spec:
+      priorityClassName: db-priority
+      terminationGracePeriodSeconds: 60
       securityContext:
         fsGroup: 1000
         seccompProfile:
@@ -243,6 +282,16 @@ spec:
             limits:
               cpu: "1"
               memory: 2Gi
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - -c
+                - "ldapsearch -x -H ldap://localhost -b '' -s base > /dev/null 2>&1"
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 10
           volumeMounts:
             - name: data
               mountPath: /data
