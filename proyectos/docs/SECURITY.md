@@ -95,7 +95,7 @@
 Capa 1 (Red):      UFW + NetworkPolicies K8s
 Capa 2 (WAF):      Nginx + ModSecurity + OWASP CRS
 Capa 3 (Rate):     Rate limiting Nginx + Fail2ban
-Capa 4 (Auth):     Keycloak OIDC + 2FA TOTP + LDAP FreeIPA
+Capa 4 (Auth):     Keycloak OIDC + 2FA TOTP + OpenLDAP (READ-ONLY)
 Capa 5 (App):      Vaultwarden (signups disabled, admin token)
 Capa 6 (DB):       MariaDB hardened (STRICT mode, local_infile=0)
 Capa 7 (Container):Pod Security Standards + non-root + read-only FS
@@ -111,3 +111,19 @@ Capa 8 (Audit):    Logs + audit.py + sql-injection-detector.py
 | security-audit.sh | Ejecuta Trivy, kube-bench y Polaris | scripts/setup/ |
 | Fail2ban | Banea IPs automaticamente | fail2ban/ |
 | ModSecurity | WAF con reglas OWASP CRS | docker/kube/nginx-proxy/modsec/ |
+
+## Reduccion de superficie: migracion FreeIPA -> OpenLDAP
+
+La sustitucion de FreeIPA por OpenLDAP reduce la superficie de ataque en el
+namespace `auth`:
+
+| Vector | FreeIPA | OpenLDAP |
+|---|---|---|
+| Privileged container | Si (requerido) | No |
+| Capabilities elevadas | SYS_ADMIN, NET_ADMIN, SYS_TIME | Solo CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE |
+| Puertos expuestos | 80, 443, 389, 636, 88 (Kerberos), 464 | 389, 636 |
+| Servicios internos | slapd + KDC + BIND + Dogtag CA + httpd | slapd |
+| systemd en contenedor | Si | No |
+| Pod Security Standard | No soporta `baseline` | Compatible con `baseline` |
+
+Ver `docs/ARCHITECTURE.md` seccion "Identidad" para la justificacion completa.

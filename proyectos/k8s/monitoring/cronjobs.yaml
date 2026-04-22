@@ -17,7 +17,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: audit
-              image: dsegura97/ubseguridad:latest
+              image: dsegura97/ubseguridadd:latest
               command:
                 - /bin/bash
                 - -c

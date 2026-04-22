@@ -15,7 +15,7 @@ spec:
             {{- include "passprotect.podSecurityContext" . | nindent 12 }}
           containers:
             - name: audit
-              image: "{{ .Values.global.imageRegistry }}/ubseguridad:latest"
+              image: "{{ .Values.global.imageRegistry }}/ubseguridadd:latest"
               command: ["/bin/bash", "-c", "echo '=== Auditoria $(date) ===' && cat /root/logs/security_audit.log 2>/dev/null | tail -100"]
               securityContext:
                 {{- include "passprotect.containerSecurityContext" . | nindent 16 }}

@@ -1,4 +1,4 @@
-FROM dsegura97/ubseguridad:latest
+FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Dashboard PassProtect — panel de gestion para expo"
 LABEL version="1.0.0"

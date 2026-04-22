@@ -143,34 +143,43 @@ services:
       retries: 5
       start_period: 120s
 
-  # ── FreeIPA ──
-  freeipa:
-    image: freeipa/freeipa-server:fedora-40
-    container_name: freeipa
-    hostname: ipa.passprotect.local
+  # ── OpenLDAP (sustituye a FreeIPA) ──
+  # Justificacion en docs/ARCHITECTURE.md:
+  # osixia/openldap no requiere privileged/systemd y es compatible
+  # con Pod Security Standards baseline.
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    hostname: openldap
     restart: unless-stopped
+    command: ["--copy-service"]
     environment:
-      IPA_SERVER_HOSTNAME: ipa.passprotect.local
-      IPA_SERVER_IP: "127.0.0.1"
-    command: >
-      ipa-server-install
-      --unattended
-      --realm=PASSPROTECT.LOCAL
-      --domain=passprotect.local
-      --ds-password=${IPA_DS_PASSWORD}
-      --admin-password=${IPA_ADMIN_PASSWORD}
-      --no-ntp
-      --setup-dns
-      --no-forwarders
+      LDAP_ORGANISATION: "PassProtect Corp"
+      LDAP_DOMAIN: "corp.local"
+      LDAP_BASE_DN: "dc=corp,dc=local"
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+      LDAP_TLS: "true"
+      LDAP_TLS_VERIFY_CLIENT: "never"
+      LDAP_BACKEND: "mdb"
+      LDAP_LOG_LEVEL: "256"
     volumes:
-      - freeipa-data:/data
+      - openldap-data:/var/lib/ldap
+      - openldap-config:/etc/ldap/slapd.d
+      - ../../dockerfiles/openldap/bootstrap:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+    ports:
+      - "389:389"
+      - "636:636"
     networks:
       - backend
     security_opt:
       - no-new-privileges:true
-    read_only: false
-    sysctls:
-      net.ipv6.conf.all.disable_ipv6: 0
+    healthcheck:
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://localhost:389 -b dc=corp,dc=local -s base '(objectclass=*)' > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # ── Nginx Reverse Proxy ──
   nginx-proxy:
@@ -248,6 +257,7 @@ volumes:
   mariadb-vw-data:
   mariadb-kc-data:
   keycloak-data:
-  freeipa-data:
+  openldap-data:
+  openldap-config:
   nginx-certs:
   nginx-logs:

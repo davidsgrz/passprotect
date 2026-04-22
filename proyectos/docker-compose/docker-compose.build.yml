@@ -2,19 +2,19 @@
 # Uso: docker compose -f proyectos/docker-compose/docker-compose.build.yml build
 
 services:
-  ubbase:
+  ubbasse:
     build:
       context: ../..
       dockerfile: dockerfiles/base/Dockerfile
-    image: dsegura97/ubbase:latest
+    image: dsegura97/ubbasse:latest
 
-  ubseguridad:
+  ubseguridadd:
     build:
       context: ../..
       dockerfile: dockerfiles/seguridad/Dockerfile
-    image: dsegura97/ubseguridad:latest
+    image: dsegura97/ubseguridadd:latest
     depends_on:
-      - ubbase
+      - ubbasse
 
   vaultwarden-corp:
     build:
@@ -22,7 +22,7 @@ services:
       dockerfile: dockerfiles/vaultwarden/Dockerfile
     image: dsegura97/vaultwarden-corp:1.0.0
     depends_on:
-      - ubseguridad
+      - ubseguridadd
 
   keycloak-corp:
     build:
@@ -30,7 +30,7 @@ services:
       dockerfile: dockerfiles/keycloak/Dockerfile
     image: dsegura97/keycloak-corp:1.0.0
     depends_on:
-      - ubseguridad
+      - ubseguridadd
 
   mariadb-corp:
     build:
@@ -38,7 +38,7 @@ services:
       dockerfile: dockerfiles/mariadb/Dockerfile
     image: dsegura97/mariadb-corp:1.0.0
     depends_on:
-      - ubseguridad
+      - ubseguridadd
 
   nginx-proxy-corp:
     build:
@@ -46,7 +46,7 @@ services:
       dockerfile: dockerfiles/nginx-proxy/Dockerfile
     image: dsegura97/nginx-proxy-corp:1.0.0
     depends_on:
-      - ubseguridad
+      - ubseguridadd
 
   dashboard-corp:
     build:
@@ -54,4 +54,4 @@ services:
       dockerfile: dockerfiles/dashboard/Dockerfile
     image: dsegura97/dashboard-corp:1.0.0
     depends_on:
-      - ubseguridad
+      - ubseguridadd

@@ -53,9 +53,9 @@ mariadbKc:
   rootPassword: "${DB_KC_ROOT_PASSWORD}"
   password: "${DB_KC_PASSWORD}"
 
-freeipa:
-  dsPassword: "${IPA_DS_PASSWORD}"
-  adminPassword: "${IPA_ADMIN_PASSWORD}"
+openldap:
+  adminPassword: "${LDAP_ADMIN_PASSWORD}"
+  configPassword: "${LDAP_CONFIG_PASSWORD}"
 EOF
 
 echo "[2/3] Desplegando con Helm..."

@@ -116,12 +116,6 @@ spec:
       labels:
         app: mariadb-kc
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: mariadb
           image: "{{ .Values.mariadbKc.image.repository }}:{{ .Values.mariadbKc.image.tag }}"
@@ -143,11 +137,6 @@ spec:
                 secretKeyRef:
                   name: keycloak-secrets
                   key: db-password
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              add: [SETUID, SETGID, DAC_OVERRIDE]
           resources:
             {{- toYaml .Values.mariadbKc.resources | nindent 12 }}
           volumeMounts:
@@ -175,78 +164,3 @@ spec:
   ports:
     - port: 3306
       targetPort: 3306
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: freeipa
-  namespace: auth
-  labels:
-    app: freeipa
-    {{- include "passprotect.labels" . | nindent 4 }}
-spec:
-  serviceName: freeipa
-  replicas: 1
-  selector:
-    matchLabels:
-      app: freeipa
-  template:
-    metadata:
-      labels:
-        app: freeipa
-    spec:
-      securityContext:
-        fsGroup: 1000
-        seccompProfile:
-          type: RuntimeDefault
-      containers:
-        - name: freeipa
-          image: "{{ .Values.freeipa.image.repository }}:{{ .Values.freeipa.image.tag }}"
-          imagePullPolicy: {{ .Values.freeipa.image.pullPolicy }}
-          env:
-            - name: IPA_SERVER_HOSTNAME
-              value: "ipa.passprotect.local"
-            - name: IPA_DS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: freeipa-secrets
-                  key: ds-password
-            - name: IPA_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: freeipa-secrets
-                  key: admin-password
-          ports:
-            - containerPort: 389
-            - containerPort: 636
-            - containerPort: 80
-            - containerPort: 443
-          resources:
-            {{- toYaml .Values.freeipa.resources | nindent 12 }}
-          volumeMounts:
-            - name: data
-              mountPath: /data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: freeipa-data
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: freeipa
-  namespace: auth
-  labels:
-    {{- include "passprotect.labels" . | nindent 4 }}
-spec:
-  selector:
-    app: freeipa
-  ports:
-    - name: ldap
-      port: 389
-    - name: ldaps
-      port: 636
-    - name: http
-      port: 80
-    - name: https
-      port: 443

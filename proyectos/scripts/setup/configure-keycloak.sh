@@ -99,31 +99,34 @@ if [ -n "$BROWSER_FLOW_ID" ] && [ "$BROWSER_FLOW_ID" != "null" ]; then
     echo "Browser flow ID: $BROWSER_FLOW_ID"
 fi
 
-# Configurar LDAP federation con FreeIPA (READ-ONLY)
-echo "[6/6] Configurando LDAP federation con FreeIPA..."
+# Configurar LDAP federation con OpenLDAP (READ-ONLY)
+echo "[6/6] Configurando LDAP federation con OpenLDAP..."
 curl -sk -X POST "${KC_URL}/admin/realms/${REALM}/components" \
     -H "$AUTH" \
     -H "Content-Type: application/json" \
     -d "{
-        \"name\": \"freeipa-ldap\",
+        \"name\": \"openldap\",
         \"providerId\": \"ldap\",
         \"providerType\": \"org.keycloak.storage.UserStorageProvider\",
         \"config\": {
             \"vendor\": [\"other\"],
-            \"connectionUrl\": [\"ldap://freeipa.auth.svc.cluster.local:389\"],
-            \"bindDn\": [\"uid=admin,cn=users,cn=accounts,dc=passprotect,dc=local\"],
-            \"bindCredential\": [\"${IPA_ADMIN_PASSWORD}\"],
-            \"usersDn\": [\"cn=users,cn=accounts,dc=passprotect,dc=local\"],
+            \"connectionUrl\": [\"ldap://openldap.auth.svc.cluster.local:389\"],
+            \"bindDn\": [\"cn=admin,dc=corp,dc=local\"],
+            \"bindCredential\": [\"${LDAP_ADMIN_PASSWORD}\"],
+            \"usersDn\": [\"ou=people,dc=corp,dc=local\"],
             \"usernameLDAPAttribute\": [\"uid\"],
             \"rdnLDAPAttribute\": [\"uid\"],
-            \"uuidLDAPAttribute\": [\"ipaUniqueID\"],
+            \"uuidLDAPAttribute\": [\"entryUUID\"],
             \"userObjectClasses\": [\"inetOrgPerson, organizationalPerson\"],
             \"editMode\": [\"READ_ONLY\"],
             \"syncRegistrations\": [\"false\"],
             \"trustEmail\": [\"true\"],
             \"fullSyncPeriod\": [\"604800\"],
             \"changedSyncPeriod\": [\"86400\"],
-            \"batchSizeForSync\": [\"1000\"]
+            \"batchSizeForSync\": [\"1000\"],
+            \"searchScope\": [\"1\"],
+            \"connectionPooling\": [\"true\"],
+            \"pagination\": [\"true\"]
         }
     }" || echo "Federation ya existe o error"
 
@@ -132,6 +135,6 @@ echo "=== Keycloak configurado ==="
 echo "Realm:  ${REALM}"
 echo "Client: ${SSO_CLIENT_ID}"
 echo "2FA:    TOTP obligatorio"
-echo "LDAP:   FreeIPA (READ-ONLY)"
+echo "LDAP:   OpenLDAP (READ-ONLY, dc=corp,dc=local)"
 echo ""
-echo "Siguiente paso: bash $SCRIPT_DIR/configure-freeipa.sh"
+echo "Siguiente paso: bash $SCRIPT_DIR/configure-openldap.sh"

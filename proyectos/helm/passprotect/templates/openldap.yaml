@@ -1,0 +1,131 @@
+# ============================================================
+# PassProtect — OpenLDAP Deployment + Service
+# ============================================================
+# Sustituye a FreeIPA. Razones documentadas en docs/ARCHITECTURE.md:
+#   - osixia/openldap NO requiere privileged container
+#   - NO requiere systemd (solo slapd)
+#   - Compatible con Pod Security Standards "baseline"
+#   - Menor superficie de ataque (LDAP puro vs LDAP+Kerberos+DNS+CA+HTTP)
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  namespace: auth
+  labels:
+    app: openldap
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.openldap.replicas | default 1 }}
+  strategy:
+    type: Recreate  # LDAP con backend MDB no admite dos pods escribiendo
+  selector:
+    matchLabels:
+      app: openldap
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      priorityClassName: db-priority
+      securityContext:
+        fsGroup: 911
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: openldap
+          image: "{{ .Values.openldap.image.repository }}:{{ .Values.openldap.image.tag }}"
+          imagePullPolicy: {{ .Values.openldap.image.pullPolicy }}
+          args: ["--copy-service"]
+          env:
+            - name: LDAP_ORGANISATION
+              value: {{ .Values.openldap.organization | quote }}
+            - name: LDAP_DOMAIN
+              value: {{ .Values.openldap.domain | quote }}
+            - name: LDAP_BASE_DN
+              value: {{ .Values.openldap.baseDn | quote }}
+            - name: LDAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openldap-secrets
+                  key: admin-password
+            - name: LDAP_CONFIG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openldap-secrets
+                  key: config-password
+            - name: LDAP_TLS
+              value: "true"
+            - name: LDAP_TLS_VERIFY_CLIENT
+              value: "never"
+            - name: LDAP_RFC2307BIS_SCHEMA
+              value: "false"
+            - name: LDAP_BACKEND
+              value: "mdb"
+            - name: LDAP_LOG_LEVEL
+              value: "256"
+          ports:
+            - name: ldap
+              containerPort: 389
+            - name: ldaps
+              containerPort: 636
+          livenessProbe:
+            tcpSocket:
+              port: 389
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "ldapsearch -x -H ldap://localhost:389 -b dc=corp,dc=local -s base '(objectclass=*)' > /dev/null"
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.openldap.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE]  # Para bind a <1024
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/ldap
+            - name: config
+              mountPath: /etc/ldap/slapd.d
+            - name: certs
+              mountPath: /container/service/slapd/assets/certs
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openldap-data
+        - name: config
+          persistentVolumeClaim:
+            claimName: openldap-config
+        - name: certs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+  namespace: auth
+  labels:
+    app: openldap
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app: openldap
+  ports:
+    - name: ldap
+      port: 389
+      targetPort: 389
+      protocol: TCP
+    - name: ldaps
+      port: 636
+      targetPort: 636
+      protocol: TCP

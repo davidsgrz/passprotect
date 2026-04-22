@@ -1,14 +1,14 @@
 # PriorityClasses — el scheduler da prioridad a BD y servicios criticos
 # Si hay presion de recursos, los pods de menor prioridad se expulsan primero
 
-# Bases de datos y FreeIPA — maxima prioridad (no se desalojan nunca)
+# Bases de datos y OpenLDAP — maxima prioridad (no se desalojan nunca)
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
   name: db-priority
 value: 1000000
 globalDefault: false
-description: "Prioridad maxima para bases de datos y FreeIPA — nunca desalojados"
+description: "Prioridad maxima para bases de datos y OpenLDAP — nunca desalojados"
 ---
 # Servicios de aplicacion — alta prioridad
 apiVersion: scheduling.k8s.io/v1

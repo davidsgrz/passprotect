@@ -12,6 +12,8 @@ id_rsa
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.pytest_cache/
 .venv/
 
 # Logs y reportes

@@ -10,8 +10,8 @@ Pasos post-instalacion:
 1. Configurar Keycloak (realm, cliente OIDC, 2FA):
    bash proyectos/passprotect/scripts/setup/configure-keycloak.sh
 
-2. Configurar FreeIPA (usuarios LDAP):
-   bash proyectos/passprotect/scripts/setup/configure-freeipa.sh
+2. Configurar OpenLDAP (usuarios y grupos):
+   bash proyectos/passprotect/scripts/setup/configure-openldap.sh
 
 3. Verificar despliegue:
    bash proyectos/passprotect/scripts/setup/verify-deployment.sh

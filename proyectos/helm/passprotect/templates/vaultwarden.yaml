@@ -129,12 +129,6 @@ spec:
       labels:
         app: mariadb-vw
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: mariadb
           image: "{{ .Values.mariadbVw.image.repository }}:{{ .Values.mariadbVw.image.tag }}"
@@ -156,11 +150,6 @@ spec:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-              add: [SETUID, SETGID, DAC_OVERRIDE]
           resources:
             {{- toYaml .Values.mariadbVw.resources | nindent 12 }}
           volumeMounts:

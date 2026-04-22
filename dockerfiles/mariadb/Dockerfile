@@ -1,6 +1,6 @@
 FROM mariadb:11.2 AS mdb-source
 
-FROM dsegura97/ubseguridad:latest
+FROM dsegura97/ubseguridadd:latest
 
 LABEL description="MariaDB hardened con protecciones anti-SQLi"
 LABEL version="1.0.0"

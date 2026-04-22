@@ -122,7 +122,7 @@ spec:
       ports:
         - port: 8080
 ---
-# Permitir Keycloak -> MariaDB-KC y FreeIPA
+# Permitir Keycloak -> MariaDB-KC y OpenLDAP
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -144,7 +144,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: freeipa
+              app: openldap
       ports:
         - port: 389
         - port: 636

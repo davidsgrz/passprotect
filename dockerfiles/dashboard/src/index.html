@@ -98,7 +98,7 @@
                             <tr><td>Keycloak</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>15%</td><td>1.2 GB</td></tr>
                             <tr><td>MariaDB-VW</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>3%</td><td>384 MB</td></tr>
                             <tr><td>MariaDB-KC</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>256 MB</td></tr>
-                            <tr><td>FreeIPA</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>5%</td><td>1.0 GB</td></tr>
+                            <tr><td>OpenLDAP</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>128 MB</td></tr>
                             <tr><td>Nginx Proxy</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>64 MB</td></tr>
                             <tr><td>Dashboard</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>32 MB</td></tr>
                         </tbody>
@@ -135,7 +135,7 @@
                         <tr><td>aruiz</td><td>aruiz@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 5d</td><td><span class="status-warn">Inactivo</span></td></tr>
                     </tbody>
                 </table>
-                <p class="info-text">Fuente: FreeIPA (LDAP, solo lectura) + Keycloak (SSO + 2FA)</p>
+                <p class="info-text">Fuente: OpenLDAP (dc=corp,dc=local, solo lectura) + Keycloak (SSO + 2FA)</p>
             </section>
 
             <!-- Seguridad (solo admin) -->
@@ -175,7 +175,7 @@
                     <div class="log-line"><span class="log-time">2026-04-14 20:30:10</span> <span class="log-warn">[WARN]</span> 3 intentos fallidos desde 203.0.113.42 — baneado 1h</div>
                     <div class="log-line"><span class="log-time">2026-04-14 20:15:00</span> <span class="log-ok">[INFO]</span> Security audit completado: 0 vulnerabilidades criticas</div>
                     <div class="log-line"><span class="log-time">2026-04-14 18:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via FreeIPA sync</div>
+                    <div class="log-line"><span class="log-time">2026-04-14 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via OpenLDAP sync</div>
                     <div class="log-line"><span class="log-time">2026-04-14 12:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
                     <div class="log-line"><span class="log-time">2026-04-14 03:00:15</span> <span class="log-ok">[INFO]</span> Backup diario completado</div>
                 </div>
@@ -189,7 +189,7 @@
                     <p><strong>Usuario:</strong> <span id="settings-user"></span></p>
                     <p><strong>Rol:</strong> <span id="settings-role"></span></p>
                     <p><strong>2FA:</strong> TOTP activo</p>
-                    <p><strong>Autenticacion:</strong> Keycloak OIDC + FreeIPA LDAP</p>
+                    <p><strong>Autenticacion:</strong> Keycloak OIDC + OpenLDAP (dc=corp,dc=local)</p>
                 </div>
                 <div class="panel admin-only">
                     <h3>Infraestructura</h3>

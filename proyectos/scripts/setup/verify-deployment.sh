@@ -38,7 +38,7 @@ check "Vaultwarden pod" "kubectl get pods -n vaultwarden -l app=vaultwarden -o j
 check "MariaDB-VW pod" "kubectl get pods -n vaultwarden -l app=mariadb-vw -o jsonpath='{.items[0].status.phase}' | grep -q Running"
 check "Keycloak pod" "kubectl get pods -n auth -l app=keycloak -o jsonpath='{.items[0].status.phase}' | grep -q Running"
 check "MariaDB-KC pod" "kubectl get pods -n auth -l app=mariadb-kc -o jsonpath='{.items[0].status.phase}' | grep -q Running"
-check "FreeIPA pod" "kubectl get pods -n auth -l app=freeipa -o jsonpath='{.items[0].status.phase}' | grep -q Running"
+check "OpenLDAP pod" "kubectl get pods -n auth -l app=openldap -o jsonpath='{.items[0].status.phase}' | grep -q Running"
 echo ""
 
 # Servicios
@@ -47,7 +47,7 @@ check "Vaultwarden svc" "kubectl get svc -n vaultwarden vaultwarden"
 check "MariaDB-VW svc" "kubectl get svc -n vaultwarden mariadb-vw"
 check "Keycloak svc" "kubectl get svc -n auth keycloak"
 check "MariaDB-KC svc" "kubectl get svc -n auth mariadb-kc"
-check "FreeIPA svc" "kubectl get svc -n auth freeipa"
+check "OpenLDAP svc" "kubectl get svc -n auth openldap"
 echo ""
 
 # Ingress

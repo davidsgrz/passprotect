@@ -1,0 +1,157 @@
+# ============================================================
+# PassProtect — Bootstrap LDIF
+# ============================================================
+# Estructura:
+#   dc=corp,dc=local
+#   ├── ou=people    (usuarios humanos)
+#   ├── ou=groups    (grupos de autorizacion)
+#   └── ou=services  (cuentas de servicio, p.ej. bind del LDAP federation)
+#
+# Password temporal para todos los usuarios: TempPass123!
+# Hash SSHA generado con: slappasswd -h '{SSHA}' -s 'TempPass123!'
+# (El hash abajo se valida con TempPass123! — cambialo en primera sesion)
+#
+# Keycloak hara el bind como admin con la password definida en
+# la variable LDAP_ADMIN_PASSWORD (secret openldap-secrets).
+# ============================================================
+
+# ---------- OU: people ----------
+dn: ou=people,dc=corp,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: people
+description: Usuarios humanos de PassProtect
+
+# ---------- OU: groups ----------
+dn: ou=groups,dc=corp,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: groups
+description: Grupos de autorizacion
+
+# ---------- OU: services ----------
+dn: ou=services,dc=corp,dc=local
+objectClass: organizationalUnit
+objectClass: top
+ou: services
+description: Cuentas de servicio (bind DNs)
+
+# ============================================================
+# USUARIOS
+# ============================================================
+
+# --- admin.vault: administrador del password manager ---
+dn: uid=admin.vault,ou=people,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: admin.vault
+cn: Admin Vault
+sn: Vault
+givenName: Admin
+displayName: Admin Vault (Password Manager)
+mail: admin.vault@corp.local
+userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+title: Vault Administrator
+employeeType: admin
+
+# --- david.segura: coautor del proyecto, rol admin ---
+dn: uid=david.segura,ou=people,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: david.segura
+cn: David Segura
+sn: Segura Rodriguez
+givenName: David
+displayName: David Segura Rodriguez
+mail: david.segura@corp.local
+userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+title: DevOps Engineer
+employeeType: admin
+
+# --- fran.parra: coautor del proyecto, rol admin ---
+dn: uid=fran.parra,ou=people,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: fran.parra
+cn: Francisco Parra
+sn: Parra Caparros
+givenName: Francisco
+displayName: Francisco Parra Caparros
+mail: fran.parra@corp.local
+userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+title: Security Engineer
+employeeType: admin
+
+# --- user.demo: usuario de prueba sin privilegios ---
+dn: uid=user.demo,ou=people,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: user.demo
+cn: Usuario Demo
+sn: Demo
+givenName: Usuario
+displayName: Usuario de Prueba
+mail: user.demo@corp.local
+userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+title: Standard User
+employeeType: user
+
+# ============================================================
+# GRUPOS
+# ============================================================
+
+# --- vw-admins: administradores del Vaultwarden ---
+dn: cn=vw-admins,ou=groups,dc=corp,dc=local
+objectClass: groupOfNames
+objectClass: top
+cn: vw-admins
+description: Administradores del password manager Vaultwarden
+member: uid=admin.vault,ou=people,dc=corp,dc=local
+member: uid=david.segura,ou=people,dc=corp,dc=local
+member: uid=fran.parra,ou=people,dc=corp,dc=local
+
+# --- vw-users: usuarios estandar del Vaultwarden ---
+dn: cn=vw-users,ou=groups,dc=corp,dc=local
+objectClass: groupOfNames
+objectClass: top
+cn: vw-users
+description: Usuarios estandar del password manager
+member: uid=user.demo,ou=people,dc=corp,dc=local
+
+# --- it-dept: departamento de TI (admins + power users) ---
+dn: cn=it-dept,ou=groups,dc=corp,dc=local
+objectClass: groupOfNames
+objectClass: top
+cn: it-dept
+description: Departamento de TI
+member: uid=david.segura,ou=people,dc=corp,dc=local
+member: uid=fran.parra,ou=people,dc=corp,dc=local
+
+# ============================================================
+# CUENTAS DE SERVICIO
+# ============================================================
+
+# --- svc-keycloak-bind: cuenta que usa Keycloak para leer el arbol ---
+# (Keycloak consulta LDAP en modo READ_ONLY con esta cuenta)
+dn: uid=svc-keycloak-bind,ou=services,dc=corp,dc=local
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: svc-keycloak-bind
+cn: Keycloak Bind Service
+sn: Service
+givenName: Keycloak
+displayName: Keycloak LDAP Federation Bind
+description: Cuenta de servicio usada por Keycloak para la federation LDAP
+userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+title: Service Account
+employeeType: service

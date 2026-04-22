@@ -48,11 +48,17 @@ bash proyectos/passprotect/scripts/setup/deploy.sh
 bash proyectos/passprotect/scripts/setup/configure-keycloak.sh
 ```
 
-### 6. Configurar FreeIPA
+### 6. Configurar OpenLDAP
 
 ```bash
-bash proyectos/passprotect/scripts/setup/configure-freeipa.sh
+bash proyectos/passprotect/scripts/setup/configure-openldap.sh
 ```
+
+Este script carga los LDIFs de `dockerfiles/openldap/bootstrap/01-users.ldif`
+(usuarios `admin.vault`, `david.segura`, `fran.parra`, `user.demo` y grupos
+`vw-admins`, `vw-users`, `it-dept`) sobre `dc=corp,dc=local`. La contraseña
+temporal de los usuarios es `TempPass123!` — cambiala en primera sesion via
+Keycloak.
 
 ### 7. Verificar
 

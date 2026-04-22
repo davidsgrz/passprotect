@@ -129,7 +129,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: freeipa
+              app: openldap
       ports:
         - port: 389
         - port: 636

@@ -1,6 +1,6 @@
 FROM vaultwarden/server:1.32.5 AS vw-source
 
-FROM dsegura97/ubseguridad:latest
+FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Vaultwarden corporativo con capa seguridad"
 LABEL version="1.0.0"

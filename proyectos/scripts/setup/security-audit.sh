@@ -12,8 +12,8 @@ echo ""
 # Trivy scan de imagenes
 echo "=== [1/3] Trivy scan de imagenes ==="
 IMAGES=(
-    "dsegura97/ubbase:latest"
-    "dsegura97/ubseguridad:latest"
+    "dsegura97/ubbasse:latest"
+    "dsegura97/ubseguridadd:latest"
     "dsegura97/vaultwarden-corp:1.0.0"
     "dsegura97/keycloak-corp:1.0.0"
     "dsegura97/mariadb-corp:1.0.0"

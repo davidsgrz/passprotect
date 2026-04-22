@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 LABEL maintainer="David Segura & Francisco Parra"
 LABEL description="Capa base: SSH hardening + gestion usuarios"
@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Paquetes minimos con pinning de versiones cuando es posible
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nano=7.* \
+    nano \
     git \
     curl \
     wget \

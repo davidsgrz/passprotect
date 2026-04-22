@@ -92,23 +92,30 @@ mariadbKc:
   persistence:
     size: 5Gi
 
-# ── FreeIPA ──
-freeipa:
+# ── OpenLDAP ──
+# Sustituye a FreeIPA. Ver docs/ARCHITECTURE.md (seccion "Identidad")
+# para la justificacion de la migracion.
+openldap:
   image:
-    repository: freeipa/freeipa-server
-    tag: "fedora-40"
+    repository: dsegura97/openldap-corp
+    tag: "1.0.0"
     pullPolicy: IfNotPresent
-  realm: "PASSPROTECT.LOCAL"
-  domain: "passprotect.local"
+  replicas: 1
+  organization: "PassProtect Corp"
+  domain: "corp.local"
+  baseDn: "dc=corp,dc=local"
   resources:
     requests:
-      cpu: 200m
-      memory: 1Gi
+      cpu: 100m
+      memory: 256Mi
     limits:
-      cpu: "1"
-      memory: 2Gi
+      cpu: 500m
+      memory: 512Mi
   persistence:
-    size: 5Gi
+    data:
+      size: 2Gi
+    config:
+      size: 512Mi
 
 # ── Dashboard ──
 dashboard:
@@ -145,9 +152,9 @@ monitoring:
 # ── Security ──
 security:
   podSecurityStandards:
-    vaultwarden: "restricted"
+    vaultwarden: "baseline"
     auth: "baseline"
-    monitoring: "restricted"
+    monitoring: "baseline"
   networkPolicies:
     enabled: true
   resourceQuotas:

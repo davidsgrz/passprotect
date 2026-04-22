@@ -1,4 +1,4 @@
-FROM dsegura97/ubseguridad:latest
+FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Nginx reverse proxy con ModSecurity + OWASP CRS"
 LABEL version="1.0.0"

@@ -7,7 +7,7 @@
 ## Descripcion
 
 Plataforma de gestion de contraseñas corporativa basada en Vaultwarden con
-autenticacion centralizada (Keycloak + FreeIPA), desplegada sobre Kubernetes
+autenticacion centralizada (Keycloak + OpenLDAP), desplegada sobre Kubernetes
 (MicroK8s) en un VPS Contabo con hardening completo.
 
 ## Arquitectura
@@ -17,13 +17,14 @@ Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ MariaDB
                       │              │
                       └─▶ Keycloak ──┴─ OIDC
                             │
-                            └─▶ FreeIPA (LDAP federation, READ-ONLY)
+                            └─▶ OpenLDAP (LDAP federation, READ-ONLY)
+                                dc=corp,dc=local
 ```
 
 ## Capas Docker
 
 ```
-ubuntu:22.04
+ubuntu:24.04
   └── ubbase              (SSH hardening, gestion usuarios, sudo)
        └── ubseguridad    (auditoria puertos, log rotation, fail2ban-ready)
             ├── vaultwarden-corp:1.0.0
@@ -56,9 +57,9 @@ bash proyectos/scripts/setup/build-images.sh
 # 4. Desplegar en Kubernetes
 bash proyectos/scripts/setup/deploy.sh
 
-# 5. Configurar Keycloak + FreeIPA
+# 5. Configurar Keycloak + OpenLDAP
 bash proyectos/scripts/setup/configure-keycloak.sh
-bash proyectos/scripts/setup/configure-freeipa.sh
+bash proyectos/scripts/setup/configure-openldap.sh
 
 # 6. Verificar
 bash proyectos/scripts/setup/verify-deployment.sh
@@ -77,7 +78,7 @@ brute force, privilege escalation y mas.
 | Vaultwarden | 1.32.5 |
 | Keycloak | 24.0 |
 | MariaDB | 11.2 |
-| FreeIPA | Latest |
+| OpenLDAP | 1.5.0 (osixia) |
 | MicroK8s | 1.30 |
-| Ubuntu base | 22.04 |
+| Ubuntu base | 24.04 |
 | VPS SO | Ubuntu 24.04 LTS |
