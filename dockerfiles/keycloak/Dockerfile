@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=kc-source /opt/keycloak /opt/keycloak
 
+# Tema corporativo PassProtect (login + 2FA) alineado con paleta del dashboard
+COPY dockerfiles/keycloak/themes/passprotect /opt/keycloak/themes/passprotect
+
 RUN groupadd -r keycloak && useradd -r -g keycloak -d /opt/keycloak keycloak \
     && chown -R keycloak:keycloak /opt/keycloak
 

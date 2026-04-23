@@ -43,7 +43,12 @@ curl -sk -X POST "${KC_URL}/admin/realms" \
     -d "{
         \"realm\": \"${REALM}\",
         \"enabled\": true,
-        \"displayName\": \"PassProtect Corporativo\",
+        \"displayName\": \"PassProtect\",
+        \"displayNameHtml\": \"PassProtect\",
+        \"loginTheme\": \"passprotect\",
+        \"defaultLocale\": \"es\",
+        \"internationalizationEnabled\": true,
+        \"supportedLocales\": [\"es\", \"en\"],
         \"registrationAllowed\": false,
         \"bruteForceProtected\": true,
         \"permanentLockout\": false,
@@ -55,6 +60,18 @@ curl -sk -X POST "${KC_URL}/admin/realms" \
         \"failureFactor\": 5,
         \"passwordPolicy\": \"length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername\"
     }" || echo "Realm ya existe o error"
+
+# Si el realm ya existia, forzamos actualizacion del tema (idempotente)
+echo "[2b/6] Aplicando tema 'passprotect' al realm..."
+curl -sk -X PUT "${KC_URL}/admin/realms/${REALM}" \
+    -H "$AUTH" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"loginTheme\": \"passprotect\",
+        \"defaultLocale\": \"es\",
+        \"internationalizationEnabled\": true,
+        \"supportedLocales\": [\"es\", \"en\"]
+    }" || echo "No se pudo actualizar tema"
 
 # Crear cliente OIDC para Vaultwarden
 echo "[3/6] Creando cliente OIDC 'vaultwarden'..."

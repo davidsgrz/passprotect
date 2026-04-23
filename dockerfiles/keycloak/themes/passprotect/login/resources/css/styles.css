@@ -1,0 +1,302 @@
+/* === PassProtect — Tema Keycloak Login ===
+ * Paleta alineada con el dashboard corporativo:
+ *   --bg-dark: #0f1923  --bg-card: #1a2733  --accent: #1da1f2
+ * Hereda de keycloak.v2 (PatternFly 5) y sobreescribe el look.
+ */
+
+:root {
+    --pp-bg-dark: #0f1923;
+    --pp-bg-card: #1a2733;
+    --pp-bg-input: #0d1520;
+    --pp-text-primary: #e8edf2;
+    --pp-text-secondary: #8899a6;
+    --pp-accent: #1da1f2;
+    --pp-accent-hover: #1a91da;
+    --pp-green: #17bf63;
+    --pp-red: #e0245e;
+    --pp-border: #2d3d4f;
+    --pp-radius: 8px;
+}
+
+html, body {
+    background: var(--pp-bg-dark) !important;
+    color: var(--pp-text-primary) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    min-height: 100vh;
+}
+
+body {
+    background: linear-gradient(135deg, #0a1628 0%, #1a2733 100%) !important;
+}
+
+/* === Contenedor principal === */
+.login-pf-page {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.login-pf-page .login-pf-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-pf-page .login-pf-header h1 {
+    color: var(--pp-accent) !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+}
+
+/* === Header branding (logo) === */
+#kc-header-wrapper {
+    color: var(--pp-accent) !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    padding: 24px 10px !important;
+    text-shadow: none !important;
+    background-image: none !important;
+    letter-spacing: 0.5px;
+}
+
+#kc-header-wrapper::before {
+    content: "\1F512";
+    display: block;
+    font-size: 48px;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+#kc-header-wrapper::after {
+    content: "Plataforma Corporativa de Gestion de Contrasenas";
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--pp-text-secondary);
+    margin-top: 6px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* === Login card === */
+.card-pf,
+div.login-pf-page .card-pf {
+    background: var(--pp-bg-card) !important;
+    border: 1px solid var(--pp-border) !important;
+    border-radius: 12px !important;
+    padding: 40px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+    max-width: 440px;
+    margin: 20px auto;
+}
+
+/* === Form elements === */
+.pf-c-form__label,
+.pf-v5-c-form__label,
+label {
+    color: var(--pp-text-secondary) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px !important;
+}
+
+.pf-c-form-control,
+.pf-v5-c-form-control,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"] {
+    background: var(--pp-bg-input) !important;
+    border: 1px solid var(--pp-border) !important;
+    border-radius: var(--pp-radius) !important;
+    color: var(--pp-text-primary) !important;
+    font-size: 15px !important;
+    padding: 12px 16px !important;
+    height: auto !important;
+    transition: border-color 0.2s;
+}
+
+.pf-c-form-control:focus,
+.pf-v5-c-form-control:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    border-color: var(--pp-accent) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(29,161,242,0.15) !important;
+}
+
+/* === Botón primario === */
+.pf-c-button.pf-m-primary,
+.pf-v5-c-button.pf-m-primary,
+#kc-login,
+input[type="submit"].btn-primary,
+input[type="submit"] {
+    background: var(--pp-accent) !important;
+    border: none !important;
+    border-radius: var(--pp-radius) !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 12px !important;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-transform: none !important;
+    letter-spacing: 0;
+}
+
+.pf-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-m-primary:hover,
+#kc-login:hover,
+input[type="submit"]:hover {
+    background: var(--pp-accent-hover) !important;
+}
+
+.pf-c-button.pf-m-secondary,
+.pf-v5-c-button.pf-m-secondary,
+input[type="submit"].btn-default,
+input[type="button"].btn-default {
+    background: transparent !important;
+    border: 1px solid var(--pp-border) !important;
+    border-radius: var(--pp-radius) !important;
+    color: var(--pp-text-secondary) !important;
+    padding: 10px 16px !important;
+}
+
+.pf-c-button.pf-m-secondary:hover,
+.pf-v5-c-button.pf-m-secondary:hover {
+    border-color: var(--pp-accent) !important;
+    color: var(--pp-text-primary) !important;
+}
+
+/* === Enlaces === */
+a,
+a:link,
+a:visited {
+    color: var(--pp-accent) !important;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--pp-accent-hover) !important;
+    text-decoration: underline;
+}
+
+/* === Alertas === */
+.alert,
+.pf-c-alert,
+.pf-v5-c-alert {
+    border-radius: var(--pp-radius) !important;
+    border: 1px solid var(--pp-border) !important;
+}
+
+.alert-error,
+.pf-m-danger {
+    background: rgba(224,36,94,0.1) !important;
+    color: var(--pp-red) !important;
+    border-color: var(--pp-red) !important;
+}
+
+.alert-success,
+.pf-m-success {
+    background: rgba(23,191,99,0.1) !important;
+    color: var(--pp-green) !important;
+    border-color: var(--pp-green) !important;
+}
+
+.alert-warning,
+.pf-m-warning {
+    background: rgba(255,173,31,0.1) !important;
+    color: #ffad1f !important;
+    border-color: #ffad1f !important;
+}
+
+/* === Checkbox / rememberMe === */
+.checkbox,
+.pf-c-check,
+.pf-v5-c-check {
+    color: var(--pp-text-secondary) !important;
+}
+
+.checkbox label,
+.pf-c-check__label,
+.pf-v5-c-check__label {
+    color: var(--pp-text-secondary) !important;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+/* === Footer de la card === */
+#kc-info,
+#kc-info-wrapper {
+    background: transparent !important;
+    border-top: 1px solid var(--pp-border) !important;
+    color: var(--pp-text-secondary) !important;
+    font-size: 13px !important;
+    padding: 16px 0 0 !important;
+    margin-top: 16px;
+}
+
+/* === Selección de TOTP / device / nombre app === */
+.kc-dropdown > a,
+.login-pf-signup a {
+    color: var(--pp-accent) !important;
+}
+
+/* === 2FA / OTP input (pantalla de TOTP) === */
+.pf-c-form__group input[name="otp"],
+input[name="totp"],
+input[autocomplete="one-time-code"] {
+    letter-spacing: 6px !important;
+    font-family: 'SF Mono', 'Fira Code', monospace !important;
+    font-size: 20px !important;
+    text-align: center;
+}
+
+/* === Selector de idioma === */
+#kc-locale-dropdown {
+    color: var(--pp-text-secondary) !important;
+}
+
+#kc-locale-dropdown a,
+.kc-dropdown li a {
+    color: var(--pp-text-secondary) !important;
+}
+
+/* === Texto auxiliar === */
+.instruction,
+.subtitle,
+#kc-page-title {
+    color: var(--pp-text-primary) !important;
+}
+
+#kc-page-title {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    margin-bottom: 20px !important;
+}
+
+/* === Social login buttons (si se usaran) === */
+#kc-social-providers ul li a {
+    background: var(--pp-bg-input) !important;
+    border: 1px solid var(--pp-border) !important;
+    color: var(--pp-text-primary) !important;
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+    .card-pf,
+    div.login-pf-page .card-pf {
+        padding: 28px 24px !important;
+        margin: 12px;
+    }
+    #kc-header-wrapper {
+        font-size: 22px !important;
+    }
+    #kc-header-wrapper::before {
+        font-size: 40px;
+    }
+}
