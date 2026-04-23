@@ -21,8 +21,8 @@ ENV PATH="/opt/keycloak/bin:${PATH}"
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 
-# Hardening: limite JVM para evitar resource exhaustion
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+# Hardening: heap JVM ajustado para VPS 4GB (1024->768MB, suficiente <100 usuarios)
+ENV JAVA_OPTS="-Xms384m -Xmx768m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=192m -Djava.awt.headless=true -Dfile.encoding=UTF-8"
 
 RUN mkdir -p /opt/keycloak/admin /opt/keycloak/logs \
     && chown -R keycloak:keycloak /opt/keycloak/admin /opt/keycloak/logs \

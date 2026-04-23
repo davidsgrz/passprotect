@@ -32,13 +32,11 @@ services:
     depends_on:
       - ubseguridadd
 
-  mariadb-corp:
+  postgres-corp:
     build:
       context: ../..
-      dockerfile: dockerfiles/mariadb/Dockerfile
-    image: dsegura97/mariadb-corp:1.0.0
-    depends_on:
-      - ubseguridadd
+      dockerfile: dockerfiles/postgres/Dockerfile
+    image: dsegura97/postgres-corp:1.0.0
 
   nginx-proxy-corp:
     build:

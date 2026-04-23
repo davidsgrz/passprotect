@@ -1,5 +1,7 @@
-# PodDisruptionBudgets — garantizan minimo 1 pod activo en mantenimiento
-# Aplica a servicios sin estado con replicas: 2
+# PodDisruptionBudgets — single-node friendly (VPS 1 nodo).
+# maxUnavailable: 1 permite mantenimiento sin bloquear rolling updates
+# cuando solo hay 1 replica por servicio.
+# En single-node, minAvailable:1 bloquearia drain/upgrade.
 
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -7,7 +9,7 @@ metadata:
   name: vaultwarden-pdb
   namespace: vaultwarden
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: vaultwarden
@@ -18,7 +20,7 @@ metadata:
   name: keycloak-pdb
   namespace: auth
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: keycloak
@@ -29,7 +31,7 @@ metadata:
   name: dashboard-pdb
   namespace: monitoring
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: dashboard

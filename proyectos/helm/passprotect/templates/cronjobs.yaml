@@ -42,25 +42,30 @@ spec:
       template:
         spec:
           securityContext:
-            {{- include "passprotect.podSecurityContext" . | nindent 12 }}
+            runAsNonRoot: true
+            runAsUser: 70
+            fsGroup: 70
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: backup
-              image: "{{ .Values.mariadbVw.image.repository }}:{{ .Values.mariadbVw.image.tag }}"
+              image: "{{ .Values.postgresVw.image.repository }}:{{ .Values.postgresVw.image.tag }}"
               command:
-                - /bin/bash
+                - /bin/sh
                 - -c
                 - |
                   BACKUP_FILE="/backup/vaultwarden-$(date +%Y%m%d-%H%M%S).sql.gz"
-                  mysqldump -h mariadb-vw.vaultwarden.svc.cluster.local \
-                    -u "${MYSQL_USER}" -p"${MYSQL_PASSWORD}" \
-                    "${MYSQL_DATABASE}" | gzip > "$BACKUP_FILE"
+                  pg_dump -h postgres-vw.vaultwarden.svc.cluster.local \
+                    -U "${POSTGRES_USER}" \
+                    -d "${POSTGRES_DB}" \
+                    --no-owner --no-privileges | gzip > "$BACKUP_FILE"
                   find /backup -name "*.sql.gz" -mtime +{{ .Values.monitoring.backup.retentionDays }} -delete
               env:
-                - name: MYSQL_USER
-                  value: {{ .Values.mariadbVw.user | quote }}
-                - name: MYSQL_DATABASE
-                  value: {{ .Values.mariadbVw.database | quote }}
-                - name: MYSQL_PASSWORD
+                - name: POSTGRES_USER
+                  value: {{ .Values.postgresVw.user | quote }}
+                - name: POSTGRES_DB
+                  value: {{ .Values.postgresVw.database | quote }}
+                - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: vaultwarden-secrets

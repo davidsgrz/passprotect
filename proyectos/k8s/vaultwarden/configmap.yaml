@@ -4,13 +4,13 @@ metadata:
   name: vaultwarden-config
   namespace: vaultwarden
 data:
-  DOMAIN: "https://vault.TU_IP_VPS.nip.io"
+  DOMAIN: "https://vault.passprotect.es"
   SIGNUPS_ALLOWED: "false"
   INVITATIONS_ALLOWED: "true"
   SHOW_PASSWORD_HINT: "false"
   SSO_ENABLED: "true"
   SSO_CLIENT_ID: "vaultwarden"
-  SSO_AUTHORITY: "https://auth.TU_IP_VPS.nip.io/realms/corporativo"
+  SSO_AUTHORITY: "https://auth.passprotect.es/realms/corporativo"
   EXTENDED_LOGGING: "true"
   LOG_LEVEL: "info"
   ROCKET_PORT: "80"

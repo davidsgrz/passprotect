@@ -31,12 +31,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-vw-to-mariadb
+  name: allow-vw-to-postgres
   namespace: vaultwarden
 spec:
   podSelector:
     matchLabels:
-      app: mariadb-vw
+      app: postgres-vw
   policyTypes: [Ingress]
   ingress:
     - from:
@@ -44,7 +44,7 @@ spec:
             matchLabels:
               app: vaultwarden
       ports:
-        - port: 3306
+        - port: 5432
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -60,9 +60,9 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: mariadb-vw
+              app: postgres-vw
       ports:
-        - port: 3306
+        - port: 5432
     - ports:
         - port: 53
           protocol: UDP
@@ -123,9 +123,9 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: mariadb-kc
+              app: postgres-kc
       ports:
-        - port: 3306
+        - port: 5432
     - to:
         - podSelector:
             matchLabels:

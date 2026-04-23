@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
-    libmariadb3 \
+    libpq5 \
     ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

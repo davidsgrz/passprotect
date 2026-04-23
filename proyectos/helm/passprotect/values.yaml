@@ -11,15 +11,15 @@ vaultwarden:
     repository: dsegura97/vaultwarden-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 2
-  domain: "https://vault.TU_IP_VPS.nip.io"
+  replicas: 1
+  domain: "https://vault.passprotect.es"
   signupsAllowed: "false"
   invitationsAllowed: "true"
   showPasswordHint: "false"
   sso:
     enabled: "true"
     clientId: "vaultwarden"
-    authority: "https://auth.TU_IP_VPS.nip.io/realms/corporativo"
+    authority: "https://auth.passprotect.es/realms/corporativo"
   smtp:
     host: ""
     from: ""
@@ -35,10 +35,10 @@ vaultwarden:
   persistence:
     size: 5Gi
 
-# ── MariaDB Vaultwarden ──
-mariadbVw:
+# ── PostgreSQL Vaultwarden ──
+postgresVw:
   image:
-    repository: dsegura97/mariadb-corp
+    repository: dsegura97/postgres-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
   database: "vaultwarden"
@@ -46,10 +46,10 @@ mariadbVw:
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 192Mi
     limits:
       cpu: 500m
-      memory: 1Gi
+      memory: 512Mi
   persistence:
     size: 10Gi
 
@@ -59,11 +59,11 @@ keycloak:
     repository: dsegura97/keycloak-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 2
-  hostname: "auth.TU_IP_VPS.nip.io"
+  replicas: 1
+  hostname: "auth.passprotect.es"
   adminUser: "admin"
   db:
-    vendor: "mariadb"
+    vendor: "postgres"
     database: "keycloak"
     user: "keycloak"
   resources:
@@ -72,12 +72,12 @@ keycloak:
       memory: 512Mi
     limits:
       cpu: "1"
-      memory: 1536Mi
+      memory: 1280Mi
 
-# ── MariaDB Keycloak ──
-mariadbKc:
+# ── PostgreSQL Keycloak ──
+postgresKc:
   image:
-    repository: dsegura97/mariadb-corp
+    repository: dsegura97/postgres-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
   database: "keycloak"
@@ -85,10 +85,10 @@ mariadbKc:
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 192Mi
     limits:
       cpu: 500m
-      memory: 1Gi
+      memory: 512Mi
   persistence:
     size: 5Gi
 
@@ -123,13 +123,13 @@ dashboard:
     repository: dsegura97/dashboard-corp
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-  replicas: 2
+  replicas: 1
   resources:
     requests:
       cpu: 50m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 100m
       memory: 128Mi
 
 # ── Ingress ──

@@ -1,13 +1,11 @@
-# ── Vaultwarden — 2 replicas (sin estado) ──
+# ── Vaultwarden — 1 replica (sin estado, right-sized para VPS 4GB) ──
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vaultwarden
   namespace: vaultwarden
-  labels:
-    app: vaultwarden
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: vaultwarden
@@ -46,7 +44,7 @@ spec:
                   name: vaultwarden-secrets
                   key: admin-token
             - name: DATABASE_URL
-              value: "mysql://$(DB_VW_USER):$(DB_VW_PASSWORD)@mariadb-vw:3306/$(DB_VW_NAME)"
+              value: "postgresql://$(DB_VW_USER):$(DB_VW_PASSWORD)@postgres-vw:5432/$(DB_VW_NAME)"
             - name: DB_VW_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -81,7 +79,7 @@ spec:
               path: /alive
               port: 80
             initialDelaySeconds: 20
-            periodSeconds: 10
+            periodSeconds: 30
             failureThreshold: 3
             timeoutSeconds: 5
           readinessProbe:
@@ -89,7 +87,7 @@ spec:
               path: /alive
               port: 80
             initialDelaySeconds: 10
-            periodSeconds: 5
+            periodSeconds: 15
             failureThreshold: 2
             timeoutSeconds: 3
       volumes:
@@ -97,9 +95,11 @@ spec:
           persistentVolumeClaim:
             claimName: vaultwarden-data
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
         - name: logs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 100Mi
 ---
 apiVersion: v1
 kind: Service
@@ -117,93 +117,79 @@ spec:
       port: 3012
       targetPort: 3012
 ---
-# ── MariaDB Vaultwarden — StatefulSet (1 replica, reinicio rapido) ──
+# ── PostgreSQL Vaultwarden — StatefulSet (sustituye a mariadb-vw) ──
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mariadb-vw
+  name: postgres-vw
   namespace: vaultwarden
   labels:
-    app: mariadb-vw
+    app: postgres-vw
 spec:
-  serviceName: mariadb-vw
+  serviceName: postgres-vw
   replicas: 1
   selector:
     matchLabels:
-      app: mariadb-vw
+      app: postgres-vw
   template:
     metadata:
       labels:
-        app: mariadb-vw
+        app: postgres-vw
     spec:
       priorityClassName: db-priority
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: mariadb
-          image: dsegura97/mariadb-corp:1.0.0
+        - name: postgres
+          image: dsegura97/postgres-corp:1.0.0
           ports:
-            - containerPort: 3306
+            - containerPort: 5432
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: vaultwarden-secrets
-                  key: db-root-password
-            - name: MYSQL_DATABASE
+            - name: POSTGRES_DB
               value: "vaultwarden"
-            - name: MYSQL_USER
+            - name: POSTGRES_USER
               value: "vaultwarden"
-            - name: MYSQL_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [SETUID, SETGID, DAC_OVERRIDE]
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 192Mi
             limits:
               cpu: 500m
-              memory: 1Gi
+              memory: 512Mi
           volumeMounts:
             - name: data
-              mountPath: /var/lib/mysql
-            - name: logs
-              mountPath: /var/log/mysql
+              mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command:
-                - bash
-                - -c
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD} --silent"
+              command: ["pg_isready", "-U", "vaultwarden", "-d", "vaultwarden"]
             initialDelaySeconds: 20
-            periodSeconds: 10
-            failureThreshold: 3
+            periodSeconds: 15
             timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             exec:
-              command:
-                - bash
-                - -c
-                - "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' --silent"
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 2
+              command: ["pg_isready", "-U", "vaultwarden", "-d", "vaultwarden"]
+            initialDelaySeconds: 5
+            periodSeconds: 15
             timeoutSeconds: 3
-      volumes:
-        - name: logs
-          emptyDir: {}
+            failureThreshold: 2
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -216,12 +202,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mariadb-vw
+  name: postgres-vw
   namespace: vaultwarden
 spec:
   selector:
-    app: mariadb-vw
+    app: postgres-vw
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 5432
+      targetPort: 5432
   clusterIP: None

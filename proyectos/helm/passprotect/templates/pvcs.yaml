@@ -14,32 +14,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mariadb-vw
-  namespace: vaultwarden
-  labels:
-    {{- include "passprotect.labels" . | nindent 4 }}
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: {{ .Values.mariadbVw.persistence.size }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mariadb-kc
-  namespace: auth
-  labels:
-    {{- include "passprotect.labels" . | nindent 4 }}
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: {{ .Values.mariadbKc.persistence.size }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: openldap-data
   namespace: auth
   labels:
@@ -75,3 +49,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.monitoring.backup.persistence.size }}
+# Nota: los PVCs de postgres-kc y postgres-vw se crean via volumeClaimTemplates
+# de sus respectivos StatefulSets (patron idiomatico de K8s para DBs).

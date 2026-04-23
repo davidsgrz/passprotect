@@ -1,4 +1,4 @@
-# ── Keycloak — 2 replicas (sin estado) ──
+# ── Keycloak — 1 replica (sin estado) ──
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
   labels:
     app: keycloak
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: keycloak
@@ -64,7 +64,7 @@ spec:
               memory: 512Mi
             limits:
               cpu: "1"
-              memory: 1536Mi
+              memory: 1280Mi
           volumeMounts:
             - name: tmp
               mountPath: /tmp
@@ -75,9 +75,9 @@ spec:
               path: /health/started
               port: 9000
             initialDelaySeconds: 30
-            periodSeconds: 10
+            periodSeconds: 15
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 20
           livenessProbe:
             httpGet:
               path: /health/live
@@ -91,14 +91,16 @@ spec:
               path: /health/ready
               port: 9000
             initialDelaySeconds: 0
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
       volumes:
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
         - name: logs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 100Mi
 ---
 apiVersion: v1
 kind: Service
@@ -116,93 +118,81 @@ spec:
       port: 9000
       targetPort: 9000
 ---
-# ── MariaDB Keycloak — StatefulSet (1 replica, reinicio rapido) ──
+# ── PostgreSQL Keycloak — StatefulSet (sustituye a mariadb-kc) ──
+# Ver docs/ARCHITECTURE.md: PostgreSQL es la BD de referencia de Keycloak,
+# alpine-based (~80MB imagen vs 400MB mariadb), ~100MB RAM en reposo.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mariadb-kc
+  name: postgres-kc
   namespace: auth
   labels:
-    app: mariadb-kc
+    app: postgres-kc
 spec:
-  serviceName: mariadb-kc
+  serviceName: postgres-kc
   replicas: 1
   selector:
     matchLabels:
-      app: mariadb-kc
+      app: postgres-kc
   template:
     metadata:
       labels:
-        app: mariadb-kc
+        app: postgres-kc
     spec:
       priorityClassName: db-priority
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: mariadb
-          image: dsegura97/mariadb-corp:1.0.0
+        - name: postgres
+          image: dsegura97/postgres-corp:1.0.0
           ports:
-            - containerPort: 3306
+            - containerPort: 5432
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secrets
-                  key: db-root-password
-            - name: MYSQL_DATABASE
+            - name: POSTGRES_DB
               value: "keycloak"
-            - name: MYSQL_USER
+            - name: POSTGRES_USER
               value: "keycloak"
-            - name: MYSQL_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-secrets
                   key: db-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [SETUID, SETGID, DAC_OVERRIDE]
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 192Mi
             limits:
               cpu: 500m
-              memory: 1Gi
+              memory: 512Mi
           volumeMounts:
             - name: data
-              mountPath: /var/lib/mysql
-            - name: logs
-              mountPath: /var/log/mysql
+              mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command:
-                - bash
-                - -c
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD} --silent"
+              command: ["pg_isready", "-U", "keycloak", "-d", "keycloak"]
             initialDelaySeconds: 20
-            periodSeconds: 10
-            failureThreshold: 3
+            periodSeconds: 15
             timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             exec:
-              command:
-                - bash
-                - -c
-                - "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' --silent"
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 2
+              command: ["pg_isready", "-U", "keycloak", "-d", "keycloak"]
+            initialDelaySeconds: 5
+            periodSeconds: 15
             timeoutSeconds: 3
-      volumes:
-        - name: logs
-          emptyDir: {}
+            failureThreshold: 2
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -215,14 +205,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mariadb-kc
+  name: postgres-kc
   namespace: auth
 spec:
   selector:
-    app: mariadb-kc
+    app: postgres-kc
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 5432
+      targetPort: 5432
   clusterIP: None
 ---
 # ── OpenLDAP — Deployment (LDAP puro, sustituye a FreeIPA) ──
@@ -299,16 +289,13 @@ spec:
             tcpSocket:
               port: 389
             initialDelaySeconds: 30
-            periodSeconds: 10
+            periodSeconds: 15
             timeoutSeconds: 5
           readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - "ldapsearch -x -H ldap://localhost:389 -b dc=corp,dc=local -s base '(objectclass=*)' > /dev/null"
-            initialDelaySeconds: 20
-            periodSeconds: 5
+            tcpSocket:
+              port: 389
+            initialDelaySeconds: 15
+            periodSeconds: 20
             timeoutSeconds: 5
           volumeMounts:
             - name: data
@@ -325,7 +312,8 @@ spec:
           persistentVolumeClaim:
             claimName: openldap-config
         - name: certs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
 ---
 apiVersion: v1
 kind: Service

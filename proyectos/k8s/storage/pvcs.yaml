@@ -13,30 +13,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mariadb-vw
-  namespace: vaultwarden
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mariadb-kc
-  namespace: auth
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: openldap-data
   namespace: auth
 spec:
@@ -81,3 +57,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
+# Nota: los PVCs de postgres-kc y postgres-vw se crean via volumeClaimTemplates
+# de sus respectivos StatefulSets (patron idiomatico de K8s para DBs).

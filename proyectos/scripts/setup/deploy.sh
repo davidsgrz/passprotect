@@ -18,7 +18,6 @@ fi
 
 source "$CONFIG_FILE"
 
-# Verificar que VPS_IP esta configurado
 if [ "$VPS_IP" = "TU_IP_VPS" ]; then
     echo "ERROR: Configura VPS_IP en $CONFIG_FILE"
     exit 1
@@ -41,16 +40,14 @@ vaultwarden:
     clientSecret: "${SSO_CLIENT_SECRET}"
     authority: "https://auth.passprotect.es/realms/corporativo"
 
-mariadbVw:
-  rootPassword: "${DB_VW_ROOT_PASSWORD}"
+postgresVw:
   password: "${DB_VW_PASSWORD}"
 
 keycloak:
   hostname: "auth.passprotect.es"
   adminPassword: "${KC_ADMIN_PASSWORD}"
 
-mariadbKc:
-  rootPassword: "${DB_KC_ROOT_PASSWORD}"
+postgresKc:
   password: "${DB_KC_PASSWORD}"
 
 openldap:
@@ -71,7 +68,7 @@ kubectl get pods -n monitoring
 
 echo ""
 echo "=== Despliegue completado ==="
-echo "Vaultwarden: https://vault.${VPS_IP}.nip.io"
-echo "Keycloak:    https://auth.${VPS_IP}.nip.io"
+echo "Vaultwarden: https://vault.passprotect.es"
+echo "Keycloak:    https://auth.passprotect.es"
 echo ""
 echo "Siguiente paso: bash $SCRIPT_DIR/configure-keycloak.sh"

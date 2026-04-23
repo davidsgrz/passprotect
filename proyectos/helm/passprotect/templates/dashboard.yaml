@@ -39,22 +39,26 @@ spec:
               path: /
               port: 3000
             initialDelaySeconds: 10
-            periodSeconds: 30
+            periodSeconds: 60
           readinessProbe:
             httpGet:
               path: /
               port: 3000
             initialDelaySeconds: 5
-            periodSeconds: 10
+            periodSeconds: 30
       volumes:
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 20Mi
         - name: cache
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
         - name: run
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 10Mi
         - name: logs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
 ---
 apiVersion: v1
 kind: Service

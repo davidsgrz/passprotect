@@ -48,7 +48,7 @@ spec:
                   name: vaultwarden-secrets
                   key: admin-token
             - name: DATABASE_URL
-              value: "mysql://{{ .Values.mariadbVw.user }}:$(DB_PASSWORD)@mariadb-vw:3306/{{ .Values.mariadbVw.database }}"
+              value: "postgresql://{{ .Values.postgresVw.user }}:$(DB_PASSWORD)@postgres-vw:5432/{{ .Values.postgresVw.database }}"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -81,15 +81,17 @@ spec:
               path: /alive
               port: 80
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 15
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: vaultwarden-data
         - name: tmp
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 50Mi
         - name: logs
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 100Mi
 ---
 apiVersion: v1
 kind: Service
@@ -109,71 +111,95 @@ spec:
       port: 3012
       targetPort: 3012
 ---
+# ── PostgreSQL Vaultwarden — StatefulSet (sustituye a mariadb-vw) ──
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mariadb-vw
+  name: postgres-vw
   namespace: vaultwarden
   labels:
-    app: mariadb-vw
+    app: postgres-vw
     {{- include "passprotect.labels" . | nindent 4 }}
 spec:
+  serviceName: postgres-vw
   replicas: 1
   selector:
     matchLabels:
-      app: mariadb-vw
-  strategy:
-    type: Recreate
+      app: postgres-vw
   template:
     metadata:
       labels:
-        app: mariadb-vw
+        app: postgres-vw
     spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-        - name: mariadb
-          image: "{{ .Values.mariadbVw.image.repository }}:{{ .Values.mariadbVw.image.tag }}"
-          imagePullPolicy: {{ .Values.mariadbVw.image.pullPolicy }}
+        - name: postgres
+          image: "{{ .Values.postgresVw.image.repository }}:{{ .Values.postgresVw.image.tag }}"
+          imagePullPolicy: {{ .Values.postgresVw.image.pullPolicy }}
           ports:
-            - containerPort: 3306
+            - containerPort: 5432
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: vaultwarden-secrets
-                  key: db-root-password
-            - name: MYSQL_DATABASE
-              value: {{ .Values.mariadbVw.database | quote }}
-            - name: MYSQL_USER
-              value: {{ .Values.mariadbVw.user | quote }}
-            - name: MYSQL_PASSWORD
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresVw.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresVw.user | quote }}
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           resources:
-            {{- toYaml .Values.mariadbVw.resources | nindent 12 }}
+            {{- toYaml .Values.postgresVw.resources | nindent 12 }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/mysql
-            - name: logs
-              mountPath: /var/log/mysql
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: mariadb-vw
-        - name: logs
-          emptyDir: {}
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "{{ .Values.postgresVw.user }}", "-d", "{{ .Values.postgresVw.database }}"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "{{ .Values.postgresVw.user }}", "-d", "{{ .Values.postgresVw.database }}"]
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 2
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: {{ .Values.postgresVw.persistence.size }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mariadb-vw
+  name: postgres-vw
   namespace: vaultwarden
   labels:
     {{- include "passprotect.labels" . | nindent 4 }}
 spec:
   selector:
-    app: mariadb-vw
+    app: postgres-vw
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None

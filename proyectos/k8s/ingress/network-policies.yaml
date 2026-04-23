@@ -31,16 +31,16 @@ spec:
         - port: 80
         - port: 3012
 ---
-# Permitir Vaultwarden -> MariaDB
+# Permitir Vaultwarden -> PostgreSQL
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-vw-to-mariadb
+  name: allow-vw-to-postgres
   namespace: vaultwarden
 spec:
   podSelector:
     matchLabels:
-      app: mariadb-vw
+      app: postgres-vw
   policyTypes:
     - Ingress
   ingress:
@@ -49,9 +49,9 @@ spec:
             matchLabels:
               app: vaultwarden
       ports:
-        - port: 3306
+        - port: 5432
 ---
-# Permitir egress de Vaultwarden a MariaDB y DNS
+# Permitir egress de Vaultwarden a PostgreSQL y DNS
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -67,9 +67,9 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: mariadb-vw
+              app: postgres-vw
       ports:
-        - port: 3306
+        - port: 5432
     - to: []
       ports:
         - port: 53
@@ -122,7 +122,7 @@ spec:
       ports:
         - port: 8080
 ---
-# Permitir Keycloak -> MariaDB-KC y OpenLDAP
+# Permitir Keycloak -> PostgreSQL-KC y OpenLDAP
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -138,9 +138,9 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: mariadb-kc
+              app: postgres-kc
       ports:
-        - port: 3306
+        - port: 5432
     - to:
         - podSelector:
             matchLabels:

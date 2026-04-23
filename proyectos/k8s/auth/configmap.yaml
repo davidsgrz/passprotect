@@ -4,12 +4,10 @@ metadata:
   name: keycloak-config
   namespace: auth
 data:
-  KC_DB: "mariadb"
-  KC_DB_URL: "jdbc:mariadb://mariadb-kc:3306/keycloak"
+  KC_DB: "postgres"
+  KC_DB_URL: "jdbc:postgresql://postgres-kc:5432/keycloak"
   KC_DB_USERNAME: "keycloak"
-  KC_HOSTNAME: "auth.TU_IP_VPS.nip.io"
+  KC_HOSTNAME: "auth.passprotect.es"
   KC_PROXY: "edge"
   KC_HEALTH_ENABLED: "true"
   KC_METRICS_ENABLED: "true"
-  DB_KC_NAME: "keycloak"
-  DB_KC_USER: "keycloak"
