@@ -16,6 +16,8 @@
     --red: #e0245e;
     --border: #2d3d4f;
     --radius: 8px;
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+    --shadow-sm: 0 4px 16px rgba(0,0,0,0.25);
 }
 
 body {
@@ -27,23 +29,157 @@ body {
 
 .hidden { display: none !important; }
 
-/* === Login === */
+/* === Login (split layout: branding + formulario) === */
 #login-screen {
+    display: flex;
+    align-items: stretch;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 20% 10%, rgba(29,161,242,0.08), transparent 60%),
+                radial-gradient(ellipse at 80% 90%, rgba(23,191,99,0.06), transparent 55%),
+                linear-gradient(135deg, #0a1628 0%, #0f1923 50%, #1a2733 100%);
+}
+
+.login-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+/* --- Panel de branding (izquierda) --- */
+.login-brand {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-brand-header { margin-bottom: 40px; }
+
+.login-brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.login-brand-logo .icon {
+    font-size: 42px;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(29,161,242,0.3));
+}
+
+.login-brand-logo h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+}
+
+.login-brand p.tagline {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.login-brand p.subtagline {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.login-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 32px;
+}
+
+.login-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.login-features li .check {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(23,191,99,0.15);
+    color: var(--green);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0a1628 0%, #1a2733 100%);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.login-features li strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.login-features li span {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.login-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 32px;
+}
+
+.login-chips .chip {
+    padding: 6px 12px;
+    background: rgba(29,161,242,0.1);
+    border: 1px solid rgba(29,161,242,0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.3px;
+}
+
+/* --- Panel formulario (derecha) --- */
+.login-form-wrapper {
+    padding: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .login-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 48px 40px;
+    padding: 40px;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-lg);
+}
+
+.login-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.login-card .form-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
 }
 
 .logo { text-align: center; margin-bottom: 32px; }
@@ -70,12 +206,13 @@ body {
     border-radius: var(--radius);
     color: var(--text-primary);
     font-size: 15px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus {
     outline: none;
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29,161,242,0.15);
 }
 
 .btn-primary {
@@ -88,16 +225,58 @@ body {
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:active { transform: translateY(1px); }
 
 .login-hint {
     text-align: center;
     font-size: 12px;
     color: var(--text-secondary);
     margin-top: 16px;
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.btn-sso {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-sso:hover {
+    border-color: var(--accent);
+    background: rgba(29,161,242,0.05);
 }
 
 /* === Dashboard Layout === */
@@ -204,6 +383,21 @@ body {
     color: var(--text-primary);
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-header h2 { margin-bottom: 0; }
+
+.section-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
 /* === Stats Grid === */
 .stats-grid {
     display: grid;
@@ -218,6 +412,12 @@ body {
     border-radius: var(--radius);
     padding: 24px;
     text-align: center;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
 }
 
 .stat-number {
@@ -287,17 +487,55 @@ body {
 
 .badge-admin { background: rgba(29,161,242,0.15); color: var(--accent); }
 .badge-user { background: rgba(136,153,166,0.15); color: var(--text-secondary); }
+.badge-db { background: rgba(23,191,99,0.15); color: var(--green); }
 
 /* === Status === */
 .status-ok { color: var(--green); font-weight: 600; }
 .status-warn { color: var(--yellow); font-weight: 600; }
 .status-err { color: var(--red); font-weight: 600; }
 
-/* === Vault === */
+/* === Vault redesign === */
 .vault-toolbar {
     display: flex;
     gap: 12px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.vault-toolbar .search-input {
+    flex: 1;
+    min-width: 240px;
+}
+
+.vault-filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.vault-filter {
+    padding: 6px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+}
+
+.vault-filter:hover {
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+
+.vault-filter.active {
+    background: rgba(29,161,242,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .search-input {
@@ -322,10 +560,193 @@ body {
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    transition: background 0.15s;
 }
 
 .btn-sm:hover { background: var(--accent-hover); }
 
+.btn-ghost {
+    padding: 8px 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Vault grid (tarjetas) */
+.vault-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.vault-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.vault-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.vault-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vault-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(29,161,242,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.vault-card-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.vault-card-title strong {
+    display: block;
+    font-size: 15px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vault-card-title span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.vault-card-fav {
+    color: var(--text-secondary);
+    font-size: 16px;
+    transition: color 0.15s;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 4px;
+}
+
+.vault-card-fav.active { color: var(--yellow); }
+
+/* Indicador de fuerza de contraseña */
+.pwd-strength {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pwd-strength-bar {
+    display: flex;
+    gap: 3px;
+    height: 4px;
+}
+
+.pwd-strength-bar span {
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.2s;
+}
+
+.pwd-strength.strong .pwd-strength-bar span { background: var(--green); }
+.pwd-strength.medium .pwd-strength-bar span:nth-child(-n+2) { background: var(--yellow); }
+.pwd-strength.weak .pwd-strength-bar span:nth-child(1) { background: var(--red); }
+
+.pwd-strength-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pwd-strength.strong .pwd-strength-label .val { color: var(--green); }
+.pwd-strength.medium .pwd-strength-label .val { color: var(--yellow); }
+.pwd-strength.weak .pwd-strength-label .val { color: var(--red); }
+
+.vault-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.vault-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg-input);
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.vault-tag.tag-work { background: rgba(29,161,242,0.12); color: var(--accent); }
+.vault-tag.tag-personal { background: rgba(23,191,99,0.12); color: var(--green); }
+.vault-tag.tag-infra { background: rgba(255,173,31,0.12); color: var(--yellow); }
+
+.vault-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.vault-card-actions .icon-btn {
+    flex: 1;
+    padding: 7px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.vault-card-actions .icon-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Mantener compatibilidad con vault-list antiguo si existe */
 .vault-list { display: flex; flex-direction: column; gap: 8px; }
 
 .vault-item {
@@ -340,16 +761,8 @@ body {
 }
 
 .vault-item:hover { border-color: var(--accent); }
-
 .vault-icon { font-size: 24px; width: 40px; text-align: center; }
-
-.vault-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
+.vault-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .vault-info strong { font-size: 15px; }
 .vault-info span { font-size: 13px; color: var(--text-secondary); }
 
@@ -393,6 +806,22 @@ body {
 }
 
 /* === Responsive === */
+@media (max-width: 900px) {
+    .login-wrapper {
+        grid-template-columns: 1fr;
+    }
+    .login-brand {
+        padding: 40px 32px 20px;
+        text-align: center;
+    }
+    .login-brand-logo { justify-content: center; }
+    .login-features { max-width: 420px; margin: 24px auto 0; text-align: left; }
+    .login-chips { justify-content: center; }
+    .login-form-wrapper {
+        padding: 20px 32px 40px;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         width: 60px;
@@ -407,4 +836,5 @@ body {
     .sidebar .nav-item { justify-content: center; padding: 14px; }
     .content { margin-left: 60px; padding: 20px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .vault-grid { grid-template-columns: 1fr; }
 }

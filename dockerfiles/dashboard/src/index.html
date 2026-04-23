@@ -9,24 +9,82 @@
 <body>
     <!-- Login -->
     <div id="login-screen" class="screen">
-        <div class="login-card">
-            <div class="logo">
-                <span class="logo-icon">&#128274;</span>
-                <h1>PassProtect</h1>
-                <p>Plataforma Corporativa de Gestion de Contraseñas</p>
+        <div class="login-wrapper">
+            <!-- Panel branding -->
+            <aside class="login-brand">
+                <div class="login-brand-header">
+                    <div class="login-brand-logo">
+                        <span class="icon">&#128274;</span>
+                        <h1>PassProtect</h1>
+                    </div>
+                    <p class="tagline">Gestion corporativa de credenciales</p>
+                    <p class="subtagline">Plataforma self-hosted en Kubernetes con SSO, 2FA y cifrado de extremo a extremo. Diseñada para equipos que necesitan control total sobre sus secretos.</p>
+                </div>
+
+                <ul class="login-features">
+                    <li>
+                        <span class="check">&#10003;</span>
+                        <div>
+                            <strong>SSO con Keycloak + OpenLDAP</strong>
+                            <span>Autenticacion federada con 2FA obligatorio via TOTP</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="check">&#10003;</span>
+                        <div>
+                            <strong>Vaultwarden (cifrado AES-256)</strong>
+                            <span>Boveda compatible con Bitwarden, backups cifrados a PostgreSQL</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="check">&#10003;</span>
+                        <div>
+                            <strong>WAF ModSecurity + Fail2ban</strong>
+                            <span>OWASP CRS, rate limiting y ban automatico ante ataques</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="check">&#10003;</span>
+                        <div>
+                            <strong>Infraestructura hardened</strong>
+                            <span>Pod Security restricted, NetworkPolicies, TLS 1.3</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="login-chips">
+                    <span class="chip">KUBERNETES</span>
+                    <span class="chip">OIDC</span>
+                    <span class="chip">TOTP</span>
+                    <span class="chip">TLS 1.3</span>
+                </div>
+            </aside>
+
+            <!-- Panel formulario -->
+            <div class="login-form-wrapper">
+                <div class="login-card">
+                    <h2>Acceso corporativo</h2>
+                    <p class="form-subtitle">Introduce tus credenciales del directorio corp.local</p>
+
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="username">Usuario</label>
+                            <input type="text" id="username" placeholder="admin / usuario" autocomplete="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contrasena</label>
+                            <input type="password" id="password" placeholder="cualquier valor" autocomplete="current-password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Iniciar sesion</button>
+                        <p class="login-hint">Demo: <strong>admin</strong> o <strong>usuario</strong></p>
+                    </form>
+
+                    <div class="login-divider">O</div>
+                    <button type="button" class="btn-sso" id="sso-btn">
+                        <span>&#128273;</span> Continuar con SSO Keycloak
+                    </button>
+                </div>
             </div>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Usuario</label>
-                    <input type="text" id="username" placeholder="admin / usuario" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" placeholder="cualquier valor" required>
-                </div>
-                <button type="submit" class="btn-primary">Iniciar sesion</button>
-                <p class="login-hint">Demo: <strong>admin</strong> o <strong>usuario</strong></p>
-            </form>
         </div>
     </div>
 
@@ -94,31 +152,235 @@
                     <table class="table">
                         <thead><tr><th>Servicio</th><th>Estado</th><th>Uptime</th><th>CPU</th><th>RAM</th></tr></thead>
                         <tbody>
-                            <tr><td>Vaultwarden</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>8%</td><td>256 MB</td></tr>
-                            <tr><td>Keycloak</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>15%</td><td>1.2 GB</td></tr>
-                            <tr><td>MariaDB-VW</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>3%</td><td>384 MB</td></tr>
-                            <tr><td>MariaDB-KC</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>256 MB</td></tr>
-                            <tr><td>OpenLDAP</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>128 MB</td></tr>
-                            <tr><td>Nginx Proxy</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>64 MB</td></tr>
+                            <tr><td>Vaultwarden</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>6%</td><td>180 MB</td></tr>
+                            <tr><td>Keycloak</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>12%</td><td>780 MB</td></tr>
+                            <tr><td>Postgres-VW <span class="badge badge-db">Postgres 16</span></td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>110 MB</td></tr>
+                            <tr><td>Postgres-KC <span class="badge badge-db">Postgres 16</span></td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>105 MB</td></tr>
+                            <tr><td>OpenLDAP</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>96 MB</td></tr>
+                            <tr><td>Nginx Proxy (WAF)</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>64 MB</td></tr>
                             <tr><td>Dashboard</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>32 MB</td></tr>
                         </tbody>
                     </table>
+                    <p class="info-text">Tras migrar MariaDB a PostgreSQL 16-alpine: ~1 GB de RAM liberada y -300 MB en imagenes.</p>
                 </div>
             </section>
 
             <!-- Boveda -->
             <section id="section-vault" class="section hidden">
-                <h2>Mi Boveda</h2>
-                <div class="vault-toolbar">
-                    <input type="text" id="vault-search" placeholder="Buscar contraseñas..." class="search-input">
-                    <button class="btn-primary btn-sm">+ Nueva entrada</button>
+                <div class="section-header">
+                    <div>
+                        <h2>Mi Boveda</h2>
+                        <p class="section-subtitle">Credenciales cifradas en Vaultwarden (AES-256 + PBKDF2 600k iter)</p>
+                    </div>
+                    <button class="btn-sm">+ Nueva entrada</button>
                 </div>
-                <div class="vault-list">
-                    <div class="vault-item"><div class="vault-icon">&#127760;</div><div class="vault-info"><strong>GitHub</strong><span>dsegura97@github.com</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
-                    <div class="vault-item"><div class="vault-icon">&#9993;</div><div class="vault-info"><strong>Email Corporativo</strong><span>david@passprotect.local</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
-                    <div class="vault-item"><div class="vault-icon">&#128187;</div><div class="vault-info"><strong>VPS Contabo</strong><span>root@vps.contabo.com</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
-                    <div class="vault-item"><div class="vault-icon">&#128230;</div><div class="vault-info"><strong>Docker Hub</strong><span>dsegura97</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
-                    <div class="vault-item"><div class="vault-icon">&#128218;</div><div class="vault-info"><strong>Campus Virtual ASIR</strong><span>david.segura@edu.es</span></div><div class="vault-actions"><button class="btn-sm">Copiar</button></div></div>
+
+                <div class="vault-toolbar">
+                    <input type="text" id="vault-search" placeholder="Buscar en la boveda..." class="search-input">
+                    <button class="btn-ghost">Generador</button>
+                    <button class="btn-ghost">Importar</button>
+                </div>
+
+                <div class="vault-filters">
+                    <button class="vault-filter active">Todas <span>(8)</span></button>
+                    <button class="vault-filter">Favoritas <span>(2)</span></button>
+                    <button class="vault-filter">Trabajo <span>(4)</span></button>
+                    <button class="vault-filter">Personal <span>(2)</span></button>
+                    <button class="vault-filter">Infraestructura <span>(2)</span></button>
+                </div>
+
+                <div class="vault-grid">
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#127760;</div>
+                            <div class="vault-card-title">
+                                <strong>GitHub</strong>
+                                <span>dsegura97@github.com</span>
+                            </div>
+                            <button class="vault-card-fav active" title="Quitar de favoritas">&#9733;</button>
+                        </div>
+                        <div class="pwd-strength strong">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 24 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-work">Trabajo</span>
+                            <span>Actualizada hace 12 dias</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn" title="Copiar usuario">Usuario</button>
+                            <button class="icon-btn" title="Copiar contrasena">Contrasena</button>
+                            <button class="icon-btn" title="Ver detalles">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#9993;</div>
+                            <div class="vault-card-title">
+                                <strong>Email corporativo</strong>
+                                <span>david@passprotect.es</span>
+                            </div>
+                            <button class="vault-card-fav active" title="Quitar de favoritas">&#9733;</button>
+                        </div>
+                        <div class="pwd-strength strong">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 20 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-work">Trabajo</span>
+                            <span>Actualizada hace 3 dias</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#128187;</div>
+                            <div class="vault-card-title">
+                                <strong>VPS Contabo (root)</strong>
+                                <span>root@vps.passprotect.es</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength strong">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 32 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-infra">Infraestructura</span>
+                            <span>Rotada hace 7 dias</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#128230;</div>
+                            <div class="vault-card-title">
+                                <strong>Docker Hub</strong>
+                                <span>dsegura97</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength medium">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Media &middot; 14 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-work">Trabajo</span>
+                            <span>Actualizada hace 2 meses</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#128218;</div>
+                            <div class="vault-card-title">
+                                <strong>Campus Virtual ASIR</strong>
+                                <span>david.segura@edu.es</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength medium">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Media &middot; 12 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-personal">Personal</span>
+                            <span>Actualizada hace 1 mes</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#128273;</div>
+                            <div class="vault-card-title">
+                                <strong>Keycloak Admin</strong>
+                                <span>admin@corp.local</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength strong">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 28 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-infra">Infraestructura</span>
+                            <span>Rotada hace 5 dias</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#127974;</div>
+                            <div class="vault-card-title">
+                                <strong>Cloudflare DNS</strong>
+                                <span>devops@passprotect.es</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength strong">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 26 car.</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-work">Trabajo</span>
+                            <span>Actualizada hace 21 dias</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
+
+                    <article class="vault-card">
+                        <div class="vault-card-header">
+                            <div class="vault-card-icon">&#128241;</div>
+                            <div class="vault-card-title">
+                                <strong>Banco (personal)</strong>
+                                <span>**** 1234</span>
+                            </div>
+                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
+                        </div>
+                        <div class="pwd-strength weak">
+                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
+                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Debil &middot; rotar</span></div>
+                        </div>
+                        <div class="vault-card-meta">
+                            <span class="vault-tag tag-personal">Personal</span>
+                            <span>Sin rotar hace 11 meses</span>
+                        </div>
+                        <div class="vault-card-actions">
+                            <button class="icon-btn">Usuario</button>
+                            <button class="icon-btn">Contrasena</button>
+                            <button class="icon-btn">Ver</button>
+                        </div>
+                    </article>
                 </div>
             </section>
 
@@ -153,7 +415,7 @@
                         <div class="sec-item sec-ok"><span>&#10003;</span> ModSecurity + OWASP CRS (WAF)</div>
                         <div class="sec-item sec-ok"><span>&#10003;</span> Rate limiting (5r/s login, 2r/s admin)</div>
                         <div class="sec-item sec-ok"><span>&#10003;</span> Fail2ban (3 jails: login, admin, SQLi)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> MariaDB hardened (STRICT mode, local_infile=0)</div>
+                        <div class="sec-item sec-ok"><span>&#10003;</span> PostgreSQL 16 hardened (scram-sha-256, schema public revocado)</div>
                         <div class="sec-item sec-ok"><span>&#10003;</span> Pod Security Standards (restricted)</div>
                         <div class="sec-item sec-ok"><span>&#10003;</span> NetworkPolicies (deny-all default)</div>
                         <div class="sec-item sec-ok"><span>&#10003;</span> TLS 1.2/1.3 (certificados autofirmados)</div>

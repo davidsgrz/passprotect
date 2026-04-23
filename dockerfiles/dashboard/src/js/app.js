@@ -83,6 +83,35 @@
         }
     }
 
+    /* --- SSO placeholder (demo) --- */
+    var ssoBtn = document.getElementById('sso-btn');
+    if (ssoBtn) {
+        ssoBtn.addEventListener('click', function () {
+            alert('SSO con Keycloak: en produccion te redirige a auth.passprotect.es\n\nPara la demo usa admin / usuario.');
+        });
+    }
+
+    /* --- Filtros de boveda (visual) --- */
+    var vaultFilters = document.querySelectorAll('.vault-filter');
+    for (var f = 0; f < vaultFilters.length; f++) {
+        vaultFilters[f].addEventListener('click', function () {
+            for (var k = 0; k < vaultFilters.length; k++) {
+                vaultFilters[k].classList.remove('active');
+            }
+            this.classList.add('active');
+        });
+    }
+
+    /* --- Toggle favoritas --- */
+    var favBtns = document.querySelectorAll('.vault-card-fav');
+    for (var v = 0; v < favBtns.length; v++) {
+        favBtns[v].addEventListener('click', function (e) {
+            e.stopPropagation();
+            this.classList.toggle('active');
+            this.textContent = this.classList.contains('active') ? '\u2605' : '\u2606';
+        });
+    }
+
     /* --- Logout --- */
     document.getElementById('logout-btn').addEventListener('click', function () {
         currentUser = null;
