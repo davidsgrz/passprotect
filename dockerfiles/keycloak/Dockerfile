@@ -24,10 +24,11 @@ ENV KC_METRICS_ENABLED=true
 # Hardening: limite JVM para evitar resource exhaustion
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.awt.headless=true -Dfile.encoding=UTF-8"
 
-RUN mkdir -p /root/admin/keycloak
-COPY dockerfiles/keycloak/admin/start.sh /root/admin/keycloak/
-RUN chmod +x /root/admin/keycloak/start.sh
+RUN mkdir -p /opt/keycloak/admin /opt/keycloak/logs \
+    && chown -R keycloak:keycloak /opt/keycloak/admin /opt/keycloak/logs \
+    && chmod 0775 /opt/keycloak/logs
+COPY --chmod=0755 --chown=keycloak:keycloak dockerfiles/keycloak/admin/start.sh /opt/keycloak/admin/start.sh
 
 EXPOSE 8080 9000
 
-ENTRYPOINT ["/root/admin/keycloak/start.sh"]
+ENTRYPOINT ["/opt/keycloak/admin/start.sh"]

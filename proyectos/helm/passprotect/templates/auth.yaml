@@ -59,7 +59,7 @@ spec:
             - name: tmp
               mountPath: /tmp
             - name: logs
-              mountPath: /root/logs
+              mountPath: /opt/keycloak/logs
           livenessProbe:
             httpGet:
               path: /health/live

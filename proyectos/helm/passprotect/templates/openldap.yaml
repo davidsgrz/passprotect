@@ -90,7 +90,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE]  # Para bind a <1024
+              add: [CHOWN, DAC_OVERRIDE, FOWNER, FSETID, NET_BIND_SERVICE]  # FOWNER/FSETID para cp --preserve en startup de slapd; bind a <1024
           volumeMounts:
             - name: data
               mountPath: /var/lib/ldap
