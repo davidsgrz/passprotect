@@ -165,223 +165,84 @@
                 </div>
             </section>
 
-            <!-- Boveda -->
+            <!-- Boveda (layout 3 columnas estilo 1Password) -->
             <section id="section-vault" class="section hidden">
-                <div class="section-header">
-                    <div>
-                        <h2>Mi Boveda</h2>
-                        <p class="section-subtitle">Credenciales cifradas en Vaultwarden (AES-256 + PBKDF2 600k iter)</p>
+                <div class="vault-workspace">
+                    <!-- Columna 1: categorias y grupos -->
+                    <aside class="vault-nav">
+                        <div class="vault-nav-header">
+                            <h3>Mi Boveda</h3>
+                            <button class="btn-sm" id="new-entry-btn" title="Nueva entrada">+</button>
+                        </div>
+                        <ul class="vault-nav-list">
+                            <li class="vault-nav-item active" data-filter="all">
+                                <span class="vault-nav-icon">&#128218;</span>
+                                <span class="vault-nav-label">Todos los items</span>
+                                <span class="vault-nav-count"></span>
+                            </li>
+                            <li class="vault-nav-item" data-filter="fav">
+                                <span class="vault-nav-icon">&#9733;</span>
+                                <span class="vault-nav-label">Favoritas</span>
+                                <span class="vault-nav-count"></span>
+                            </li>
+                            <li class="vault-nav-item" data-filter="watchtower">
+                                <span class="vault-nav-icon">&#128737;</span>
+                                <span class="vault-nav-label">Watchtower</span>
+                                <span class="vault-nav-count"></span>
+                            </li>
+                        </ul>
+
+                        <div class="vault-nav-group">
+                            <div class="vault-nav-group-title">CATEGORIAS</div>
+                            <ul class="vault-nav-list">
+                                <li class="vault-nav-item" data-filter="work">
+                                    <span class="vault-nav-icon dot dot-work"></span>
+                                    <span class="vault-nav-label">Trabajo</span>
+                                    <span class="vault-nav-count"></span>
+                                </li>
+                                <li class="vault-nav-item" data-filter="personal">
+                                    <span class="vault-nav-icon dot dot-personal"></span>
+                                    <span class="vault-nav-label">Personal</span>
+                                    <span class="vault-nav-count"></span>
+                                </li>
+                                <li class="vault-nav-item" data-filter="infra">
+                                    <span class="vault-nav-icon dot dot-infra"></span>
+                                    <span class="vault-nav-label">Infraestructura</span>
+                                    <span class="vault-nav-count"></span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="vault-nav-group">
+                            <div class="vault-nav-group-title">ETIQUETAS</div>
+                            <ul class="vault-nav-list">
+                                <li class="vault-nav-item" data-filter="tag-sso"><span class="vault-nav-icon">&#35;</span><span class="vault-nav-label">sso</span></li>
+                                <li class="vault-nav-item" data-filter="tag-critical"><span class="vault-nav-icon">&#35;</span><span class="vault-nav-label">critico</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="vault-nav-footer">
+                            <span class="vault-nav-icon">&#128451;</span>
+                            <span class="vault-nav-label">Archivo</span>
+                        </div>
+                    </aside>
+
+                    <!-- Columna 2: lista de items -->
+                    <div class="vault-list-col">
+                        <div class="vault-list-toolbar">
+                            <input type="text" id="vault-search" placeholder="Buscar en la boveda..." class="search-input">
+                            <button class="btn-ghost" id="generator-btn" title="Generar contrasena">&#9881;</button>
+                            <button class="btn-ghost" id="import-btn" title="Importar">&#11015;</button>
+                        </div>
+                        <div class="vault-list" id="vault-list"></div>
                     </div>
-                    <button class="btn-sm">+ Nueva entrada</button>
+
+                    <!-- Columna 3: detalle del item seleccionado -->
+                    <div class="vault-detail" id="vault-detail">
+                        <!-- Se renderiza desde JS al seleccionar un item -->
+                    </div>
                 </div>
 
-                <div class="vault-toolbar">
-                    <input type="text" id="vault-search" placeholder="Buscar en la boveda..." class="search-input">
-                    <button class="btn-ghost">Generador</button>
-                    <button class="btn-ghost">Importar</button>
-                </div>
-
-                <div class="vault-filters">
-                    <button class="vault-filter active">Todas <span>(8)</span></button>
-                    <button class="vault-filter">Favoritas <span>(2)</span></button>
-                    <button class="vault-filter">Trabajo <span>(4)</span></button>
-                    <button class="vault-filter">Personal <span>(2)</span></button>
-                    <button class="vault-filter">Infraestructura <span>(2)</span></button>
-                </div>
-
-                <div class="vault-grid">
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#127760;</div>
-                            <div class="vault-card-title">
-                                <strong>GitHub</strong>
-                                <span>dsegura97@github.com</span>
-                            </div>
-                            <button class="vault-card-fav active" title="Quitar de favoritas">&#9733;</button>
-                        </div>
-                        <div class="pwd-strength strong">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 24 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-work">Trabajo</span>
-                            <span>Actualizada hace 12 dias</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn" title="Copiar usuario">Usuario</button>
-                            <button class="icon-btn" title="Copiar contrasena">Contrasena</button>
-                            <button class="icon-btn" title="Ver detalles">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#9993;</div>
-                            <div class="vault-card-title">
-                                <strong>Email corporativo</strong>
-                                <span>david@passprotect.es</span>
-                            </div>
-                            <button class="vault-card-fav active" title="Quitar de favoritas">&#9733;</button>
-                        </div>
-                        <div class="pwd-strength strong">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 20 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-work">Trabajo</span>
-                            <span>Actualizada hace 3 dias</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#128187;</div>
-                            <div class="vault-card-title">
-                                <strong>VPS Contabo (root)</strong>
-                                <span>root@vps.passprotect.es</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength strong">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 32 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-infra">Infraestructura</span>
-                            <span>Rotada hace 7 dias</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#128230;</div>
-                            <div class="vault-card-title">
-                                <strong>Docker Hub</strong>
-                                <span>dsegura97</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength medium">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Media &middot; 14 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-work">Trabajo</span>
-                            <span>Actualizada hace 2 meses</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#128218;</div>
-                            <div class="vault-card-title">
-                                <strong>Campus Virtual ASIR</strong>
-                                <span>david.segura@edu.es</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength medium">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Media &middot; 12 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-personal">Personal</span>
-                            <span>Actualizada hace 1 mes</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#128273;</div>
-                            <div class="vault-card-title">
-                                <strong>Keycloak Admin</strong>
-                                <span>admin@corp.local</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength strong">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 28 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-infra">Infraestructura</span>
-                            <span>Rotada hace 5 dias</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#127974;</div>
-                            <div class="vault-card-title">
-                                <strong>Cloudflare DNS</strong>
-                                <span>devops@passprotect.es</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength strong">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Fuerte &middot; 26 car.</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-work">Trabajo</span>
-                            <span>Actualizada hace 21 dias</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-
-                    <article class="vault-card">
-                        <div class="vault-card-header">
-                            <div class="vault-card-icon">&#128241;</div>
-                            <div class="vault-card-title">
-                                <strong>Banco (personal)</strong>
-                                <span>**** 1234</span>
-                            </div>
-                            <button class="vault-card-fav" title="Marcar favorita">&#9734;</button>
-                        </div>
-                        <div class="pwd-strength weak">
-                            <div class="pwd-strength-bar"><span></span><span></span><span></span><span></span></div>
-                            <div class="pwd-strength-label"><span>Fuerza</span><span class="val">Debil &middot; rotar</span></div>
-                        </div>
-                        <div class="vault-card-meta">
-                            <span class="vault-tag tag-personal">Personal</span>
-                            <span>Sin rotar hace 11 meses</span>
-                        </div>
-                        <div class="vault-card-actions">
-                            <button class="icon-btn">Usuario</button>
-                            <button class="icon-btn">Contrasena</button>
-                            <button class="icon-btn">Ver</button>
-                        </div>
-                    </article>
-                </div>
             </section>
 
             <!-- Usuarios (solo admin) -->
@@ -430,16 +291,16 @@
             <section id="section-audit" class="section hidden admin-only">
                 <h2>Logs de Auditoria</h2>
                 <div class="log-viewer">
-                    <div class="log-line"><span class="log-time">2026-04-14 20:45:12</span> <span class="log-ok">[INFO]</span> Login exitoso: dsegura desde 192.168.1.10</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 20:42:08</span> <span class="log-warn">[WARN]</span> Intento SQLi bloqueado: UNION SELECT desde 45.33.12.88 — baneado 24h</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 20:38:55</span> <span class="log-ok">[INFO]</span> Backup completado: vaultwarden-20260414-030000.sql.gz</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 20:35:22</span> <span class="log-ok">[INFO]</span> Login exitoso: fparra desde 192.168.1.15</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 20:30:10</span> <span class="log-warn">[WARN]</span> 3 intentos fallidos desde 203.0.113.42 — baneado 1h</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 20:15:00</span> <span class="log-ok">[INFO]</span> Security audit completado: 0 vulnerabilidades criticas</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 18:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via OpenLDAP sync</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 12:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
-                    <div class="log-line"><span class="log-time">2026-04-14 03:00:15</span> <span class="log-ok">[INFO]</span> Backup diario completado</div>
+                    <div class="log-line"><span class="log-time">2026-04-24 10:45:12</span> <span class="log-ok">[INFO]</span> Login exitoso: dsegura desde 192.168.1.10</div>
+                    <div class="log-line"><span class="log-time">2026-04-24 10:42:08</span> <span class="log-warn">[WARN]</span> Intento SQLi bloqueado: UNION SELECT desde 45.33.12.88 — baneado 24h</div>
+                    <div class="log-line"><span class="log-time">2026-04-24 03:00:15</span> <span class="log-ok">[INFO]</span> Backup completado: vaultwarden-20260424-030000.sql.gz</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 20:35:22</span> <span class="log-ok">[INFO]</span> Login exitoso: fparra desde 192.168.1.15</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 20:30:10</span> <span class="log-warn">[WARN]</span> 3 intentos fallidos desde 203.0.113.42 — baneado 1h</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 20:15:00</span> <span class="log-ok">[INFO]</span> Security audit completado: 0 vulnerabilidades criticas</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 18:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via OpenLDAP sync</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 12:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
+                    <div class="log-line"><span class="log-time">2026-04-23 03:00:15</span> <span class="log-ok">[INFO]</span> Backup diario completado</div>
                 </div>
             </section>
 

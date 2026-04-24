@@ -121,7 +121,7 @@ openldap:
 dashboard:
   image:
     repository: dsegura97/dashboard-corp
-    tag: "1.0.0"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
