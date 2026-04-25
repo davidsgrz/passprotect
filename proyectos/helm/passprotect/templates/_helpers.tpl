@@ -51,6 +51,13 @@ Dominio Dashboard (configurable via .Values.dashboard.host)
 {{- end }}
 
 {{/*
+Dominio Keycloak (configurable via .Values.keycloak.host, fallback nip.io)
+*/}}
+{{- define "passprotect.keycloakHost" -}}
+{{- .Values.keycloak.host | default (printf "auth.%s.nip.io" .Values.global.vpsIp) -}}
+{{- end }}
+
+{{/*
 Security context comun para pods
 */}}
 {{- define "passprotect.podSecurityContext" -}}

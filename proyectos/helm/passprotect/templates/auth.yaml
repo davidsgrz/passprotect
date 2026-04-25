@@ -22,7 +22,7 @@ spec:
         - name: keycloak
           image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
-          args: ["start-dev"]
+          args: ["start"]
           ports:
             - containerPort: 8080
               name: http
@@ -48,9 +48,13 @@ spec:
                   name: keycloak-secrets
                   key: db-password
             - name: KC_HOSTNAME
-              value: {{ .Values.keycloak.hostname | quote }}
-            - name: KC_PROXY
-              value: "edge"
+              value: {{ include "passprotect.keycloakHost" . | quote }}
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_ENABLED
+              value: "true"
           securityContext:
             {{- include "passprotect.containerSecurityContext" . | nindent 12 }}
           resources:
@@ -60,19 +64,24 @@ spec:
               mountPath: /tmp
             - name: logs
               mountPath: /opt/keycloak/logs
+            - name: kc-quarkus
+              mountPath: /opt/keycloak/lib/quarkus
+            - name: kc-conf
+              mountPath: /opt/keycloak/conf
+            - name: kc-data
+              mountPath: /opt/keycloak/data
           startupProbe:
             httpGet:
               path: /health/started
               port: 9000
             initialDelaySeconds: 30
-            periodSeconds: 15
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 20
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health/live
               port: 9000
-            initialDelaySeconds: 0
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 3
@@ -80,8 +89,7 @@ spec:
             httpGet:
               path: /health/ready
               port: 9000
-            initialDelaySeconds: 0
-            periodSeconds: 30
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
       volumes:
@@ -89,6 +97,15 @@ spec:
           emptyDir:
             sizeLimit: 50Mi
         - name: logs
+          emptyDir:
+            sizeLimit: 100Mi
+        - name: kc-quarkus
+          emptyDir:
+            sizeLimit: 200Mi
+        - name: kc-conf
+          emptyDir:
+            sizeLimit: 20Mi
+        - name: kc-data
           emptyDir:
             sizeLimit: 100Mi
 ---

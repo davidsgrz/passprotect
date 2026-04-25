@@ -54,11 +54,11 @@ spec:
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ include "passprotect.kcDomain" . }}
+        - {{ include "passprotect.keycloakHost" . }}
       secretName: keycloak-tls
   {{- end }}
   rules:
-    - host: {{ include "passprotect.kcDomain" . }}
+    - host: {{ include "passprotect.keycloakHost" . }}
       http:
         paths:
           - path: /

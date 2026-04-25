@@ -60,6 +60,7 @@ keycloak:
     tag: "1.0.0"
     pullPolicy: IfNotPresent
   replicas: 1
+  host: "auth.passprotect.es"
   hostname: "auth.passprotect.es"
   adminUser: "admin"
   db:
