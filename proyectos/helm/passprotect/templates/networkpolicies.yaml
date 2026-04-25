@@ -138,4 +138,97 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
+---
+# Ingress a postgres-kc desde keycloak (counterpart de allow-kc-egress)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-kc-ingress
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-kc
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: keycloak
+      ports:
+        - port: 5432
+---
+# Ingress a openldap desde keycloak (counterpart de allow-kc-egress)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-openldap-ingress
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: openldap
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: keycloak
+      ports:
+        - port: 389
+        - port: 636
+---
+# Egress de postgres-kc para DNS (resolver el upstream del statefulset)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-kc-egress
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-kc
+  policyTypes: [Egress]
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# Egress de openldap para DNS y operaciones internas
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-openldap-egress
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: openldap
+  policyTypes: [Egress]
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# Egress de postgres-vw para DNS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgres-vw-egress
+  namespace: vaultwarden
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-vw
+  policyTypes: [Egress]
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
 {{- end }}
