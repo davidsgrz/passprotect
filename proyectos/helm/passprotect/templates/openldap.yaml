@@ -36,7 +36,7 @@ spec:
         - name: openldap
           image: "{{ .Values.openldap.image.repository }}:{{ .Values.openldap.image.tag }}"
           imagePullPolicy: {{ .Values.openldap.image.pullPolicy }}
-          args: ["--copy-service", "--loglevel", "debug"]
+          args: ["--copy-service"]
           env:
             - name: LDAP_ORGANISATION
               value: {{ .Values.openldap.organization | quote }}
@@ -63,7 +63,9 @@ spec:
             - name: LDAP_BACKEND
               value: "mdb"
             - name: LDAP_LOG_LEVEL
-              value: "256"
+              value: "1024"
+            - name: CONTAINER_LOG_LEVEL
+              value: "4"
           ports:
             - name: ldap
               containerPort: 389
