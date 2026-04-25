@@ -3,7 +3,7 @@ FROM vaultwarden/server:1.32.5 AS vw-source
 FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Vaultwarden corporativo con capa seguridad"
-LABEL version="1.0.2"
+LABEL version="1.0.3"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -35,9 +35,10 @@ ENV WEB_VAULT_FOLDER=/web-vault
 ENV LOG_FILE=/data/vaultwarden.log
 ENV EXTENDED_LOGGING=true
 ENV LOG_LEVEL=info
-
-# Hardening Rocket (web server de Vaultwarden) — limite 10MB JSON payload
-ENV ROCKET_LIMITS='{"json":10485760}'
+# ROCKET_LIMITS eliminado: la sintaxis JSON string es válida en Rocket 0.4 pero
+# Rocket 0.5 (Vaultwarden 1.32+) espera un map. El default de Vaultwarden ya
+# limita correctamente (10MB JSON). Si en el futuro se necesita ajustar:
+# ENV ROCKET_LIMITS={json=10485760,form=10485760}
 
 VOLUME /data
 
