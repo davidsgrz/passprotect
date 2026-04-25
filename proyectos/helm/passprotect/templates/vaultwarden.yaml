@@ -17,7 +17,12 @@ spec:
         app: vaultwarden
     spec:
       securityContext:
-        {{- include "passprotect.podSecurityContext" . | nindent 8 }}
+        # vaultwarden-corp:1.0.0 entrypoint /root/admin/vaultwarden/start.sh hace `su vaultwarden`
+        # al final, así que el container DEBE arrancar como root. El binario real corre como user
+        # vaultwarden (UID asignado por useradd -r en el Dockerfile).
+        # Bumpear a 1.0.1 con permisos arreglados queda para otra sesión.
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: vaultwarden
           image: "{{ .Values.vaultwarden.image.repository }}:{{ .Values.vaultwarden.image.tag }}"
@@ -60,7 +65,12 @@ spec:
                   name: vaultwarden-secrets
                   key: sso-client-secret
           securityContext:
-            {{- include "passprotect.containerSecurityContext" . | nindent 12 }}
+            # No usamos readOnlyRootFilesystem porque el wrapper escribe a /root/logs
+            # y porque el wrapper hace mkdir en runtime. Caps mínimas + drop ALL.
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, DAC_OVERRIDE, SETUID, SETGID, NET_BIND_SERVICE]
           resources:
             {{- toYaml .Values.vaultwarden.resources | nindent 12 }}
           volumeMounts:
