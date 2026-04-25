@@ -37,12 +37,15 @@ err() { echo "ERROR: $*" >&2; exit 1; }
 
 TOKEN=""
 get_token() {
+  # IMPORTANTE: --data-urlencode (no -d) porque el password puede contener
+  # caracteres como '+' o '=' (base64) que en application/x-www-form-urlencoded
+  # se reinterpretan como espacios -> "Invalid user credentials" silencioso.
   TOKEN=$(curl -sk -X POST "${KC_URL}/realms/master/protocol/openid-connect/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "client_id=admin-cli" \
-    -d "username=${KC_ADMIN}" \
-    -d "password=${KC_ADMIN_PASSWORD}" \
-    -d "grant_type=password" | jq -r '.access_token')
+    --data-urlencode "client_id=admin-cli" \
+    --data-urlencode "username=${KC_ADMIN}" \
+    --data-urlencode "password=${KC_ADMIN_PASSWORD}" \
+    --data-urlencode "grant_type=password" | jq -r '.access_token')
   [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] || err "No se pudo obtener token admin"
 }
 
