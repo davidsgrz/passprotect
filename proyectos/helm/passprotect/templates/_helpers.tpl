@@ -30,10 +30,10 @@ app.kubernetes.io/instance: {{ .release }}
 {{- end }}
 
 {{/*
-Dominio Vaultwarden generado con nip.io
+Dominio Vaultwarden (configurable via .Values.vaultwarden.host, fallback nip.io)
 */}}
 {{- define "passprotect.vwDomain" -}}
-vault.{{ .Values.global.vpsIp }}.nip.io
+{{- .Values.vaultwarden.host | default (printf "vault.%s.nip.io" .Values.global.vpsIp) -}}
 {{- end }}
 
 {{/*

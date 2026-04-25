@@ -38,6 +38,10 @@ spec:
             # aunque el container tenga CAP_NET_BIND_SERVICE. Usamos 8080 (unprivileged).
             - name: ROCKET_PORT
               value: "8080"
+            # Por defecto Rocket bind a 127.0.0.1 -> probes de kubelet (que llegan de la
+            # IP del nodo) fallan. 0.0.0.0 expone todas las interfaces del pod.
+            - name: ROCKET_ADDRESS
+              value: "0.0.0.0"
             - name: DOMAIN
               value: {{ .Values.vaultwarden.domain | quote }}
             - name: SIGNUPS_ALLOWED
