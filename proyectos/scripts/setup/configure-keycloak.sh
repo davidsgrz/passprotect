@@ -174,7 +174,7 @@ create_ldap_federation() {
   log "[3/6] LDAP federation -> $LDAP_URL"
   local existing
   existing=$(api GET "/realms/${REALM}/components?type=org.keycloak.storage.UserStorageProvider" \
-    | jq -r '.[] | select(.name=="openldap-federation") | .id // empty' | head -1)
+    | jq -r '.[] | select(.name=="openldap-federation") | .id // empty' )
   local payload
   payload=$(cat <<JSON
 {
@@ -219,7 +219,7 @@ JSON
     [ "$code" = "201" ] || err "Crear federation devolvio HTTP $code"
     sleep 1
     api GET "/realms/${REALM}/components?type=org.keycloak.storage.UserStorageProvider" \
-      | jq -r '.[] | select(.name=="openldap-federation") | .id' | head -1
+      | jq -r '.[] | select(.name=="openldap-federation") | .id'
   fi
 }
 
@@ -229,7 +229,7 @@ create_group_mapper() {
   log "[4/6] Group LDAP mapper"
   local existing
   existing=$(api GET "/realms/${REALM}/components?parent=${fed_id}" \
-    | jq -r '.[] | select(.name=="group-mapper") | .id // empty' | head -1)
+    | jq -r '.[] | select(.name=="group-mapper") | .id // empty' )
   local payload
   payload=$(cat <<JSON
 {
@@ -277,7 +277,7 @@ sync_ldap() {
 
   local mapper_id
   mapper_id=$(api GET "/realms/${REALM}/components?parent=${fed_id}" \
-    | jq -r '.[] | select(.name=="group-mapper") | .id' | head -1)
+    | jq -r '.[] | select(.name=="group-mapper") | .id' )
   if [ -n "$mapper_id" ]; then
     log "  sync group-mapper (fedToKeycloak)..."
     api POST "/realms/${REALM}/user-storage/${fed_id}/mappers/${mapper_id}/sync?direction=fedToKeycloak" "" >/dev/null
