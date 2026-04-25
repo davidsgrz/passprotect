@@ -52,7 +52,7 @@ sn: Vault
 givenName: Admin
 displayName: Admin Vault (Password Manager)
 mail: admin.vault@corp.local
-userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+userPassword: {SSHA}W8lWgQmfY/EvEGlaGtZXozG1dws+1yVw
 title: Vault Administrator
 employeeType: admin
 
@@ -68,7 +68,7 @@ sn: Segura Rodriguez
 givenName: David
 displayName: David Segura Rodriguez
 mail: david.segura@corp.local
-userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+userPassword: {SSHA}W8lWgQmfY/EvEGlaGtZXozG1dws+1yVw
 title: DevOps Engineer
 employeeType: admin
 
@@ -84,7 +84,7 @@ sn: Parra Caparros
 givenName: Francisco
 displayName: Francisco Parra Caparros
 mail: fran.parra@corp.local
-userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+userPassword: {SSHA}W8lWgQmfY/EvEGlaGtZXozG1dws+1yVw
 title: Security Engineer
 employeeType: admin
 
@@ -100,7 +100,7 @@ sn: Demo
 givenName: Usuario
 displayName: Usuario de Prueba
 mail: user.demo@corp.local
-userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+userPassword: {SSHA}W8lWgQmfY/EvEGlaGtZXozG1dws+1yVw
 title: Standard User
 employeeType: user
 
@@ -152,6 +152,6 @@ sn: Service
 givenName: Keycloak
 displayName: Keycloak LDAP Federation Bind
 description: Cuenta de servicio usada por Keycloak para la federation LDAP
-userPassword: {SSHA}6PbORa8qh3kdy2NG9ydZTkcnZK/N0D6o
+userPassword: {SSHA}W8lWgQmfY/EvEGlaGtZXozG1dws+1yVw
 title: Service Account
 employeeType: service
