@@ -39,7 +39,7 @@ vaultwarden:
 postgresVw:
   image:
     repository: dsegura97/postgres-corp
-    tag: "1.0.0"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   database: "vaultwarden"
   user: "vaultwarden"
@@ -57,7 +57,7 @@ postgresVw:
 keycloak:
   image:
     repository: dsegura97/keycloak-corp
-    tag: "1.0.0"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   replicas: 1
   host: "auth.passprotect.es"
@@ -79,7 +79,7 @@ keycloak:
 postgresKc:
   image:
     repository: dsegura97/postgres-corp
-    tag: "1.0.0"
+    tag: "1.0.1"
     pullPolicy: IfNotPresent
   database: "keycloak"
   user: "keycloak"

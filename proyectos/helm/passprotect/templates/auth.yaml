@@ -22,7 +22,7 @@ spec:
         - name: keycloak
           image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
-          args: ["start"]
+          args: ["start", "--optimized"]
           ports:
             - containerPort: 8080
               name: http
@@ -64,10 +64,6 @@ spec:
               mountPath: /tmp
             - name: logs
               mountPath: /opt/keycloak/logs
-            - name: kc-quarkus
-              mountPath: /opt/keycloak/lib/quarkus
-            - name: kc-conf
-              mountPath: /opt/keycloak/conf
             - name: kc-data
               mountPath: /opt/keycloak/data
           startupProbe:
@@ -99,12 +95,6 @@ spec:
         - name: logs
           emptyDir:
             sizeLimit: 100Mi
-        - name: kc-quarkus
-          emptyDir:
-            sizeLimit: 200Mi
-        - name: kc-conf
-          emptyDir:
-            sizeLimit: 20Mi
         - name: kc-data
           emptyDir:
             sizeLimit: 100Mi
@@ -160,8 +150,6 @@ spec:
         - name: postgres
           image: "{{ .Values.postgresKc.image.repository }}:{{ .Values.postgresKc.image.tag }}"
           imagePullPolicy: {{ .Values.postgresKc.image.pullPolicy }}
-          command: ["docker-entrypoint.sh"]
-          args: ["postgres"]
           ports:
             - containerPort: 5432
           env:

@@ -143,8 +143,6 @@ spec:
         - name: postgres
           image: "{{ .Values.postgresVw.image.repository }}:{{ .Values.postgresVw.image.tag }}"
           imagePullPolicy: {{ .Values.postgresVw.image.pullPolicy }}
-          command: ["docker-entrypoint.sh"]
-          args: ["postgres"]
           ports:
             - containerPort: 5432
           env:

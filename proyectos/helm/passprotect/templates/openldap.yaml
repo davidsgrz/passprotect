@@ -36,7 +36,7 @@ spec:
         - name: openldap
           image: "{{ .Values.openldap.image.repository }}:{{ .Values.openldap.image.tag }}"
           imagePullPolicy: {{ .Values.openldap.image.pullPolicy }}
-          args: ["--copy-service"]
+          args: ["--copy-service", "--loglevel", "debug"]
           env:
             - name: LDAP_ORGANISATION
               value: {{ .Values.openldap.organization | quote }}

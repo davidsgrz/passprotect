@@ -23,6 +23,7 @@ RUN groupadd -r keycloak && useradd -r -g keycloak -d /opt/keycloak keycloak \
 ENV PATH="/opt/keycloak/bin:${PATH}"
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
+ENV KC_DB=postgres
 
 # Hardening: heap JVM ajustado para VPS 4GB (1024->768MB, suficiente <100 usuarios)
 ENV JAVA_OPTS="-Xms384m -Xmx768m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=192m -Djava.awt.headless=true -Dfile.encoding=UTF-8"
@@ -31,6 +32,12 @@ RUN mkdir -p /opt/keycloak/admin /opt/keycloak/logs \
     && chown -R keycloak:keycloak /opt/keycloak/admin /opt/keycloak/logs \
     && chmod 0775 /opt/keycloak/logs
 COPY --chmod=0755 --chown=keycloak:keycloak dockerfiles/keycloak/admin/start.sh /opt/keycloak/admin/start.sh
+
+# Pre-build optimizado para Postgres (permite 'kc.sh start --optimized' en runtime
+# sin re-augment, compatible con readOnlyRootFilesystem: true)
+USER keycloak
+RUN /opt/keycloak/bin/kc.sh build --db=postgres
+USER root
 
 EXPOSE 8080 9000
 
