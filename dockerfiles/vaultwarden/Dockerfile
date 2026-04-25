@@ -3,16 +3,23 @@ FROM vaultwarden/server:1.32.5 AS vw-source
 FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Vaultwarden corporativo con capa seguridad"
-LABEL version="1.0.0"
+LABEL version="1.0.1"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# libpq5 requerido por el binario vaultwarden (postgres backend dynamically linked).
+# Se verifica explícitamente que la lib quedó instalada porque en builds anteriores
+# desaparecía silenciosamente (1.0.0 quedó sin libpq -> libpq.so.5: not found).
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libpq5 \
+    libpq-dev \
+    postgresql-client \
     ca-certificates \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && test -f /usr/lib/x86_64-linux-gnu/libpq.so.5 \
+    && ldconfig
 
 # Copiar binarios desde la imagen oficial
 COPY --from=vw-source /vaultwarden /usr/local/bin/vaultwarden
