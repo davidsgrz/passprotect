@@ -171,7 +171,9 @@ JSON
 # === 3. LDAP federation ===
 # Devuelve el ID del componente de federation por stdout.
 create_ldap_federation() {
-  log "[3/6] LDAP federation -> $LDAP_URL"
+  # IMPORTANTE: TODOS los logs aqui van a stderr (>&2) porque el stdout
+  # de esta funcion captura el UUID del componente para el caller.
+  log "[3/6] LDAP federation -> $LDAP_URL" >&2
   local existing
   existing=$(api GET "/realms/${REALM}/components?type=org.keycloak.storage.UserStorageProvider" \
     | jq -r '.[] | select(.name=="openldap-federation") | .id // empty' )
