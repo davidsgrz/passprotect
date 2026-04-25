@@ -28,11 +28,16 @@ spec:
           image: "{{ .Values.vaultwarden.image.repository }}:{{ .Values.vaultwarden.image.tag }}"
           imagePullPolicy: {{ .Values.vaultwarden.image.pullPolicy }}
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
             - containerPort: 3012
               name: websocket
           env:
+            # Vaultwarden corre como user no-root tras 'su vaultwarden' (en el wrapper),
+            # y 'su' droppea las capabilities -> bind a port <1024 falla con PermissionDenied
+            # aunque el container tenga CAP_NET_BIND_SERVICE. Usamos 8080 (unprivileged).
+            - name: ROCKET_PORT
+              value: "8080"
             - name: DOMAIN
               value: {{ .Values.vaultwarden.domain | quote }}
             - name: SIGNUPS_ALLOWED
@@ -83,13 +88,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /alive
-              port: 80
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /alive
-              port: 80
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 15
       volumes:
@@ -116,7 +121,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: 8080
     - name: websocket
       port: 3012
       targetPort: 3012
