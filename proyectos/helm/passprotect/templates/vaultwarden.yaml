@@ -47,13 +47,13 @@ spec:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: admin-token
-            - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresVw.user }}:$(DB_PASSWORD)@postgres-vw:5432/{{ .Values.postgresVw.database }}"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresVw.user }}:$(DB_PASSWORD)@postgres-vw:5432/{{ .Values.postgresVw.database }}"
             - name: SSO_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:

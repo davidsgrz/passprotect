@@ -71,21 +71,28 @@ spec:
               containerPort: 389
             - name: ldaps
               containerPort: 636
-          livenessProbe:
+          startupProbe:
             tcpSocket:
               port: 389
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
+            failureThreshold: 60   # 10 min para generar DH params en host con load alto
+          livenessProbe:
+            tcpSocket:
+              port: 389
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
                 - "ldapsearch -x -H ldap://localhost:389 -b dc=corp,dc=local -s base '(objectclass=*)' > /dev/null"
-            initialDelaySeconds: 20
-            periodSeconds: 5
-            timeoutSeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.openldap.resources | nindent 12 }}
           securityContext:
