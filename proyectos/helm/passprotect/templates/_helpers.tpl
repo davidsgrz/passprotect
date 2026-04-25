@@ -44,6 +44,13 @@ auth.{{ .Values.global.vpsIp }}.nip.io
 {{- end }}
 
 {{/*
+Dominio Dashboard (configurable via .Values.dashboard.host)
+*/}}
+{{- define "passprotect.dashboardDomain" -}}
+{{- .Values.dashboard.host | default (printf "dashboard.%s.nip.io" .Values.global.vpsIp) -}}
+{{- end }}
+
+{{/*
 Security context comun para pods
 */}}
 {{- define "passprotect.podSecurityContext" -}}

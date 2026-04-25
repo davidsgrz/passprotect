@@ -124,6 +124,7 @@ dashboard:
     tag: "1.0.2"
     pullPolicy: IfNotPresent
   replicas: 1
+  host: "dashboard.passprotect.es"
   resources:
     requests:
       cpu: 50m
