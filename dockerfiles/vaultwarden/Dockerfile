@@ -3,22 +3,22 @@ FROM vaultwarden/server:1.32.5 AS vw-source
 FROM dsegura97/ubseguridadd:latest
 
 LABEL description="Vaultwarden corporativo con capa seguridad"
-LABEL version="1.0.1"
+LABEL version="1.0.2"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# libpq5 requerido por el binario vaultwarden (postgres backend dynamically linked).
-# Se verifica explícitamente que la lib quedó instalada porque en builds anteriores
-# desaparecía silenciosamente (1.0.0 quedó sin libpq -> libpq.so.5: not found).
+# libpq5 + libmariadb3 son AMBOS requeridos por el binario vaultwarden (compilado
+# con backends mariadb y postgres dynamically linked). Sin uno de los dos:
+# 'libpq.so.5: cannot open shared object file' o 'libmariadb.so.3: ...'
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libpq5 \
-    libpq-dev \
-    postgresql-client \
+    libmariadb3 \
     ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && test -f /usr/lib/x86_64-linux-gnu/libpq.so.5 \
+    && test -f /usr/lib/x86_64-linux-gnu/libmariadb.so.3 \
     && ldconfig
 
 # Copiar binarios desde la imagen oficial

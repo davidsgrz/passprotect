@@ -99,7 +99,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [CHOWN, DAC_OVERRIDE, FOWNER, FSETID, NET_BIND_SERVICE, SETUID, SETGID]  # SETUID/SETGID para que slapd descienda a user openldap; FOWNER/FSETID para cp --preserve; NET_BIND_SERVICE para bind a <1024
+              add: [CHOWN, DAC_OVERRIDE, FOWNER, FSETID, NET_BIND_SERVICE, SETUID, SETGID, KILL]  # SETUID/SETGID para que slapd descienda a user openldap; KILL para que el script init mate y reinicie slapd tras seed; FOWNER/FSETID para cp --preserve; NET_BIND_SERVICE para bind a <1024
           volumeMounts:
             - name: data
               mountPath: /var/lib/ldap
