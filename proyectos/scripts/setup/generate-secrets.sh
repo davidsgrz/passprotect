@@ -23,6 +23,11 @@ DB_KC_PASSWORD=$(openssl rand -base64 32)
 SSO_CLIENT_SECRET=$(openssl rand -hex 32)
 LDAP_ADMIN_PASSWORD=$(openssl rand -base64 24)
 LDAP_CONFIG_PASSWORD=$(openssl rand -base64 24)
+# Dashboard oauth2-proxy (SSO via Keycloak):
+# - DASHBOARD_SSO_CLIENT_SECRET: secret del cliente OIDC "dashboard" en Keycloak
+# - DASHBOARD_OAUTH2_COOKIE_SECRET: clave AES-256 (32 bytes) para cifrar cookie de sesion
+DASHBOARD_SSO_CLIENT_SECRET=$(openssl rand -hex 32)
+DASHBOARD_OAUTH2_COOKIE_SECRET=$(openssl rand -base64 32 | tr -d '\n=' | head -c 32)
 
 # Reemplazar placeholders en config.env
 sed -i "s|VW_ADMIN_TOKEN=.*|VW_ADMIN_TOKEN=${VW_ADMIN_TOKEN}|" "$CONFIG_FILE"
@@ -34,6 +39,17 @@ sed -i "s|DB_KC_PASSWORD=.*|DB_KC_PASSWORD=${DB_KC_PASSWORD}|" "$CONFIG_FILE"
 sed -i "s|SSO_CLIENT_SECRET=.*|SSO_CLIENT_SECRET=${SSO_CLIENT_SECRET}|" "$CONFIG_FILE"
 sed -i "s|LDAP_ADMIN_PASSWORD=.*|LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}|" "$CONFIG_FILE"
 sed -i "s|LDAP_CONFIG_PASSWORD=.*|LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD}|" "$CONFIG_FILE"
+# Append-or-replace para las nuevas vars (compatibilidad con config.env preexistente)
+if grep -q "^DASHBOARD_SSO_CLIENT_SECRET=" "$CONFIG_FILE"; then
+    sed -i "s|DASHBOARD_SSO_CLIENT_SECRET=.*|DASHBOARD_SSO_CLIENT_SECRET=${DASHBOARD_SSO_CLIENT_SECRET}|" "$CONFIG_FILE"
+else
+    echo "DASHBOARD_SSO_CLIENT_SECRET=${DASHBOARD_SSO_CLIENT_SECRET}" >> "$CONFIG_FILE"
+fi
+if grep -q "^DASHBOARD_OAUTH2_COOKIE_SECRET=" "$CONFIG_FILE"; then
+    sed -i "s|DASHBOARD_OAUTH2_COOKIE_SECRET=.*|DASHBOARD_OAUTH2_COOKIE_SECRET=${DASHBOARD_OAUTH2_COOKIE_SECRET}|" "$CONFIG_FILE"
+else
+    echo "DASHBOARD_OAUTH2_COOKIE_SECRET=${DASHBOARD_OAUTH2_COOKIE_SECRET}" >> "$CONFIG_FILE"
+fi
 
 # Generar .env para docker-compose
 COMPOSE_DIR="$PROJECT_DIR/proyectos/docker-compose"

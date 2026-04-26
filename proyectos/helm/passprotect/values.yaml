@@ -134,6 +134,20 @@ dashboard:
     limits:
       cpu: 100m
       memory: 128Mi
+  # ── oauth2-proxy delante del dashboard (SSO via Keycloak) ──
+  # Si enabled=true, el ingress dashboard-ingress apunta a oauth2-proxy:4180
+  # en lugar de dashboard:3000 directamente. oauth2-proxy valida sesión OIDC
+  # contra Keycloak antes de exponer el contenido (patrón Reverse Proxy Auth).
+  oauth2Proxy:
+    enabled: true
+    image:
+      repository: quay.io/oauth2-proxy/oauth2-proxy
+      tag: "v7.6.0"
+      pullPolicy: IfNotPresent
+    clientId: "dashboard"
+    issuerUrl: "https://auth.passprotect.es/realms/corporativo"
+    # clientSecret y cookieSecret se generan en deploy.sh desde config.env
+    # (DASHBOARD_SSO_CLIENT_SECRET y DASHBOARD_OAUTH2_COOKIE_SECRET)
 
 # ── Ingress ──
 ingress:

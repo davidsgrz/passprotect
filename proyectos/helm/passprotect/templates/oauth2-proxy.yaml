@@ -1,0 +1,119 @@
+{{- if .Values.dashboard.oauth2Proxy.enabled }}
+# ============================================================
+# oauth2-proxy delante del dashboard (SSO via Keycloak)
+# ============================================================
+# El dashboard es HTML estatico sin auth. Para protegerlo via OIDC
+# delegamos la verificacion de identidad a oauth2-proxy:
+#   navegador -> ingress -> oauth2-proxy:4180
+#                            ├─ no auth -> redirect a Keycloak
+#                            └─ auth OK -> upstream a dashboard:3000
+# Patron "Reverse Proxy Auth" estandar para apps sin OIDC nativo.
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-oauth2-proxy
+  namespace: monitoring
+  labels:
+    app: dashboard-oauth2-proxy
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: dashboard-oauth2-proxy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: oauth2-proxy
+          image: "{{ .Values.dashboard.oauth2Proxy.image.repository }}:{{ .Values.dashboard.oauth2Proxy.image.tag }}"
+          imagePullPolicy: {{ .Values.dashboard.oauth2Proxy.image.pullPolicy }}
+          args:
+            - --provider=keycloak-oidc
+            - --oidc-issuer-url={{ .Values.dashboard.oauth2Proxy.issuerUrl }}
+            - --redirect-url={{ printf "https://%s/oauth2/callback" (include "passprotect.dashboardDomain" .) }}
+            - --upstream=http://dashboard.monitoring.svc.cluster.local:3000
+            - --http-address=0.0.0.0:4180
+            - --reverse-proxy=true
+            - --cookie-secure=true
+            - --cookie-domain={{ include "passprotect.dashboardDomain" . }}
+            - --whitelist-domain={{ include "passprotect.dashboardDomain" . }}
+            - --email-domain=*
+            - --skip-provider-button=true
+            - --pass-access-token=true
+            - --pass-authorization-header=true
+            - --set-authorization-header=true
+            - --set-xauthrequest=true
+            - --code-challenge-method=S256
+            - --scope=openid email profile
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-oauth2-proxy-secrets
+                  key: client-id
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-oauth2-proxy-secrets
+                  key: client-secret
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-oauth2-proxy-secrets
+                  key: cookie-secret
+          ports:
+            - containerPort: 4180
+              name: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-oauth2-proxy
+  namespace: monitoring
+  labels:
+    app: dashboard-oauth2-proxy
+    {{- include "passprotect.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: dashboard-oauth2-proxy
+  ports:
+    - name: http
+      port: 4180
+      targetPort: 4180
+{{- end }}

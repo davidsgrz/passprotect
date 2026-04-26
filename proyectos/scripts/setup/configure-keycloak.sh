@@ -168,6 +168,62 @@ JSON
   fi
 }
 
+# === 2b. Cliente OIDC dashboard (oauth2-proxy) ===
+# Cliente confidential con PKCE para que oauth2-proxy proteja el dashboard.
+# Skip si no esta definido DASHBOARD_SSO_CLIENT_SECRET (oauth2Proxy desactivado).
+create_dashboard_client() {
+  if [ -z "${DASHBOARD_SSO_CLIENT_SECRET:-}" ]; then
+    log "[2b/6] Cliente 'dashboard' SKIPPED (DASHBOARD_SSO_CLIENT_SECRET no definido)"
+    return 0
+  fi
+  local DASH_DOMAIN="${DASHBOARD_DOMAIN:-https://dashboard.passprotect.es}"
+  # Asegurar prefijo https://
+  case "$DASH_DOMAIN" in
+    https://*) ;;
+    http://*) ;;
+    *) DASH_DOMAIN="https://${DASH_DOMAIN}" ;;
+  esac
+  log "[2b/6] Cliente OIDC 'dashboard' (oauth2-proxy)"
+  local existing
+  existing=$(api GET "/realms/${REALM}/clients?clientId=dashboard" | jq -r '.[0].id // empty')
+  local payload
+  payload=$(cat <<JSON
+{
+  "clientId": "dashboard",
+  "name": "Dashboard PassProtect (oauth2-proxy)",
+  "description": "Cliente OIDC para proteger el dashboard via oauth2-proxy",
+  "enabled": true,
+  "protocol": "openid-connect",
+  "publicClient": false,
+  "secret": "${DASHBOARD_SSO_CLIENT_SECRET}",
+  "redirectUris": ["${DASH_DOMAIN}/oauth2/callback"],
+  "webOrigins": ["${DASH_DOMAIN}"],
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "frontchannelLogout": true,
+  "fullScopeAllowed": true,
+  "attributes": {
+    "pkce.code.challenge.method": "S256",
+    "post.logout.redirect.uris": "+",
+    "access.token.lifespan": "3600",
+    "client.session.idle.timeout": "1800"
+  }
+}
+JSON
+)
+  if [ -n "$existing" ]; then
+    log "  Existe (id=$existing) -> PUT"
+    api PUT "/realms/${REALM}/clients/${existing}" "$payload" >/dev/null
+  else
+    log "  No existe -> POST"
+    local code
+    code=$(api_status POST "/realms/${REALM}/clients" "$payload")
+    [ "$code" = "201" ] || err "Crear cliente dashboard devolvio HTTP $code"
+  fi
+}
+
 # === 3. LDAP federation ===
 # Devuelve el ID del componente de federation por stdout.
 create_ldap_federation() {
@@ -347,6 +403,7 @@ main() {
 
   create_realm
   create_client
+  create_dashboard_client
   local fed_id
   fed_id=$(create_ldap_federation)
   log "  Federation ID: $fed_id"

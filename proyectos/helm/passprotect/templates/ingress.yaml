@@ -106,7 +106,14 @@ spec:
             pathType: Prefix
             backend:
               service:
+                {{- if .Values.dashboard.oauth2Proxy.enabled }}
+                # Tráfico pasa por oauth2-proxy:4180 → si auth OK, upstream a dashboard:3000
+                name: dashboard-oauth2-proxy
+                port:
+                  number: 4180
+                {{- else }}
                 name: dashboard
                 port:
                   number: 3000
+                {{- end }}
 {{- end }}

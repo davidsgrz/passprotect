@@ -53,6 +53,11 @@ postgresKc:
 openldap:
   adminPassword: "${LDAP_ADMIN_PASSWORD}"
   configPassword: "${LDAP_CONFIG_PASSWORD}"
+
+dashboard:
+  oauth2Proxy:
+    clientSecret: "${DASHBOARD_SSO_CLIENT_SECRET:-}"
+    cookieSecret: "${DASHBOARD_OAUTH2_COOKIE_SECRET:-}"
 EOF
 
 echo "[2/3] Desplegando con Helm..."
