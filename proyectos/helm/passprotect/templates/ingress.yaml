@@ -12,6 +12,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "128m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
     nginx.ingress.kubernetes.io/limit-rps: "20"
+    # Buffers ampliados: Vaultwarden + Keycloak SSO meten cookies grandes y
+    # algunas respuestas (login, callback OIDC) exceden el default 4k -> 502.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
     {{- if .Values.certManager.enabled }}
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer | quote }}
     {{- end }}
@@ -53,6 +57,10 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: {{ $sslRedirect | quote }}
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    # Buffers ampliados (igual que vault): Keycloak emite headers grandes
+    # con cookies de sesión, exceden default 4k -> 502 upstream too big.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
     {{- if .Values.certManager.enabled }}
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer | quote }}
     {{- end }}
@@ -87,6 +95,10 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: {{ $sslRedirect | quote }}
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    # Buffers ampliados: dashboard via oauth2-proxy mantiene cookies de sesión
+    # OIDC que exceden default 4k -> 502.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
     {{- if .Values.certManager.enabled }}
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer | quote }}
     {{- end }}
