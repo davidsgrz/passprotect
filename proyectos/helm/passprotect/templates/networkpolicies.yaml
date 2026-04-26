@@ -74,6 +74,16 @@ spec:
               kubernetes.io/metadata.name: auth
       ports:
         - port: 8080
+    # Egress HTTPS al ingress externo (necesario para SSO discovery contra
+    # https://auth.passprotect.es desde el binario Timshel — el flow OIDC
+    # contacta al issuer público para descargar el discovery doc + JWKS).
+    # El tráfico hace hairpin: pod -> nodo -> ingress -> Keycloak.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP
 ---
 # Deny-all en auth
 apiVersion: networking.k8s.io/v1
