@@ -213,14 +213,50 @@ create_dashboard_client() {
 }
 JSON
 )
+  local client_uuid
   if [ -n "$existing" ]; then
     log "  Existe (id=$existing) -> PUT"
     api PUT "/realms/${REALM}/clients/${existing}" "$payload" >/dev/null
+    client_uuid="$existing"
   else
     log "  No existe -> POST"
     local code
     code=$(api_status POST "/realms/${REALM}/clients" "$payload")
     [ "$code" = "201" ] || err "Crear cliente dashboard devolvio HTTP $code"
+    client_uuid=$(api GET "/realms/${REALM}/clients?clientId=dashboard" | jq -r '.[0].id // empty')
+  fi
+
+  # Audience Mapper: por default Keycloak emite aud=[account] en el ID token,
+  # pero oauth2-proxy valida que aud contenga su propio client_id (dashboard).
+  # Sin este mapper -> "audience from claim aud does not match" -> HTTP 500
+  # en /oauth2/callback.
+  log "  Audience Mapper (aud: dashboard)"
+  local mapper_existing
+  mapper_existing=$(api GET "/realms/${REALM}/clients/${client_uuid}/protocol-mappers/models" \
+    | jq -r '.[] | select(.name=="dashboard-audience") | .id // empty')
+  local mapper_payload
+  mapper_payload=$(cat <<JSON
+{
+  "name": "dashboard-audience",
+  "protocol": "openid-connect",
+  "protocolMapper": "oidc-audience-mapper",
+  "config": {
+    "included.client.audience": "dashboard",
+    "id.token.claim": "true",
+    "access.token.claim": "true",
+    "introspection.token.claim": "true"
+  }
+}
+JSON
+)
+  if [ -n "$mapper_existing" ]; then
+    log "    mapper existe -> PUT"
+    api PUT "/realms/${REALM}/clients/${client_uuid}/protocol-mappers/models/${mapper_existing}" "$mapper_payload" >/dev/null
+  else
+    log "    mapper no existe -> POST"
+    local mc
+    mc=$(api_status POST "/realms/${REALM}/clients/${client_uuid}/protocol-mappers/models" "$mapper_payload")
+    [ "$mc" = "201" ] || err "Crear audience mapper devolvio HTTP $mc"
   fi
 }
 
