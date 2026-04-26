@@ -52,6 +52,10 @@ spec:
               value: {{ .Values.vaultwarden.showPasswordHint | quote }}
             - name: SSO_ENABLED
               value: {{ .Values.vaultwarden.sso.enabled | quote }}
+            # SSO_ONLY=false mantiene login local con master password como fallback
+            # (recomendado mientras se valida el flow). Cambiar a "true" tras demo.
+            - name: SSO_ONLY
+              value: "false"
             - name: SSO_CLIENT_ID
               value: {{ .Values.vaultwarden.sso.clientId | quote }}
             - name: SSO_AUTHORITY

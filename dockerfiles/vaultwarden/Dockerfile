@@ -1,9 +1,9 @@
-FROM vaultwarden/server:1.32.5 AS vw-source
+FROM timshel/vaultwarden:1.34.1-6 AS vw-source
 
 FROM dsegura97/ubseguridadd:latest
 
-LABEL description="Vaultwarden corporativo con capa seguridad"
-LABEL version="1.0.3"
+LABEL description="Vaultwarden corporativo con capa seguridad (Timshel SSO fork)"
+LABEL version="1.0.4"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -21,9 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && test -f /usr/lib/x86_64-linux-gnu/libmariadb.so.3 \
     && ldconfig
 
-# Copiar binarios desde la imagen oficial
+# Copiar binarios desde la imagen Timshel.
+# Timshel publica el binario en /vaultwarden (igual que upstream) pero el web-vault
+# está en /web-vault_button (UI con boton "Enterprise SSO") y /web-vault_override
+# (overrides más invasivos). Usamos _button por ser el patch mínimo necesario para
+# habilitar el flow SSO en la pantalla de login.
 COPY --from=vw-source /vaultwarden /usr/local/bin/vaultwarden
-COPY --from=vw-source /web-vault /web-vault
+COPY --from=vw-source /web-vault_button /web-vault
 
 # Hardening: usuario no root para ejecutar Vaultwarden
 RUN groupadd -r vaultwarden && useradd -r -g vaultwarden -d /data vaultwarden
