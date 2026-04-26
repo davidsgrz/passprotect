@@ -231,4 +231,45 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
+{{- if .Values.certManager.enabled }}
+---
+# Permitir ingress de nginx-ingress al pod solver de cert-manager (HTTP-01).
+# Sin esto, default-deny-all de los namespaces bloquea el self-check del
+# challenge -> emisión cuelga con "context deadline exceeded".
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-acme-solver
+  namespace: vaultwarden
+spec:
+  podSelector:
+    matchLabels:
+      acme.cert-manager.io/http01-solver: "true"
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress
+      ports:
+        - port: 8089
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-acme-solver
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      acme.cert-manager.io/http01-solver: "true"
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress
+      ports:
+        - port: 8089
+{{- end }}
 {{- end }}
