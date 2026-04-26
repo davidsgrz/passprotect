@@ -142,6 +142,15 @@ ingress:
   tls:
     enabled: true
 
+# ── cert-manager (Let's Encrypt) ──
+# Si enabled=true, cada Ingress añade la annotation cert-manager.io/cluster-issuer
+# para emisión automática + renovación de certs LE.
+# IMPORTANTE: con cert-manager habilitado, los Ingresses usan ssl-redirect=false
+# para no romper el HTTP-01 challenge (que requiere HTTP plano en /.well-known/).
+certManager:
+  enabled: true
+  issuer: "letsencrypt-prod"  # alternativa: "letsencrypt-staging" para testing
+
 # ── Monitoring ──
 monitoring:
   audit:
