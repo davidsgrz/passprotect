@@ -215,13 +215,70 @@
         }
     }
 
-    /* === SSO placeholder === */
+    /* === SSO real via oauth2-proxy ============================
+     * El dashboard está detrás de oauth2-proxy. Si hay sesión OIDC
+     * activa, /oauth2/userinfo devuelve email + groups del JWT que
+     * Keycloak emitió. Si no, redirige a /oauth2/sign_in.
+     * ========================================================= */
+
+    function ssoLogin() {
+        window.location.href = '/oauth2/sign_in?rd=' +
+            encodeURIComponent(window.location.pathname);
+    }
+
+    function ssoLogout() {
+        // Sign-out local + Keycloak: cierra cookie oauth2-proxy y luego
+        // termina la sesión SSO en Keycloak para forzar TOTP la próxima vez.
+        var kcLogout = 'https://auth.passprotect.es/realms/corporativo/protocol/openid-connect/logout' +
+                       '?post_logout_redirect_uri=' + encodeURIComponent('https://dashboard.passprotect.es/');
+        window.location.href = '/oauth2/sign_out?rd=' + encodeURIComponent(kcLogout);
+    }
+
     var ssoBtn = document.getElementById('sso-btn');
-    if (ssoBtn) {
-        ssoBtn.addEventListener('click', function () {
-            alert('SSO con Keycloak: en produccion te redirige a auth.passprotect.es\n\nPara la demo usa admin / usuario.');
+    if (ssoBtn) ssoBtn.addEventListener('click', ssoLogin);
+
+    /* Auto-detectar sesión SSO al cargar — si oauth2-proxy ya autenticó
+     * al usuario, saltamos el formulario decorativo y entramos directo. */
+    function tryAutoSSO() {
+        fetch('/oauth2/userinfo', {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+        })
+        .then(function (r) {
+            if (!r.ok) throw new Error('no-sso-session');
+            return r.json();
+        })
+        .then(function (data) {
+            // oauth2-proxy devuelve: {email, user, groups, preferredUsername}
+            var email = data.email || data.user || data.preferredUsername || 'sso-user';
+            var username = (data.preferredUsername) ||
+                           (typeof email === 'string' && email.indexOf('@') > -1
+                              ? email.split('@')[0]
+                              : email);
+            var groups = data.groups || [];
+            // Mapeo de grupos LDAP -> rol:
+            //   vw-admins, it-dept  ->  admin
+            //   resto               ->  user
+            var isAdmin = groups.some(function (g) {
+                return g === 'vw-admins' || g === '/vw-admins' ||
+                       g === 'it-dept'   || g === '/it-dept';
+            });
+            currentUser = {
+                name: username,
+                email: email,
+                role: isAdmin ? 'admin' : 'user',
+                label: isAdmin ? 'Administrador (SSO)' : 'Usuario (SSO)'
+            };
+            initDashboard();
+        })
+        .catch(function () {
+            // Sin sesión SSO. Con oauth2-proxy delante esto no debería pasar
+            // (te redirige antes), pero por si /oauth2/userinfo no existe en
+            // un setup distinto, dejamos visible el formulario decorativo.
+            console.log('[SSO] no active session — falling back to manual login');
         });
     }
+    tryAutoSSO();
 
     /* === Filtros sidebar === */
     var navEls = document.querySelectorAll('.vault-nav-item');
@@ -563,6 +620,12 @@
 
     /* === Logout === */
     document.getElementById('logout-btn').addEventListener('click', function () {
+        // Si vino de SSO, hacer logout federado (oauth2-proxy + Keycloak).
+        // Si fue login local de demo, simplemente vuelve a la pantalla de login.
+        if (currentUser && (currentUser.label || '').indexOf('SSO') > -1) {
+            ssoLogout();
+            return;
+        }
         currentUser = null;
         currentItemId = null;
         document.getElementById('dashboard-screen').classList.add('hidden');
