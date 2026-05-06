@@ -1,26 +1,35 @@
 {
     "tool": "Qualys SSL Labs",
     "url": "https://www.ssllabs.com/ssltest/",
-    "scanDate": null,
+    "scanDate": "2026-05-06T21:47:31Z",
     "endpoints": [
         {
             "host": "vault.passprotect.es",
             "ip": "212.90.121.53",
             "grade": "A+",
             "certificate": {
-                "issuer": "Let's Encrypt R11",
+                "issuer": "R13",
                 "subject": "vault.passprotect.es",
                 "validFrom": "2026-04-26",
                 "validTo": "2026-07-25",
                 "keyType": "ECDSA",
-                "keySize": 256
+                "keySize": 256,
+                "sigAlg": "SHA256withRSA"
             },
-            "protocols": ["TLS 1.3", "TLS 1.2"],
-            "protocolsDisabled": ["TLS 1.1", "TLS 1.0", "SSLv3", "SSLv2"],
+            "protocols": [
+                "TLS 1.3",
+                "TLS 1.2"
+            ],
+            "protocolsDisabled": [
+                "TLS 1.1",
+                "TLS 1.0",
+                "SSLv3",
+                "SSLv2"
+            ],
             "cipherStrength": "256 bits",
             "hsts": true,
             "hstsMaxAge": 31536000,
-            "ocspStapling": true,
+            "ocspStapling": false,
             "vulnerabilities": {
                 "heartbleed": false,
                 "poodle": false,
@@ -34,19 +43,28 @@
             "ip": "212.90.121.53",
             "grade": "A+",
             "certificate": {
-                "issuer": "Let's Encrypt R11",
+                "issuer": "R13",
                 "subject": "auth.passprotect.es",
                 "validFrom": "2026-04-26",
                 "validTo": "2026-07-25",
                 "keyType": "ECDSA",
-                "keySize": 256
+                "keySize": 256,
+                "sigAlg": "SHA256withRSA"
             },
-            "protocols": ["TLS 1.3", "TLS 1.2"],
-            "protocolsDisabled": ["TLS 1.1", "TLS 1.0", "SSLv3", "SSLv2"],
+            "protocols": [
+                "TLS 1.3",
+                "TLS 1.2"
+            ],
+            "protocolsDisabled": [
+                "TLS 1.1",
+                "TLS 1.0",
+                "SSLv3",
+                "SSLv2"
+            ],
             "cipherStrength": "256 bits",
             "hsts": true,
             "hstsMaxAge": 31536000,
-            "ocspStapling": true,
+            "ocspStapling": false,
             "vulnerabilities": {
                 "heartbleed": false,
                 "poodle": false,
@@ -60,19 +78,28 @@
             "ip": "212.90.121.53",
             "grade": "A+",
             "certificate": {
-                "issuer": "Let's Encrypt R11",
+                "issuer": "R12",
                 "subject": "dashboard.passprotect.es",
                 "validFrom": "2026-04-26",
                 "validTo": "2026-07-25",
                 "keyType": "ECDSA",
-                "keySize": 256
+                "keySize": 256,
+                "sigAlg": "SHA256withRSA"
             },
-            "protocols": ["TLS 1.3", "TLS 1.2"],
-            "protocolsDisabled": ["TLS 1.1", "TLS 1.0", "SSLv3", "SSLv2"],
+            "protocols": [
+                "TLS 1.3",
+                "TLS 1.2"
+            ],
+            "protocolsDisabled": [
+                "TLS 1.1",
+                "TLS 1.0",
+                "SSLv3",
+                "SSLv2"
+            ],
             "cipherStrength": "256 bits",
             "hsts": true,
             "hstsMaxAge": 31536000,
-            "ocspStapling": true,
+            "ocspStapling": false,
             "vulnerabilities": {
                 "heartbleed": false,
                 "poodle": false,

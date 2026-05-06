@@ -1,13 +1,13 @@
 {
     "tool": "Fail2ban",
-    "version": "1.0.x",
+    "version": "1.0.x (Ubuntu apt)",
     "url": "https://www.fail2ban.org/",
-    "scanDate": null,
+    "scanDate": "2026-05-06T22:21:53Z",
     "summary": {
-        "totalBans": 0,
-        "activeBans": 0,
-        "totalAttempts": 0,
-        "jailsActive": 0
+        "totalBans": 11,
+        "activeBans": 5,
+        "totalAttempts": 219,
+        "jailsActive": 1
     },
     "jails": [
         {
@@ -17,18 +17,8 @@
             "findtime": "10m",
             "bantime": "1h",
             "active": true,
-            "currentBans": 0,
-            "totalBans": 0
-        },
-        {
-            "name": "nginx-http-auth",
-            "filter": "nginx-http-auth",
-            "maxretry": 3,
-            "findtime": "10m",
-            "bantime": "1h",
-            "active": true,
-            "currentBans": 0,
-            "totalBans": 0
+            "currentBans": 5,
+            "totalBans": 11
         },
         {
             "name": "nginx-modsec",
@@ -36,10 +26,122 @@
             "maxretry": 3,
             "findtime": "5m",
             "bantime": "24h",
-            "active": true,
+            "active": false,
             "currentBans": 0,
-            "totalBans": 0
+            "totalBans": 0,
+            "note": "Configurado, activaci\u00f3n pendiente tras ajuste OWASP CRS"
         }
     ],
-    "recentBans": []
+    "recentBans": [
+        {
+            "ip": "213.177.179.195",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 21:59:50",
+            "country": "The Netherlands",
+            "city": "Eygelshoven",
+            "isp": "Feo Prest SRL",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "2.57.121.112",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 21:59:52",
+            "country": "United Kingdom",
+            "city": "Rushden",
+            "isp": "Unmanaged LTD",
+            "attempts": 5,
+            "active": false
+        },
+        {
+            "ip": "141.11.18.140",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 21:59:53",
+            "country": "France",
+            "city": "Paris",
+            "isp": "OVH SAS",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "141.11.18.82",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 21:59:53",
+            "country": "France",
+            "city": "Paris",
+            "isp": "OVH SAS",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "94.156.152.18",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:00:39",
+            "country": "South Africa",
+            "city": "Centurion",
+            "isp": "Internet Magnate (Pty) Ltd",
+            "attempts": 5,
+            "active": false
+        },
+        {
+            "ip": "141.11.21.197",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:01:02",
+            "country": "Netherlands",
+            "city": "Amsterdam",
+            "isp": "OVH SAS",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "213.209.159.56",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:07:38",
+            "country": "Germany",
+            "city": "Augsburg",
+            "isp": "Feo Prest SRL",
+            "attempts": 5,
+            "active": false
+        },
+        {
+            "ip": "141.11.18.140",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:13:50",
+            "country": "-",
+            "city": "-",
+            "isp": "-",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "141.11.18.82",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:15:07",
+            "country": "-",
+            "city": "-",
+            "isp": "-",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "141.11.21.197",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:18:33",
+            "country": "-",
+            "city": "-",
+            "isp": "-",
+            "attempts": 5,
+            "active": true
+        },
+        {
+            "ip": "2.57.121.25",
+            "jail": "sshd",
+            "bannedAt": "2026-05-06 22:19:30",
+            "country": "United Kingdom",
+            "city": "Rushden",
+            "isp": "Unmanaged LTD",
+            "attempts": 5,
+            "active": true
+        }
+    ]
 }

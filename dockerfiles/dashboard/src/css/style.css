@@ -1395,6 +1395,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    table-layout: fixed;
 }
 .table-mini th {
     text-align: left;
@@ -1409,8 +1410,18 @@ body {
     padding: 6px 8px;
     border-bottom: 1px solid var(--border);
     color: var(--text-primary);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: top;
 }
 .table-mini tr:last-child td { border-bottom: none; }
+
+/* Tablas grandes: también permitir wrap en celdas largas */
+.table td {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
 
 /* Chips row + chip-ok */
 .chips-row {

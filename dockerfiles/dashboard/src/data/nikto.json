@@ -1,52 +1,99 @@
 {
     "tool": "Nikto",
-    "version": "2.5.x",
+    "version": "2.1.5 (Ubuntu apt)",
     "url": "https://github.com/sullo/nikto",
-    "scanDate": null,
+    "scanDate": "2026-05-06T22:21:53Z",
     "summary": {
-        "totalFindings": 0,
+        "totalFindings": 11,
+        "critical": 0,
         "high": 0,
         "medium": 0,
-        "low": 0,
-        "info": 0,
+        "low": 5,
+        "info": 6,
         "endpointsScanned": 3
     },
     "scans": [
         {
             "host": "vault.passprotect.es",
-            "scanDate": null,
-            "duration": null,
-            "findings": [],
+            "scanDate": "2026-05-06T22:21:53Z",
+            "duration": "~4 min",
+            "findings": [
+                {
+                    "severity": "info",
+                    "description": "GET /: Hostname 'vault.passprotect.es' does not match certificate's CN 'Kubernetes'"
+                },
+                {
+                    "severity": "info",
+                    "description": "-3092: GET /admin/: /admin/: This might be interesting..."
+                },
+                {
+                    "severity": "info",
+                    "description": "-3092: GET /app/: /app/: This might be interesting..."
+                },
+                {
+                    "severity": "info",
+                    "description": "-3092: GET /scripts/: /scripts/: This might be interesting... possibly a system shell found."
+                }
+            ],
             "headersOk": [
-                "Strict-Transport-Security",
-                "X-Frame-Options",
-                "X-Content-Type-Options",
-                "Content-Security-Policy",
-                "Permissions-Policy",
-                "Referrer-Policy"
+                "content-security-policy",
+                "cross-origin-resource-policy",
+                "permissions-policy",
+                "referrer-policy",
+                "strict-transport-security",
+                "x-content-type-options",
+                "x-frame-options",
+                "x-robots-tag"
             ]
         },
         {
             "host": "auth.passprotect.es",
-            "scanDate": null,
-            "duration": null,
-            "findings": [],
+            "scanDate": "2026-05-06T22:21:53Z",
+            "duration": "~4 min",
+            "findings": [
+                {
+                    "severity": "info",
+                    "description": "GET /: Hostname 'auth.passprotect.es' does not match certificate's CN 'Kubernetes'"
+                },
+                {
+                    "severity": "low",
+                    "description": "OPTIONS /: Allowed HTTP Methods: HEAD, POST, GET, OPTIONS"
+                }
+            ],
             "headersOk": [
-                "Strict-Transport-Security",
-                "X-Frame-Options",
-                "X-Content-Type-Options",
-                "Referrer-Policy"
+                "referrer-policy",
+                "strict-transport-security",
+                "x-content-type-options"
             ]
         },
         {
             "host": "dashboard.passprotect.es",
-            "scanDate": null,
-            "duration": null,
-            "findings": [],
+            "scanDate": "2026-05-06T22:21:53Z",
+            "duration": "~4 min",
+            "findings": [
+                {
+                    "severity": "low",
+                    "description": "GET /: Cookie _oauth2_proxy_csrf created without the secure flag"
+                },
+                {
+                    "severity": "low",
+                    "description": "GET /: Cookie _oauth2_proxy_csrf created without the httponly flag"
+                },
+                {
+                    "severity": "info",
+                    "description": "GET /: Hostname 'dashboard.passprotect.es' does not match certificate's CN 'Kubernetes'"
+                },
+                {
+                    "severity": "low",
+                    "description": "-3931: GET /myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]&ratetype=percent: /myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]"
+                },
+                {
+                    "severity": "low",
+                    "description": "GET /modules.php?letter=%22%3E%3Cimg%20src=javascript:alert(document.cookie);%3E&op=modload&name=Members_List&file=index: /modules.php?letter=%22%3E%3Cimg%20src=javascript:alert(document.cookie);%3E"
+                }
+            ],
             "headersOk": [
-                "Strict-Transport-Security",
-                "X-Frame-Options",
-                "X-Content-Type-Options"
+                "strict-transport-security"
             ]
         }
     ]

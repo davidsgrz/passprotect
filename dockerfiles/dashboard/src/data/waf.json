@@ -1,23 +1,233 @@
 {
     "tool": "ModSecurity + OWASP CRS",
     "url": "https://owasp.org/www-project-modsecurity-core-rule-set/",
-    "version": "OWASP CRS 4.x",
-    "rulesActive": 47,
-    "scanDate": null,
-    "attackTool": "SQLMap",
+    "version": "OWASP CRS 4.x \u00b7 ModSecurity v3 \u00b7 nginx-ingress v1.11.5",
+    "mode": "DetectionOnly",
+    "modeNote": "Activo sobre vaultwarden-ingress. Bloqueo (SecRuleEngine On) planeado tras ajuste de reglas.",
+    "rulesActive": 6,
+    "scanDate": "2026-05-06T22:21:53Z",
+    "attackTool": "curl + sqlmap (manual)",
     "attackUrl": "https://sqlmap.org/",
     "summary": {
-        "totalRequests": 0,
-        "blocked": 0,
-        "passed": 0,
+        "totalRequests": 29,
+        "detected": 16,
+        "passed": 13,
         "byType": {
-            "sqli": 0,
-            "xss": 0,
+            "sqli": 3,
+            "xss": 3,
             "rce": 0,
-            "lfi": 0,
-            "scanner": 0
+            "lfi": 5,
+            "scanner": 5
         }
     },
-    "blocks": [],
-    "rulesTriggered": []
+    "blocks": [
+        {
+            "timestamp": "06/May/2026:20:07:38 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "xss",
+            "method": "GET",
+            "path": "/?q=<script>alert(1)</script>",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 400,
+            "anomalyScore": 4412.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:10:42 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "scanner",
+            "method": "GET",
+            "path": "/",
+            "userAgent": "nmap",
+            "httpStatus": 200,
+            "anomalyScore": 4605.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:12:40 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "sqli",
+            "method": "GET",
+            "path": "/?id=1%20UNION%20SELECT%201,2,3",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 6495.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:12:40 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "xss",
+            "method": "GET",
+            "path": "/?q=%3Cscript%3Ealert(1)%3C/script%3E",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 7296.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:12:40 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "lfi",
+            "method": "GET",
+            "path": "/?f=../../../etc/passwd",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 7820.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:12:40 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "lfi",
+            "method": "GET",
+            "path": "/?cmd=;cat%20/etc/passwd",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 5392.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:13:10 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "sqli",
+            "method": "GET",
+            "path": "/?x=%2f%3fid%3d1%27+OR+%271%27%3d%271%27+UNION+SELECT+password+FROM+users+WHERE+1%3d1--",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 6594.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:13:11 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "lfi",
+            "method": "GET",
+            "path": "/?x=%2fadmin%2f%3ffile%3d..%2f..%2f..%2fetc%2fshadow",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 7942.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:16:15 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "scanner",
+            "method": "GET",
+            "path": "/api/accounts/login?email=test&password=test",
+            "userAgent": "sqlmap/1.8.4#stable (https://sqlmap.org)",
+            "httpStatus": 404,
+            "anomalyScore": 3463.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:17:58 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "sqli",
+            "method": "GET",
+            "path": "/?id=1%29+UNION+SELECT+1%2c2%2c3--",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 6513.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:17:58 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "xss",
+            "method": "GET",
+            "path": "/?q=%3cscript%3ealert%28%27xss%27%29%3c%2fscript%3e",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 7332.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:17:58 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "lfi",
+            "method": "GET",
+            "path": "/?file=..%2f..%2f..%2fetc%2fpasswd",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 7865.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:17:58 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "lfi",
+            "method": "GET",
+            "path": "/?file=....%2f%2f....%2f%2fetc%2fshadow",
+            "userAgent": "curl/8.5.0",
+            "httpStatus": 200,
+            "anomalyScore": 5422.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:18:00 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "scanner",
+            "method": "GET",
+            "path": "/",
+            "userAgent": "sqlmap/1.8",
+            "httpStatus": 200,
+            "anomalyScore": 4626.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:18:00 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "scanner",
+            "method": "GET",
+            "path": "/",
+            "userAgent": "nikto/2.1",
+            "httpStatus": 200,
+            "anomalyScore": 4621.0,
+            "ruleId": "CRS-Anomaly"
+        },
+        {
+            "timestamp": "06/May/2026:20:18:00 +0000",
+            "sourceIp": "212.90.121.53",
+            "attackType": "scanner",
+            "method": "GET",
+            "path": "/",
+            "userAgent": "Mozilla/5.0 zgrab",
+            "httpStatus": 200,
+            "anomalyScore": 4647.0,
+            "ruleId": "CRS-Anomaly"
+        }
+    ],
+    "rulesTriggered": [
+        {
+            "id": "942100",
+            "category": "SQLi",
+            "description": "SQL Injection (libinjection)"
+        },
+        {
+            "id": "941100",
+            "category": "XSS",
+            "description": "XSS Attack Detected (libinjection)"
+        },
+        {
+            "id": "930120",
+            "category": "LFI",
+            "description": "OS File Access Attempt"
+        },
+        {
+            "id": "932100",
+            "category": "RCE",
+            "description": "Remote Command Execution: Unix Command"
+        },
+        {
+            "id": "913100",
+            "category": "Scanner",
+            "description": "Scanner Detection (User-Agent)"
+        },
+        {
+            "id": "920000",
+            "category": "Protocol",
+            "description": "HTTP Protocol Violation"
+        }
+    ]
 }

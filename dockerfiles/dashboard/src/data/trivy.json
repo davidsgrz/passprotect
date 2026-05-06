@@ -1,76 +1,211 @@
 {
     "tool": "Trivy",
-    "version": "0.50.x",
+    "version": "0.70.0",
     "url": "https://github.com/aquasecurity/trivy",
-    "scanDate": null,
+    "scanDate": "2026-05-06T21:47:31Z",
     "summary": {
-        "critical": 0,
-        "high": 0,
-        "medium": 0,
-        "low": 0,
+        "critical": 71,
+        "high": 461,
+        "medium": 964,
+        "low": 194,
         "unknown": 0,
         "imagesScanned": 6
     },
     "images": [
         {
-            "name": "dsegura97/dashboard-corp:1.0.3",
-            "size": "84 MB",
-            "scanDate": null,
+            "name": "dsegura97/dashboard-corp:1.0.4",
+            "os": "ubuntu 24.04",
+            "size": "290 MB",
+            "scanDate": "2026-05-06T21:47:31Z",
             "critical": 0,
             "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "medium": 121,
+            "low": 32,
+            "unknown": 0,
+            "topFindings": []
         },
         {
             "name": "dsegura97/keycloak-corp:1.0.1",
+            "os": "ubuntu 24.04",
             "size": "672 MB",
-            "scanDate": null,
+            "scanDate": "2026-05-06T21:47:31Z",
             "critical": 0,
-            "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "high": 26,
+            "medium": 184,
+            "low": 49,
+            "unknown": 0,
+            "topFindings": [
+                {
+                    "id": "CVE-2026-33870",
+                    "severity": "HIGH",
+                    "pkgName": "io.netty:netty-codec-http",
+                    "installedVersion": "4.1.108.Final",
+                    "fixedVersion": "4.1.132.Final, 4.2.10.Final",
+                    "title": "io.netty/netty-codec-http: Netty: Request smuggling via incorrect parsing of HTTP/1.1 chunked transfer encoding extensio"
+                },
+                {
+                    "id": "CVE-2025-55163",
+                    "severity": "HIGH",
+                    "pkgName": "io.netty:netty-codec-http2",
+                    "installedVersion": "4.1.108.Final",
+                    "fixedVersion": "4.2.4.Final, 4.1.124.Final",
+                    "title": "netty: netty-codec-http2: Netty MadeYouReset HTTP/2 DDoS Vulnerability"
+                },
+                {
+                    "id": "CVE-2026-33871",
+                    "severity": "HIGH",
+                    "pkgName": "io.netty:netty-codec-http2",
+                    "installedVersion": "4.1.108.Final",
+                    "fixedVersion": "4.1.132.Final, 4.2.11.Final",
+                    "title": "netty: Netty: Denial of Service via HTTP/2 CONTINUATION frame flood"
+                },
+                {
+                    "id": "CVE-2025-24970",
+                    "severity": "HIGH",
+                    "pkgName": "io.netty:netty-handler",
+                    "installedVersion": "4.1.108.Final",
+                    "fixedVersion": "4.1.118.Final",
+                    "title": "io.netty:netty-handler: SslHandler doesn't correctly validate packets which can lead to native crash when using native S"
+                },
+                {
+                    "id": "CVE-2024-12397",
+                    "severity": "HIGH",
+                    "pkgName": "io.quarkus.http:quarkus-http-core",
+                    "installedVersion": "5.2.1.Final",
+                    "fixedVersion": "5.3.4",
+                    "title": "io.quarkus.http/quarkus-http-core: Quarkus HTTP Cookie Smuggling"
+                }
+            ]
         },
         {
             "name": "dsegura97/openldap-corp:1.0.0",
+            "os": "debian 10.8",
             "size": "245 MB",
-            "scanDate": null,
-            "critical": 0,
-            "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "scanDate": "2026-05-06T21:47:31Z",
+            "critical": 70,
+            "high": 427,
+            "medium": 399,
+            "low": 48,
+            "unknown": 0,
+            "topFindings": [
+                {
+                    "id": "CVE-2022-3094",
+                    "severity": "HIGH",
+                    "pkgName": "bind9-host",
+                    "installedVersion": "1:9.16.11-2~bpo10+1",
+                    "fixedVersion": "",
+                    "title": "bind: flooding with UPDATE requests may lead to DoS"
+                },
+                {
+                    "id": "CVE-2022-3094",
+                    "severity": "HIGH",
+                    "pkgName": "bind9-libs",
+                    "installedVersion": "1:9.16.11-2~bpo10+1",
+                    "fixedVersion": "",
+                    "title": "bind: flooding with UPDATE requests may lead to DoS"
+                },
+                {
+                    "id": "CVE-2022-1664",
+                    "severity": "CRITICAL",
+                    "pkgName": "dpkg",
+                    "installedVersion": "1.19.7",
+                    "fixedVersion": "1.19.8",
+                    "title": "Dpkg::Source::Archive in dpkg, the Debian package management system, b ..."
+                },
+                {
+                    "id": "CVE-2022-1304",
+                    "severity": "HIGH",
+                    "pkgName": "e2fsprogs",
+                    "installedVersion": "1.44.5-1+deb10u3",
+                    "fixedVersion": "",
+                    "title": "e2fsprogs: out-of-bounds read/write via crafted filesystem"
+                },
+                {
+                    "id": "CVE-2018-12886",
+                    "severity": "HIGH",
+                    "pkgName": "gcc-8-base",
+                    "installedVersion": "8.3.0-6",
+                    "fixedVersion": "",
+                    "title": "gcc: spilling of stack protection address in cfgexpand.c and function.c leads to stack-overflow protection bypass"
+                }
+            ]
         },
         {
             "name": "dsegura97/postgres-corp:1.0.1",
+            "os": "alpine 3.23.4",
             "size": "98 MB",
-            "scanDate": null,
-            "critical": 0,
-            "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "scanDate": "2026-05-06T21:47:31Z",
+            "critical": 1,
+            "high": 8,
+            "medium": 16,
+            "low": 1,
+            "unknown": 0,
+            "topFindings": [
+                {
+                    "id": "CVE-2025-68121",
+                    "severity": "CRITICAL",
+                    "pkgName": "stdlib",
+                    "installedVersion": "v1.24.6",
+                    "fixedVersion": "1.24.13, 1.25.7, 1.26.0-rc.3",
+                    "title": "crypto/tls: crypto/tls: Incorrect certificate validation during TLS session resumption"
+                },
+                {
+                    "id": "CVE-2025-58183",
+                    "severity": "HIGH",
+                    "pkgName": "stdlib",
+                    "installedVersion": "v1.24.6",
+                    "fixedVersion": "1.24.8, 1.25.2",
+                    "title": "golang: archive/tar: Unbounded allocation when parsing GNU sparse map"
+                },
+                {
+                    "id": "CVE-2025-61726",
+                    "severity": "HIGH",
+                    "pkgName": "stdlib",
+                    "installedVersion": "v1.24.6",
+                    "fixedVersion": "1.24.12, 1.25.6",
+                    "title": "golang: net/url: Memory exhaustion in query parameter parsing in net/url"
+                },
+                {
+                    "id": "CVE-2025-61728",
+                    "severity": "HIGH",
+                    "pkgName": "stdlib",
+                    "installedVersion": "v1.24.6",
+                    "fixedVersion": "1.24.12, 1.25.6",
+                    "title": "golang: archive/zip: Excessive CPU consumption when building archive index in archive/zip"
+                },
+                {
+                    "id": "CVE-2025-61729",
+                    "severity": "HIGH",
+                    "pkgName": "stdlib",
+                    "installedVersion": "v1.24.6",
+                    "fixedVersion": "1.24.11, 1.25.5",
+                    "title": "crypto/x509: golang: Denial of Service due to excessive resource consumption via crafted certificate"
+                }
+            ]
         },
         {
             "name": "dsegura97/ubseguridadd:latest",
+            "os": "ubuntu 24.04",
             "size": "76 MB",
-            "scanDate": null,
+            "scanDate": "2026-05-06T21:47:31Z",
             "critical": 0,
             "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "medium": 121,
+            "low": 32,
+            "unknown": 0,
+            "topFindings": []
         },
         {
-            "name": "dsegura97/vaultwarden-corp:latest",
-            "size": "62 MB",
-            "scanDate": null,
+            "name": "dsegura97/vaultwarden-corp:1.0.4",
+            "os": "ubuntu 24.04",
+            "size": "290 MB",
+            "scanDate": "2026-05-06T21:47:31Z",
             "critical": 0,
             "high": 0,
-            "medium": 0,
-            "low": 0,
-            "vulnerabilities": []
+            "medium": 123,
+            "low": 32,
+            "unknown": 0,
+            "topFindings": []
         }
     ]
 }

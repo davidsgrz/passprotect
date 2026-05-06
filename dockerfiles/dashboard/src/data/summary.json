@@ -1,5 +1,5 @@
 {
-    "lastScan": "2026-05-07T10:00:00Z",
+    "lastScan": "2026-05-06T22:21:53Z",
     "platform": "PassProtect",
     "endpoints": [
         "https://vault.passprotect.es",
@@ -7,20 +7,62 @@
         "https://dashboard.passprotect.es"
     ],
     "kpi": {
-        "sslGrade": { "value": "A+", "status": "ok" },
-        "criticalCves": { "value": 0, "status": "ok" },
-        "highCves": { "value": 0, "status": "ok" },
-        "niktoFindings": { "value": 0, "status": "ok" },
-        "wafBlocks": { "value": 0, "status": "ok" },
-        "fail2banBans": { "value": 0, "status": "ok" }
+        "sslGrade": {
+            "value": "A+",
+            "status": "ok"
+        },
+        "criticalCves": {
+            "value": 71,
+            "status": "fail"
+        },
+        "highCves": {
+            "value": 461,
+            "status": "warn"
+        },
+        "niktoFindings": {
+            "value": 11,
+            "status": "ok"
+        },
+        "wafBlocks": {
+            "value": 16,
+            "status": "warn"
+        },
+        "fail2banBans": {
+            "value": 11,
+            "status": "warn"
+        }
     },
     "tools": [
-        { "name": "Qualys SSL Labs",   "category": "TLS",          "status": "pending" },
-        { "name": "Trivy",             "category": "CVE scanner",  "status": "pending" },
-        { "name": "Nikto",             "category": "Web scanner",  "status": "pending" },
-        { "name": "SQLMap",            "category": "Inyeccion SQL","status": "pending" },
-        { "name": "ModSecurity / OWASP CRS", "category": "WAF",    "status": "pending" },
-        { "name": "Fail2ban",          "category": "Brute-force",  "status": "pending" }
+        {
+            "name": "Qualys SSL Labs",
+            "category": "TLS",
+            "status": "ok"
+        },
+        {
+            "name": "Trivy",
+            "category": "CVE scanner",
+            "status": "fail"
+        },
+        {
+            "name": "Nikto",
+            "category": "Web scanner",
+            "status": "ok"
+        },
+        {
+            "name": "SQLMap",
+            "category": "Inyeccion SQL",
+            "status": "ok"
+        },
+        {
+            "name": "ModSecurity / OWASP CRS",
+            "category": "WAF",
+            "status": "ok"
+        },
+        {
+            "name": "Fail2ban",
+            "category": "Brute-force",
+            "status": "ok"
+        }
     ],
-    "note": "Datos placeholder. Se actualizan tras la ejecucion del pentesting (mar 07-05-2026)."
+    "note": "Pentesting completo ejecutado 2026-05-06T22:21:53Z. SSL Labs A+ x3 \u00b7 Trivy 6 imagenes \u00b7 Nikto \u00b7 ModSecurity DetectionOnly \u00b7 Fail2ban activo."
 }
