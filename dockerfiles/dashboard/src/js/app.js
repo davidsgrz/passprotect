@@ -1,161 +1,12 @@
-/* === PassProtect Dashboard — App Logic === */
+/* === PassProtect Dashboard — App Logic (Pentesting) === */
 
 (function () {
     'use strict';
 
     var currentUser = null;
-    var currentFilter = 'all';
-    var currentItemId = null;
+    var pentestData = null; // cache de los 6 JSONs
 
-    /* === Datos de la boveda (mock demo) === */
-    var vaultItems = [
-        {
-            id: 'github',
-            title: 'GitHub',
-            icon: '\u{1F310}',
-            username: 'dsegura97@github.com',
-            password: 'gh_pat_2fY9kQx7vB3zN1mL8pQwR4tUe6',
-            pwdLen: 24,
-            strength: 'strong',
-            otp: '930 657',
-            website: 'https://github.com',
-            backup: 'EXTH-1JQP-QLX2-MB6H-K4PZ',
-            notes: 'Cuenta principal de desarrollo. 2FA via TOTP + clave de respaldo guardada en caja fuerte fisica.',
-            category: 'work',
-            tags: ['sso'],
-            favorite: true,
-            updated: '2026-04-12',
-            created: '2024-09-03'
-        },
-        {
-            id: 'email',
-            title: 'Email corporativo',
-            icon: '\u2709',
-            username: 'david@passprotect.es',
-            password: 'PP-email$Xk92mNpQrT4vB',
-            pwdLen: 20,
-            strength: 'strong',
-            otp: '214 880',
-            website: 'https://mail.passprotect.es',
-            backup: 'MAIL-7KP2-LQR3-9XYZ-VBNM',
-            notes: 'Cuenta IMAP corporativa. Rotacion obligatoria cada 90 dias.',
-            category: 'work',
-            tags: ['critical'],
-            favorite: true,
-            updated: '2026-04-21',
-            created: '2024-09-03'
-        },
-        {
-            id: 'vps',
-            title: 'VPS Contabo (root)',
-            icon: '\u{1F4BB}',
-            username: 'root@vps.passprotect.es',
-            password: 'contabo-root-!K92pQxRvBnM7zT4wLe8kYuI6',
-            pwdLen: 32,
-            strength: 'strong',
-            otp: null,
-            website: 'https://my.contabo.com',
-            backup: null,
-            notes: 'Acceso SSH solo por clave ed25519. Password de emergencia rotada cada 30 dias.',
-            category: 'infra',
-            tags: ['critical'],
-            favorite: false,
-            updated: '2026-04-17',
-            created: '2024-10-11'
-        },
-        {
-            id: 'dockerhub',
-            title: 'Docker Hub',
-            icon: '\u{1F4E6}',
-            username: 'dsegura97',
-            password: 'docker-push-mQp3Xr7vN',
-            pwdLen: 14,
-            strength: 'medium',
-            otp: null,
-            website: 'https://hub.docker.com/u/dsegura97',
-            backup: null,
-            notes: 'Registry de imagenes PassProtect. Considerar migrar a token con scope acotado.',
-            category: 'work',
-            tags: [],
-            favorite: false,
-            updated: '2026-02-20',
-            created: '2024-09-15'
-        },
-        {
-            id: 'campus',
-            title: 'Campus Virtual ASIR',
-            icon: '\u{1F4DA}',
-            username: 'david.segura@edu.es',
-            password: 'campus-asir-KpQ7mR3',
-            pwdLen: 12,
-            strength: 'medium',
-            otp: null,
-            website: null,
-            backup: null,
-            notes: 'Plataforma Moodle del centro. Rotar antes de fin de curso.',
-            category: 'personal',
-            tags: [],
-            favorite: false,
-            updated: '2026-03-22',
-            created: '2023-09-14'
-        },
-        {
-            id: 'keycloak',
-            title: 'Keycloak Admin',
-            icon: '\u{1F511}',
-            username: 'admin@corp.local',
-            password: 'kc-admin-#Xp9mQ3vBnR7zT4wLe2kYu',
-            pwdLen: 28,
-            strength: 'strong',
-            otp: '476 129',
-            website: 'https://auth.passprotect.es',
-            backup: 'KCAD-3QP9-RLX7-MB6H-VBZK',
-            notes: 'Realm master. Cualquier cambio requiere aprobacion de ambos autores.',
-            category: 'infra',
-            tags: ['sso', 'critical'],
-            favorite: false,
-            updated: '2026-04-19',
-            created: '2024-11-02'
-        },
-        {
-            id: 'cloudflare',
-            title: 'Cloudflare DNS',
-            icon: '\u{1F3DB}',
-            username: 'devops@passprotect.es',
-            password: 'cf-dns-!Kp3Xr7vN9mQ4zTwLe',
-            pwdLen: 26,
-            strength: 'strong',
-            otp: '082 553',
-            website: 'https://dash.cloudflare.com',
-            backup: 'CFDN-7KP2-LQR3-9XYZ-VBNM',
-            notes: 'Zona passprotect.es. Token API dedicado para cert-manager.',
-            category: 'work',
-            tags: [],
-            favorite: false,
-            updated: '2026-04-03',
-            created: '2024-10-20'
-        },
-        {
-            id: 'banco',
-            title: 'Banco (personal)',
-            icon: '\u{1F4F1}',
-            username: '**** 1234',
-            password: 'banco2023',
-            pwdLen: 9,
-            strength: 'weak',
-            otp: null,
-            website: null,
-            backup: null,
-            notes: 'Contrasena debil. Rotar urgente y activar TOTP.',
-            category: 'personal',
-            tags: [],
-            favorite: false,
-            updated: '2025-05-18',
-            created: '2022-01-10'
-        }
-    ];
-
-    /* === Login === */
+    /* === Login decorativo (demo manual) === */
     document.getElementById('login-form').addEventListener('submit', function (e) {
         e.preventDefault();
         var username = document.getElementById('username').value.trim().toLowerCase();
@@ -178,21 +29,13 @@
         document.getElementById('dashboard-screen').classList.remove('hidden');
 
         document.getElementById('user-display').textContent = currentUser.name;
-        document.getElementById('settings-user').textContent = currentUser.name;
-        document.getElementById('settings-role').textContent = currentUser.label;
 
         var badge = document.getElementById('user-role-badge');
         badge.textContent = currentUser.label;
         badge.className = 'badge ' + (currentUser.role === 'admin' ? 'badge-admin' : 'badge-user');
 
-        var adminElements = document.querySelectorAll('.admin-only');
-        for (var i = 0; i < adminElements.length; i++) {
-            if (currentUser.role === 'admin') adminElements[i].classList.remove('hidden');
-            else adminElements[i].classList.add('hidden');
-        }
-
         showSection('overview');
-        renderVault();
+        loadAndRenderPentest();
     }
 
     /* === Navigation === */
@@ -227,8 +70,6 @@
     }
 
     function ssoLogout() {
-        // Sign-out local + Keycloak: cierra cookie oauth2-proxy y luego
-        // termina la sesión SSO en Keycloak para forzar TOTP la próxima vez.
         var kcLogout = 'https://auth.passprotect.es/realms/corporativo/protocol/openid-connect/logout' +
                        '?post_logout_redirect_uri=' + encodeURIComponent('https://dashboard.passprotect.es/');
         window.location.href = '/oauth2/sign_out?rd=' + encodeURIComponent(kcLogout);
@@ -237,8 +78,6 @@
     var ssoBtn = document.getElementById('sso-btn');
     if (ssoBtn) ssoBtn.addEventListener('click', ssoLogin);
 
-    /* Auto-detectar sesión SSO al cargar — si oauth2-proxy ya autenticó
-     * al usuario, saltamos el formulario decorativo y entramos directo. */
     function tryAutoSSO() {
         fetch('/oauth2/userinfo', {
             headers: { 'Accept': 'application/json' },
@@ -249,16 +88,12 @@
             return r.json();
         })
         .then(function (data) {
-            // oauth2-proxy devuelve: {email, user, groups, preferredUsername}
             var email = data.email || data.user || data.preferredUsername || 'sso-user';
             var username = (data.preferredUsername) ||
                            (typeof email === 'string' && email.indexOf('@') > -1
                               ? email.split('@')[0]
                               : email);
             var groups = data.groups || [];
-            // Mapeo de grupos LDAP -> rol:
-            //   vw-admins, it-dept  ->  admin
-            //   resto               ->  user
             var isAdmin = groups.some(function (g) {
                 return g === 'vw-admins' || g === '/vw-admins' ||
                        g === 'it-dept'   || g === '/it-dept';
@@ -272,319 +107,319 @@
             initDashboard();
         })
         .catch(function () {
-            // Sin sesión SSO. Con oauth2-proxy delante esto no debería pasar
-            // (te redirige antes), pero por si /oauth2/userinfo no existe en
-            // un setup distinto, dejamos visible el formulario decorativo.
             console.log('[SSO] no active session — falling back to manual login');
         });
     }
     tryAutoSSO();
 
-    /* === Filtros sidebar === */
-    var navEls = document.querySelectorAll('.vault-nav-item');
-    for (var f = 0; f < navEls.length; f++) {
-        (function (el) {
-            el.addEventListener('click', function () {
-                for (var k = 0; k < navEls.length; k++) navEls[k].classList.remove('active');
-                el.classList.add('active');
-                currentFilter = el.getAttribute('data-filter') || 'all';
-                renderVault();
-            });
-        })(navEls[f]);
-    }
-
-    /* === Buscador === */
-    var vaultSearch = document.getElementById('vault-search');
-    if (vaultSearch) vaultSearch.addEventListener('input', renderList);
-
-    /* === Filtrado === */
-    function matchesFilter(item) {
-        if (currentFilter === 'all') return true;
-        if (currentFilter === 'fav') return !!item.favorite;
-        if (currentFilter === 'watchtower') return item.strength === 'weak' || item.strength === 'medium';
-        if (currentFilter === 'work' || currentFilter === 'personal' || currentFilter === 'infra') {
-            return item.category === currentFilter;
-        }
-        if (currentFilter.indexOf('tag-') === 0) {
-            var tag = currentFilter.slice(4);
-            return item.tags && item.tags.indexOf(tag) !== -1;
-        }
-        return true;
-    }
-
-    function matchesQuery(item, q) {
-        if (!q) return true;
-        q = q.toLowerCase();
-        return (item.title + ' ' + item.username + ' ' + (item.website || '')).toLowerCase().indexOf(q) !== -1;
-    }
-
-    function filteredItems() {
-        var q = (vaultSearch && vaultSearch.value || '').trim();
-        return vaultItems.filter(function (it) { return matchesFilter(it) && matchesQuery(it, q); });
-    }
-
-    /* === Render === */
-    function renderVault() {
-        renderCounts();
-        renderList();
-    }
-
-    function renderCounts() {
-        var counts = {
-            all: vaultItems.length,
-            fav: 0,
-            watchtower: 0,
-            work: 0,
-            personal: 0,
-            infra: 0,
-            'tag-sso': 0,
-            'tag-critical': 0
-        };
-        vaultItems.forEach(function (it) {
-            if (it.favorite) counts.fav++;
-            if (it.strength === 'weak' || it.strength === 'medium') counts.watchtower++;
-            if (counts[it.category] != null) counts[it.category]++;
-            (it.tags || []).forEach(function (t) {
-                if (counts['tag-' + t] != null) counts['tag-' + t]++;
-            });
-        });
-        for (var i = 0; i < navEls.length; i++) {
-            var key = navEls[i].getAttribute('data-filter');
-            var span = navEls[i].querySelector('.vault-nav-count');
-            if (span && counts[key] != null) span.textContent = counts[key];
-        }
-    }
-
-    function renderList() {
-        var list = document.getElementById('vault-list');
-        if (!list) return;
-        var items = filteredItems();
-        list.innerHTML = '';
-
-        if (items.length === 0) {
-            var empty = document.createElement('div');
-            empty.className = 'vault-list-empty';
-            empty.textContent = 'Sin resultados.';
-            list.appendChild(empty);
-            renderDetail(null);
+    /* === Logout === */
+    document.getElementById('logout-btn').addEventListener('click', function () {
+        if (currentUser && (currentUser.label || '').indexOf('SSO') > -1) {
+            ssoLogout();
             return;
         }
+        currentUser = null;
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('login-form').reset();
+        showSection('overview');
+    });
 
-        items.forEach(function (it) {
-            var row = document.createElement('div');
-            row.className = 'vault-item-row';
-            if (it.id === currentItemId) row.classList.add('selected');
-            row.innerHTML =
-                '<div class="vault-item-icon">' + it.icon +
-                    (it.favorite ? '<span class="fav-marker">\u2605</span>' : '') +
+    /* ===========================================================
+     * Pentesting: carga y render de los 6 JSONs en src/data/
+     * =========================================================== */
+
+    function loadAndRenderPentest() {
+        var files = ['summary', 'ssl', 'trivy', 'nikto', 'waf', 'fail2ban'];
+        Promise.all(files.map(function (f) {
+            return fetch('data/' + f + '.json', { credentials: 'same-origin' })
+                .then(function (r) {
+                    if (!r.ok) throw new Error('No se pudo cargar ' + f);
+                    return r.json();
+                });
+        }))
+        .then(function (results) {
+            pentestData = {
+                summary:  results[0],
+                ssl:      results[1],
+                trivy:    results[2],
+                nikto:    results[3],
+                waf:      results[4],
+                fail2ban: results[5]
+            };
+            renderOverview(pentestData.summary);
+            renderSsl(pentestData.ssl);
+            renderTrivy(pentestData.trivy);
+            renderNikto(pentestData.nikto);
+            renderWaf(pentestData.waf);
+            renderFail2ban(pentestData.fail2ban);
+        })
+        .catch(function (err) {
+            console.error('[Pentest] error cargando datos:', err);
+            toast('Error cargando datos del pentest', 'err');
+        });
+    }
+
+    /* === Overview === */
+    function renderOverview(data) {
+        if (!data) return;
+        var kpis = data.kpi || {};
+        var grid = document.getElementById('overview-kpis');
+        if (grid) {
+            var cards = [
+                kpiCard('Calificacion SSL', kpis.sslGrade),
+                kpiCard('CVEs criticos', kpis.criticalCves),
+                kpiCard('CVEs altos', kpis.highCves),
+                kpiCard('Hallazgos Nikto', kpis.niktoFindings),
+                kpiCard('Bloqueos WAF', kpis.wafBlocks),
+                kpiCard('Baneos Fail2ban', kpis.fail2banBans)
+            ];
+            grid.innerHTML = cards.join('');
+        }
+        var tbody = document.querySelector('#overview-tools tbody');
+        if (tbody) {
+            tbody.innerHTML = (data.tools || []).map(function (t) {
+                var st = statusBadge(t.status);
+                return '<tr>' +
+                    '<td>' + escapeHtml(t.name) + '</td>' +
+                    '<td>' + escapeHtml(t.category) + '</td>' +
+                    '<td>' + st + '</td>' +
+                  '</tr>';
+            }).join('');
+        }
+        var note = document.getElementById('overview-note');
+        if (note && data.note) {
+            note.textContent = data.note;
+        }
+    }
+
+    function kpiCard(label, kpi) {
+        if (!kpi) return '';
+        var status = kpi.status || 'ok';
+        var cls = 'stat-card stat-' + (status === 'ok' ? 'green' : status === 'warn' ? 'yellow' : 'red');
+        return '<div class="' + cls + '">' +
+            '<div class="stat-number">' + escapeHtml(String(kpi.value)) + '</div>' +
+            '<div class="stat-label">' + escapeHtml(label) + '</div>' +
+        '</div>';
+    }
+
+    function statusBadge(status) {
+        if (status === 'ok')      return '<span class="status-ok">OK</span>';
+        if (status === 'warn')    return '<span class="status-warn">Aviso</span>';
+        if (status === 'fail')    return '<span class="status-err">Fallo</span>';
+        if (status === 'pending') return '<span class="status-warn">Pendiente</span>';
+        return '<span>' + escapeHtml(status || '') + '</span>';
+    }
+
+    /* === SSL / TLS === */
+    function renderSsl(data) {
+        if (!data) return;
+        var container = document.getElementById('ssl-cards');
+        if (!container) return;
+        container.innerHTML = (data.endpoints || []).map(function (ep) {
+            var grade = ep.grade || '?';
+            var gradeClass = grade.indexOf('A') === 0 ? 'grade-a' : grade === 'B' ? 'grade-b' : 'grade-c';
+            var cert = ep.certificate || {};
+            var vulns = ep.vulnerabilities || {};
+            var vulnRows = Object.keys(vulns).map(function (k) {
+                var ok = vulns[k] === false;
+                return '<tr><td>' + escapeHtml(k) + '</td><td>' +
+                    (ok ? '<span class="status-ok">No vulnerable</span>' : '<span class="status-err">VULNERABLE</span>') +
+                    '</td></tr>';
+            }).join('');
+            return '<div class="ssl-card">' +
+                '<div class="ssl-card-head">' +
+                    '<div class="ssl-host">' + escapeHtml(ep.host) + '</div>' +
+                    '<div class="ssl-grade ' + gradeClass + '">' + escapeHtml(grade) + '</div>' +
                 '</div>' +
-                '<div class="vault-item-body">' +
-                    '<div class="vault-item-title"></div>' +
-                    '<div class="vault-item-sub"></div>' +
-                '</div>';
-            row.querySelector('.vault-item-title').textContent = it.title;
-            row.querySelector('.vault-item-sub').textContent = it.username;
-            row.addEventListener('click', function () {
-                currentItemId = it.id;
-                renderList();
-                renderDetail(it);
-            });
-            list.appendChild(row);
-        });
-
-        if (!currentItemId || !items.some(function (i) { return i.id === currentItemId; })) {
-            currentItemId = items[0].id;
-            var first = list.querySelector('.vault-item-row');
-            if (first) first.classList.add('selected');
-            renderDetail(items[0]);
+                '<div class="ssl-meta">' +
+                    '<div><span>IP</span><strong>' + escapeHtml(ep.ip || '-') + '</strong></div>' +
+                    '<div><span>Cifrado</span><strong>' + escapeHtml(ep.cipherStrength || '-') + '</strong></div>' +
+                    '<div><span>HSTS</span><strong>' + (ep.hsts ? 'Si (' + (ep.hstsMaxAge || 0) + 's)' : 'No') + '</strong></div>' +
+                    '<div><span>OCSP Stapling</span><strong>' + (ep.ocspStapling ? 'Si' : 'No') + '</strong></div>' +
+                '</div>' +
+                '<div class="ssl-section"><h4>Certificado</h4>' +
+                    '<p><strong>Emisor:</strong> ' + escapeHtml(cert.issuer || '-') + '</p>' +
+                    '<p><strong>Sujeto:</strong> ' + escapeHtml(cert.subject || '-') + '</p>' +
+                    '<p><strong>Valido:</strong> ' + escapeHtml(cert.validFrom || '-') + ' &rarr; ' + escapeHtml(cert.validTo || '-') + '</p>' +
+                    '<p><strong>Clave:</strong> ' + escapeHtml(cert.keyType || '') + ' ' + (cert.keySize || '') + ' bits</p>' +
+                '</div>' +
+                '<div class="ssl-section"><h4>Protocolos</h4>' +
+                    '<p><strong>Activos:</strong> ' + (ep.protocols || []).map(escapeHtml).join(', ') + '</p>' +
+                    '<p><strong>Deshabilitados:</strong> ' + (ep.protocolsDisabled || []).map(escapeHtml).join(', ') + '</p>' +
+                '</div>' +
+                '<div class="ssl-section"><h4>Vulnerabilidades probadas</h4>' +
+                    '<table class="table-mini"><tbody>' + vulnRows + '</tbody></table>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        if (!container.innerHTML) {
+            container.innerHTML = '<p class="info-text">Sin datos. Ejecuta el scan de SSL Labs para popular esta seccion.</p>';
         }
     }
 
-    function renderDetail(item) {
-        var det = document.getElementById('vault-detail');
-        if (!det) return;
-        if (!item) {
-            det.innerHTML = '<div class="vault-detail-empty">Selecciona una entrada para ver el detalle.</div>';
-            return;
+    /* === Trivy === */
+    function renderTrivy(data) {
+        if (!data) return;
+        var summary = data.summary || {};
+        var grid = document.getElementById('trivy-summary');
+        if (grid) {
+            grid.innerHTML = [
+                kpiCard('Critical', { value: summary.critical || 0, status: (summary.critical || 0) > 0 ? 'fail' : 'ok' }),
+                kpiCard('High',     { value: summary.high     || 0, status: (summary.high     || 0) > 0 ? 'warn' : 'ok' }),
+                kpiCard('Medium',   { value: summary.medium   || 0, status: 'ok' }),
+                kpiCard('Low',      { value: summary.low      || 0, status: 'ok' }),
+                kpiCard('Imagenes',  { value: summary.imagesScanned || 0, status: 'ok' })
+            ].join('');
         }
-
-        var strengthLabel = { strong: 'Fuerte', medium: 'Media', weak: 'Debil' }[item.strength] || '';
-        var catLabel = { work: 'Trabajo', personal: 'Personal', infra: 'Infraestructura' }[item.category] || '';
-
-        var html = '';
-        html += '<div class="vault-detail-header">';
-        html +=   '<div class="vault-detail-icon">' + item.icon +
-                    (item.favorite ? '<span class="fav-marker">\u2605</span>' : '') + '</div>';
-        html +=   '<div class="vault-detail-title">';
-        html +=     '<h2></h2>';
-        html +=     '<div class="vault-detail-tag">' + catLabel + '</div>';
-        html +=   '</div>';
-        html +=   '<button class="vault-detail-fav ' + (item.favorite ? 'active' : '') + '" data-action="toggle-fav">' +
-                    (item.favorite ? '\u2605' : '\u2606') + '</button>';
-        html += '</div>';
-
-        html += field('username', 'Usuario', item.username, 'copy-user');
-
-        html += '<div class="vault-field">' +
-            '<div class="vault-field-label"><span>password</span>' +
-              '<span class="vault-field-strength ' + item.strength + '"><span class="dot"></span>' + strengthLabel + ' &middot; ' + item.pwdLen + ' car.</span></div>' +
-            '<div class="vault-field-value">' +
-              '<span class="value-text secret" data-pwd="' + escapeAttr(item.password) + '">' + mask(item.pwdLen) + '</span>' +
-              '<button class="vault-field-action" data-action="toggle-pwd" title="Mostrar">\u{1F441}</button>' +
-              '<button class="vault-field-action" data-action="copy-pwd" title="Copiar">\u2398</button>' +
-            '</div></div>';
-
-        if (item.otp) {
-            html += '<div class="vault-field">' +
-              '<div class="vault-field-label"><span>otp</span><span class="vault-field-hint">cambia en <span id="otp-countdown">30</span>s</span></div>' +
-              '<div class="vault-field-value">' +
-                '<span class="value-text" id="otp-value">' + item.otp + '</span>' +
-                '<button class="vault-field-action" data-action="copy-otp" title="Copiar OTP">\u2398</button>' +
-              '</div></div>';
+        var tbody = document.querySelector('#trivy-table tbody');
+        if (tbody) {
+            tbody.innerHTML = (data.images || []).map(function (img) {
+                var status = (img.critical || 0) > 0 ? 'fail' :
+                             (img.high     || 0) > 0 ? 'warn' :
+                             img.scanDate ? 'ok' : 'pending';
+                return '<tr>' +
+                    '<td><code>' + escapeHtml(img.name) + '</code></td>' +
+                    '<td>' + escapeHtml(img.size || '-') + '</td>' +
+                    '<td>' + sevCell(img.critical, 'red') + '</td>' +
+                    '<td>' + sevCell(img.high, 'yellow') + '</td>' +
+                    '<td>' + (img.medium || 0) + '</td>' +
+                    '<td>' + (img.low || 0) + '</td>' +
+                    '<td>' + statusBadge(status) + '</td>' +
+                '</tr>';
+            }).join('');
         }
-
-        if (item.website) {
-            html += '<div class="vault-field">' +
-              '<div class="vault-field-label">website</div>' +
-              '<div class="vault-field-value website">' +
-                '<a class="value-text" href="' + escapeAttr(item.website) + '" target="_blank" rel="noopener"></a>' +
-                '<button class="vault-field-action" data-action="copy-url" title="Copiar URL">\u2398</button>' +
-              '</div></div>';
-        }
-
-        if (item.backup) {
-            html += '<div class="vault-field">' +
-              '<div class="vault-field-label">backup 2fa code</div>' +
-              '<div class="vault-field-value">' +
-                '<span class="value-text secret" data-pwd="' + escapeAttr(item.backup) + '">' + mask(item.backup.length) + '</span>' +
-                '<button class="vault-field-action" data-action="toggle-backup" title="Mostrar">\u{1F441}</button>' +
-                '<button class="vault-field-action" data-action="copy-backup" title="Copiar">\u2398</button>' +
-              '</div></div>';
-        }
-
-        if (item.notes) {
-            html += '<div class="vault-field notes">' +
-              '<div class="vault-field-label">notes</div>' +
-              '<div class="vault-field-value"></div></div>';
-        }
-
-        html += '<div class="vault-detail-footer">' +
-            '<span>modified: ' + item.updated + '</span>' +
-            '<span>created: ' + item.created + '</span>' +
-          '</div>';
-
-        det.innerHTML = html;
-
-        // Inyectar texto como textContent para evitar XSS con títulos/URL/username.
-        det.querySelector('.vault-detail-title h2').textContent = item.title;
-        var userValue = det.querySelector('.vault-field.username .value-text');
-        if (userValue) userValue.textContent = item.username;
-        if (item.website) {
-            det.querySelector('.vault-field-value.website .value-text').textContent = item.website;
-        }
-        if (item.notes) {
-            det.querySelector('.vault-field.notes .vault-field-value').textContent = item.notes;
-        }
-
-        // Binder de acciones
-        det.querySelectorAll('[data-action]').forEach(function (btn) {
-            btn.addEventListener('click', function (e) { handleDetailAction(e, item); });
-        });
     }
 
-    function field(cls, label, value, action) {
-        var v = value == null ? '' : String(value);
-        return '<div class="vault-field ' + cls + '">' +
-            '<div class="vault-field-label">' + label + '</div>' +
-            '<div class="vault-field-value">' +
-              '<span class="value-text"></span>' +
-              (action ? '<button class="vault-field-action" data-action="' + action + '" title="Copiar">\u2398</button>' : '') +
-            '</div></div>';
+    function sevCell(n, color) {
+        n = n || 0;
+        if (n === 0) return '<span class="sev-zero">0</span>';
+        return '<span class="sev sev-' + color + '">' + n + '</span>';
     }
 
-    function handleDetailAction(e, item) {
-        var btn = e.currentTarget;
-        var act = btn.getAttribute('data-action');
-        var valueEl = btn.parentElement.querySelector('.value-text');
+    /* === Nikto === */
+    function renderNikto(data) {
+        if (!data) return;
+        var container = document.getElementById('nikto-cards');
+        if (!container) return;
+        container.innerHTML = (data.scans || []).map(function (sc) {
+            var findings = sc.findings || [];
+            var findingsHtml = findings.length === 0
+                ? '<p class="status-ok">Sin hallazgos.</p>'
+                : '<table class="table-mini"><thead><tr><th>Severidad</th><th>OSVDB</th><th>Descripcion</th></tr></thead><tbody>' +
+                    findings.map(function (f) {
+                        return '<tr>' +
+                            '<td>' + statusBadge(f.severity || 'warn') + '</td>' +
+                            '<td>' + escapeHtml(f.id || '-') + '</td>' +
+                            '<td>' + escapeHtml(f.description || '-') + '</td>' +
+                        '</tr>';
+                    }).join('') +
+                  '</tbody></table>';
+            var headers = (sc.headersOk || []).map(function (h) {
+                return '<span class="chip chip-ok">' + escapeHtml(h) + '</span>';
+            }).join(' ');
+            return '<div class="panel">' +
+                '<h3><code>' + escapeHtml(sc.host) + '</code></h3>' +
+                '<p class="info-text"><strong>Scan:</strong> ' + escapeHtml(sc.scanDate || 'pendiente') +
+                    (sc.duration ? ' &middot; <strong>Duracion:</strong> ' + escapeHtml(sc.duration) : '') + '</p>' +
+                '<h4>Hallazgos</h4>' + findingsHtml +
+                '<h4>Headers de seguridad presentes</h4>' +
+                '<div class="chips-row">' + (headers || '<span class="info-text">Sin datos</span>') + '</div>' +
+            '</div>';
+        }).join('');
+    }
 
-        if (act === 'toggle-fav') {
-            item.favorite = !item.favorite;
-            renderVault();
-            toast(item.favorite ? 'Añadida a favoritas' : 'Quitada de favoritas', 'ok');
-        } else if (act === 'toggle-pwd' || act === 'toggle-backup') {
-            var real = valueEl.getAttribute('data-pwd') || '';
-            if (valueEl.classList.contains('secret')) {
-                valueEl.textContent = real;
-                valueEl.classList.remove('secret');
+    /* === WAF === */
+    function renderWaf(data) {
+        if (!data) return;
+        var s = data.summary || {};
+        var grid = document.getElementById('waf-summary');
+        if (grid) {
+            var byType = s.byType || {};
+            grid.innerHTML = [
+                kpiCard('Total peticiones', { value: s.totalRequests || 0, status: 'ok' }),
+                kpiCard('Bloqueadas',       { value: s.blocked || 0,        status: 'ok' }),
+                kpiCard('SQLi',             { value: byType.sqli || 0,      status: (byType.sqli || 0) > 0 ? 'warn' : 'ok' }),
+                kpiCard('XSS',              { value: byType.xss || 0,       status: (byType.xss || 0) > 0 ? 'warn' : 'ok' }),
+                kpiCard('Scanner detectado',{ value: byType.scanner || 0,   status: (byType.scanner || 0) > 0 ? 'warn' : 'ok' })
+            ].join('');
+        }
+        var log = document.getElementById('waf-log');
+        if (log) {
+            var blocks = data.blocks || [];
+            if (blocks.length === 0) {
+                log.innerHTML = '<div class="log-line"><span class="log-time">--</span> <span class="log-ok">[INFO]</span> Sin bloqueos registrados aun.</div>';
             } else {
-                valueEl.textContent = mask(real.length);
-                valueEl.classList.add('secret');
+                log.innerHTML = blocks.map(function (b) {
+                    return '<div class="log-line">' +
+                        '<span class="log-time">' + escapeHtml(b.timestamp || '--') + '</span> ' +
+                        '<span class="log-warn">[BLOCK]</span> ' +
+                        escapeHtml((b.attackType || '?').toUpperCase()) + ' desde ' +
+                        '<code>' + escapeHtml(b.sourceIp || '?') + '</code> ' +
+                        '&mdash; rule ' + escapeHtml(String(b.ruleId || '?')) + ' ' +
+                        '(severity ' + escapeHtml(String(b.severity || '?')) + ')' +
+                    '</div>';
+                }).join('');
             }
-        } else if (act === 'copy-user') {
-            copyToClipboard(item.username, 'Usuario copiado');
-        } else if (act === 'copy-pwd') {
-            copyToClipboard(item.password, 'Contrasena copiada');
-        } else if (act === 'copy-otp') {
-            copyToClipboard((item.otp || '').replace(/\s/g, ''), 'OTP copiado');
-        } else if (act === 'copy-url') {
-            copyToClipboard(item.website || '', 'URL copiada');
-        } else if (act === 'copy-backup') {
-            copyToClipboard(item.backup || '', 'Codigo de respaldo copiado');
         }
     }
 
-    function mask(len) {
-        len = Math.max(8, Math.min(len || 12, 24));
-        return new Array(len + 1).join('\u2022');
+    /* === Fail2ban === */
+    function renderFail2ban(data) {
+        if (!data) return;
+        var s = data.summary || {};
+        var grid = document.getElementById('fail2ban-summary');
+        if (grid) {
+            grid.innerHTML = [
+                kpiCard('Bans totales',  { value: s.totalBans  || 0, status: 'ok' }),
+                kpiCard('Bans activos',  { value: s.activeBans || 0, status: (s.activeBans || 0) > 0 ? 'warn' : 'ok' }),
+                kpiCard('Intentos',      { value: s.totalAttempts || 0, status: 'ok' }),
+                kpiCard('Jails activos', { value: s.jailsActive || (data.jails || []).filter(function (j) { return j.active; }).length, status: 'ok' })
+            ].join('');
+        }
+        var jails = document.querySelector('#fail2ban-jails tbody');
+        if (jails) {
+            jails.innerHTML = (data.jails || []).map(function (j) {
+                return '<tr>' +
+                    '<td><strong>' + escapeHtml(j.name) + '</strong></td>' +
+                    '<td><code>' + escapeHtml(j.filter) + '</code></td>' +
+                    '<td>' + (j.maxretry || '-') + '</td>' +
+                    '<td>' + escapeHtml(j.findtime || '-') + '</td>' +
+                    '<td>' + escapeHtml(j.bantime || '-') + '</td>' +
+                    '<td>' + (j.currentBans || 0) + '</td>' +
+                    '<td>' + (j.totalBans || 0) + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+        var bans = document.querySelector('#fail2ban-bans tbody');
+        if (bans) {
+            var recent = data.recentBans || [];
+            if (recent.length === 0) {
+                bans.innerHTML = '<tr><td colspan="6" class="info-text">Sin baneos recientes.</td></tr>';
+            } else {
+                bans.innerHTML = recent.map(function (b) {
+                    return '<tr>' +
+                        '<td><code>' + escapeHtml(b.ip) + '</code></td>' +
+                        '<td>' + escapeHtml(b.jail || '-') + '</td>' +
+                        '<td>' + escapeHtml(b.bannedAt || '-') + '</td>' +
+                        '<td>' + escapeHtml(b.country || '-') + '</td>' +
+                        '<td>' + (b.attempts || '-') + '</td>' +
+                        '<td>' + (b.active ? '<span class="status-warn">Activo</span>' : '<span class="status-ok">Liberado</span>') + '</td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
     }
 
-    function escapeAttr(s) {
-        return String(s == null ? '' : s)
+    /* === Helpers === */
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
             .replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-
-    /* === Toolbar === */
-    var newEntryBtn = document.getElementById('new-entry-btn');
-    if (newEntryBtn) newEntryBtn.addEventListener('click', function () {
-        toast('Nueva entrada: en produccion abre el formulario de Vaultwarden', 'ok');
-    });
-
-    var generatorBtn = document.getElementById('generator-btn');
-    if (generatorBtn) generatorBtn.addEventListener('click', function () {
-        var pwd = generatePassword(20);
-        copyToClipboard(pwd, 'Contrasena generada copiada (' + pwd.length + ' car.)');
-    });
-
-    var importBtn = document.getElementById('import-btn');
-    if (importBtn) importBtn.addEventListener('click', function () {
-        toast('Importar: en produccion acepta CSV/JSON de Bitwarden/1Password', 'ok');
-    });
-
-    /* === Clipboard + toast === */
-    function copyToClipboard(text, okMsg) {
-        if (!text) { toast('Campo vacio', 'warn'); return; }
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(function () {
-                toast(okMsg, 'ok');
-            }).catch(function () { fallbackCopy(text, okMsg); });
-        } else {
-            fallbackCopy(text, okMsg);
-        }
-    }
-
-    function fallbackCopy(text, okMsg) {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); toast(okMsg, 'ok'); }
-        catch (e) { toast('No se pudo copiar', 'err'); }
-        document.body.removeChild(ta);
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     function toast(msg, kind) {
@@ -604,34 +439,5 @@
             setTimeout(function () { el.remove(); }, 250);
         }, 2400);
     }
-
-    function generatePassword(len) {
-        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
-        var out = '';
-        if (window.crypto && window.crypto.getRandomValues) {
-            var arr = new Uint32Array(len);
-            window.crypto.getRandomValues(arr);
-            for (var i = 0; i < len; i++) out += chars[arr[i] % chars.length];
-        } else {
-            for (var j = 0; j < len; j++) out += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return out;
-    }
-
-    /* === Logout === */
-    document.getElementById('logout-btn').addEventListener('click', function () {
-        // Si vino de SSO, hacer logout federado (oauth2-proxy + Keycloak).
-        // Si fue login local de demo, simplemente vuelve a la pantalla de login.
-        if (currentUser && (currentUser.label || '').indexOf('SSO') > -1) {
-            ssoLogout();
-            return;
-        }
-        currentUser = null;
-        currentItemId = null;
-        document.getElementById('dashboard-screen').classList.add('hidden');
-        document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('login-form').reset();
-        showSection('overview');
-    });
 
 })();

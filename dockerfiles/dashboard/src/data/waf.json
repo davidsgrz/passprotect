@@ -1,0 +1,23 @@
+{
+    "tool": "ModSecurity + OWASP CRS",
+    "url": "https://owasp.org/www-project-modsecurity-core-rule-set/",
+    "version": "OWASP CRS 4.x",
+    "rulesActive": 47,
+    "scanDate": null,
+    "attackTool": "SQLMap",
+    "attackUrl": "https://sqlmap.org/",
+    "summary": {
+        "totalRequests": 0,
+        "blocked": 0,
+        "passed": 0,
+        "byType": {
+            "sqli": 0,
+            "xss": 0,
+            "rce": 0,
+            "lfi": 0,
+            "scanner": 0
+        }
+    },
+    "blocks": [],
+    "rulesTriggered": []
+}

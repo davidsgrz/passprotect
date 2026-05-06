@@ -1,0 +1,53 @@
+{
+    "tool": "Nikto",
+    "version": "2.5.x",
+    "url": "https://github.com/sullo/nikto",
+    "scanDate": null,
+    "summary": {
+        "totalFindings": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "info": 0,
+        "endpointsScanned": 3
+    },
+    "scans": [
+        {
+            "host": "vault.passprotect.es",
+            "scanDate": null,
+            "duration": null,
+            "findings": [],
+            "headersOk": [
+                "Strict-Transport-Security",
+                "X-Frame-Options",
+                "X-Content-Type-Options",
+                "Content-Security-Policy",
+                "Permissions-Policy",
+                "Referrer-Policy"
+            ]
+        },
+        {
+            "host": "auth.passprotect.es",
+            "scanDate": null,
+            "duration": null,
+            "findings": [],
+            "headersOk": [
+                "Strict-Transport-Security",
+                "X-Frame-Options",
+                "X-Content-Type-Options",
+                "Referrer-Policy"
+            ]
+        },
+        {
+            "host": "dashboard.passprotect.es",
+            "scanDate": null,
+            "duration": null,
+            "findings": [],
+            "headersOk": [
+                "Strict-Transport-Security",
+                "X-Frame-Options",
+                "X-Content-Type-Options"
+            ]
+        }
+    ]
+}

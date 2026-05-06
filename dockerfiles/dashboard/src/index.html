@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PassProtect — Dashboard</title>
+    <title>PassProtect — Validacion de Seguridad</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -17,8 +17,8 @@
                         <span class="icon">&#128274;</span>
                         <h1>PassProtect</h1>
                     </div>
-                    <p class="tagline">Gestion corporativa de credenciales</p>
-                    <p class="subtagline">Plataforma self-hosted en Kubernetes con SSO, 2FA y cifrado de extremo a extremo. Diseñada para equipos que necesitan control total sobre sus secretos.</p>
+                    <p class="tagline">Panel de validacion de seguridad</p>
+                    <p class="subtagline">Resultados de las auditorias automaticas y pentesting realizado sobre la plataforma. SSL Labs, Trivy, Nikto, ModSecurity y Fail2ban en un mismo panel.</p>
                 </div>
 
                 <ul class="login-features">
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
+    <!-- Dashboard de Pentesting -->
     <div id="dashboard-screen" class="screen hidden">
         <nav class="sidebar">
             <div class="sidebar-header">
@@ -97,22 +97,25 @@
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active" data-section="overview">
-                    <span>&#128200;</span> Resumen
+                    <span>&#128737;</span> Resumen
                 </li>
-                <li class="nav-item" data-section="vault">
-                    <span>&#128273;</span> Boveda
+                <li class="nav-item" data-section="ssl">
+                    <span>&#128274;</span> SSL / TLS
                 </li>
-                <li class="nav-item admin-only" data-section="users">
-                    <span>&#128101;</span> Usuarios
+                <li class="nav-item" data-section="cves">
+                    <span>&#128027;</span> CVEs (Trivy)
                 </li>
-                <li class="nav-item admin-only" data-section="security">
-                    <span>&#128737;</span> Seguridad
+                <li class="nav-item" data-section="nikto">
+                    <span>&#128269;</span> Web Scan
                 </li>
-                <li class="nav-item admin-only" data-section="audit">
-                    <span>&#128203;</span> Auditoria
+                <li class="nav-item" data-section="waf">
+                    <span>&#128679;</span> WAF
                 </li>
-                <li class="nav-item" data-section="settings">
-                    <span>&#9881;</span> Ajustes
+                <li class="nav-item" data-section="fail2ban">
+                    <span>&#9940;</span> Brute-force
+                </li>
+                <li class="nav-item" data-section="about">
+                    <span>&#8505;</span> Acerca de
                 </li>
             </ul>
             <div class="sidebar-footer">
@@ -125,201 +128,111 @@
         </nav>
 
         <main class="content">
-            <!-- Resumen -->
+            <!-- Resumen ejecutivo -->
             <section id="section-overview" class="section">
-                <h2>Resumen del sistema</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-passwords">247</div>
-                        <div class="stat-label">Contraseñas almacenadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-users">12</div>
-                        <div class="stat-label">Usuarios activos</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="stat-orgs">3</div>
-                        <div class="stat-label">Organizaciones</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number stat-ok" id="stat-health">OK</div>
-                        <div class="stat-label">Estado del sistema</div>
-                    </div>
+                <h2>Validacion de Seguridad &mdash; Resumen ejecutivo</h2>
+                <p class="section-lead">Resultados consolidados de las herramientas de pentesting aplicadas sobre la plataforma. Cada herramienta dispone de su panel detallado en el menu lateral.</p>
+
+                <div class="stats-grid" id="overview-kpis">
+                    <!-- Renderizado por JS desde data/summary.json -->
                 </div>
 
-                <div class="panel admin-only">
-                    <h3>Servicios</h3>
-                    <table class="table">
-                        <thead><tr><th>Servicio</th><th>Estado</th><th>Uptime</th><th>CPU</th><th>RAM</th></tr></thead>
-                        <tbody>
-                            <tr><td>Vaultwarden</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>6%</td><td>180 MB</td></tr>
-                            <tr><td>Keycloak</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>12%</td><td>780 MB</td></tr>
-                            <tr><td>Postgres-VW <span class="badge badge-db">Postgres 16</span></td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>110 MB</td></tr>
-                            <tr><td>Postgres-KC <span class="badge badge-db">Postgres 16</span></td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>2%</td><td>105 MB</td></tr>
-                            <tr><td>OpenLDAP</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>96 MB</td></tr>
-                            <tr><td>Nginx Proxy (WAF)</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>64 MB</td></tr>
-                            <tr><td>Dashboard</td><td><span class="status-ok">Activo</span></td><td>5d 12h</td><td>1%</td><td>32 MB</td></tr>
-                        </tbody>
+                <div class="panel">
+                    <h3>Herramientas aplicadas</h3>
+                    <table class="table" id="overview-tools">
+                        <thead><tr><th>Herramienta</th><th>Categoria</th><th>Estado</th></tr></thead>
+                        <tbody></tbody>
                     </table>
-                    <p class="info-text">Tras migrar MariaDB a PostgreSQL 16-alpine: ~1 GB de RAM liberada y -300 MB en imagenes.</p>
+                    <p class="info-text" id="overview-note"></p>
                 </div>
             </section>
 
-            <!-- Boveda (layout 3 columnas estilo 1Password) -->
-            <section id="section-vault" class="section hidden">
-                <div class="vault-workspace">
-                    <!-- Columna 1: categorias y grupos -->
-                    <aside class="vault-nav">
-                        <div class="vault-nav-header">
-                            <h3>Mi Boveda</h3>
-                            <button class="btn-sm" id="new-entry-btn" title="Nueva entrada">+</button>
-                        </div>
-                        <ul class="vault-nav-list">
-                            <li class="vault-nav-item active" data-filter="all">
-                                <span class="vault-nav-icon">&#128218;</span>
-                                <span class="vault-nav-label">Todos los items</span>
-                                <span class="vault-nav-count"></span>
-                            </li>
-                            <li class="vault-nav-item" data-filter="fav">
-                                <span class="vault-nav-icon">&#9733;</span>
-                                <span class="vault-nav-label">Favoritas</span>
-                                <span class="vault-nav-count"></span>
-                            </li>
-                            <li class="vault-nav-item" data-filter="watchtower">
-                                <span class="vault-nav-icon">&#128737;</span>
-                                <span class="vault-nav-label">Watchtower</span>
-                                <span class="vault-nav-count"></span>
-                            </li>
-                        </ul>
+            <!-- SSL / TLS -->
+            <section id="section-ssl" class="section hidden">
+                <h2>Auditoria SSL / TLS</h2>
+                <p class="section-lead">Calificacion oficial de Qualys SSL Labs sobre los endpoints HTTPS de la plataforma. Verifica protocolos, cifrados, certificados y vulnerabilidades historicas.</p>
+                <div id="ssl-cards" class="cards-grid"></div>
+            </section>
 
-                        <div class="vault-nav-group">
-                            <div class="vault-nav-group-title">CATEGORIAS</div>
-                            <ul class="vault-nav-list">
-                                <li class="vault-nav-item" data-filter="work">
-                                    <span class="vault-nav-icon dot dot-work"></span>
-                                    <span class="vault-nav-label">Trabajo</span>
-                                    <span class="vault-nav-count"></span>
-                                </li>
-                                <li class="vault-nav-item" data-filter="personal">
-                                    <span class="vault-nav-icon dot dot-personal"></span>
-                                    <span class="vault-nav-label">Personal</span>
-                                    <span class="vault-nav-count"></span>
-                                </li>
-                                <li class="vault-nav-item" data-filter="infra">
-                                    <span class="vault-nav-icon dot dot-infra"></span>
-                                    <span class="vault-nav-label">Infraestructura</span>
-                                    <span class="vault-nav-count"></span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="vault-nav-group">
-                            <div class="vault-nav-group-title">ETIQUETAS</div>
-                            <ul class="vault-nav-list">
-                                <li class="vault-nav-item" data-filter="tag-sso"><span class="vault-nav-icon">&#35;</span><span class="vault-nav-label">sso</span></li>
-                                <li class="vault-nav-item" data-filter="tag-critical"><span class="vault-nav-icon">&#35;</span><span class="vault-nav-label">critico</span></li>
-                            </ul>
-                        </div>
-
-                        <div class="vault-nav-footer">
-                            <span class="vault-nav-icon">&#128451;</span>
-                            <span class="vault-nav-label">Archivo</span>
-                        </div>
-                    </aside>
-
-                    <!-- Columna 2: lista de items -->
-                    <div class="vault-list-col">
-                        <div class="vault-list-toolbar">
-                            <input type="text" id="vault-search" placeholder="Buscar en la boveda..." class="search-input">
-                            <button class="btn-ghost" id="generator-btn" title="Generar contrasena">&#9881;</button>
-                            <button class="btn-ghost" id="import-btn" title="Importar">&#11015;</button>
-                        </div>
-                        <div class="vault-list" id="vault-list"></div>
-                    </div>
-
-                    <!-- Columna 3: detalle del item seleccionado -->
-                    <div class="vault-detail" id="vault-detail">
-                        <!-- Se renderiza desde JS al seleccionar un item -->
-                    </div>
+            <!-- CVEs (Trivy) -->
+            <section id="section-cves" class="section hidden">
+                <h2>Vulnerabilidades de imagenes (Trivy)</h2>
+                <p class="section-lead">Escaneo de las imagenes Docker propias publicadas en el registry. Detecta CVEs en sistema operativo, librerias del lenguaje y dependencias.</p>
+                <div class="stats-grid" id="trivy-summary"></div>
+                <div class="panel">
+                    <h3>Imagenes escaneadas</h3>
+                    <table class="table" id="trivy-table">
+                        <thead><tr><th>Imagen</th><th>Tamano</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Estado</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-
             </section>
 
-            <!-- Usuarios (solo admin) -->
-            <section id="section-users" class="section hidden admin-only">
-                <h2>Gestion de Usuarios</h2>
-                <table class="table">
-                    <thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>2FA</th><th>Ultimo acceso</th><th>Estado</th></tr></thead>
-                    <tbody>
-                        <tr><td>dsegura</td><td>dsegura@passprotect.local</td><td><span class="badge badge-admin">Admin</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 2 min</td><td><span class="status-ok">Activo</span></td></tr>
-                        <tr><td>fparra</td><td>fparra@passprotect.local</td><td><span class="badge badge-admin">Admin</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 1h</td><td><span class="status-ok">Activo</span></td></tr>
-                        <tr><td>mgarcia</td><td>mgarcia@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 3h</td><td><span class="status-ok">Activo</span></td></tr>
-                        <tr><td>jlopez</td><td>jlopez@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-warn">Pendiente</span></td><td>Hace 2d</td><td><span class="status-ok">Activo</span></td></tr>
-                        <tr><td>aruiz</td><td>aruiz@passprotect.local</td><td><span class="badge badge-user">Usuario</span></td><td><span class="status-ok">TOTP</span></td><td>Hace 5d</td><td><span class="status-warn">Inactivo</span></td></tr>
-                    </tbody>
-                </table>
-                <p class="info-text">Fuente: OpenLDAP (dc=corp,dc=local, solo lectura) + Keycloak (SSO + 2FA)</p>
+            <!-- Nikto -->
+            <section id="section-nikto" class="section hidden">
+                <h2>Escaneo web (Nikto)</h2>
+                <p class="section-lead">Reconocimiento web de los endpoints expuestos. Detecta misconfigurations, headers ausentes y rutas administrativas accesibles.</p>
+                <div id="nikto-cards" class="cards-grid"></div>
             </section>
 
-            <!-- Seguridad (solo admin) -->
-            <section id="section-security" class="section hidden admin-only">
-                <h2>Panel de Seguridad</h2>
-                <div class="stats-grid">
-                    <div class="stat-card stat-green"><div class="stat-number">0</div><div class="stat-label">Amenazas criticas</div></div>
-                    <div class="stat-card stat-yellow"><div class="stat-number">3</div><div class="stat-label">Intentos SQLi bloqueados</div></div>
-                    <div class="stat-card stat-green"><div class="stat-number">47</div><div class="stat-label">Reglas ModSecurity activas</div></div>
-                    <div class="stat-card stat-green"><div class="stat-number">2</div><div class="stat-label">IPs baneadas (Fail2ban)</div></div>
+            <!-- WAF -->
+            <section id="section-waf" class="section hidden">
+                <h2>Proteccion WAF (ModSecurity + OWASP CRS)</h2>
+                <p class="section-lead">Intentos de inyeccion y ataques web bloqueados por el WAF. La columna izquierda muestra el resumen; la derecha, el log de bloqueos.</p>
+                <div class="stats-grid" id="waf-summary"></div>
+                <div class="panel">
+                    <h3>Bloqueos registrados</h3>
+                    <div class="log-viewer" id="waf-log"></div>
+                </div>
+            </section>
+
+            <!-- Fail2ban -->
+            <section id="section-fail2ban" class="section hidden">
+                <h2>Proteccion brute-force (Fail2ban)</h2>
+                <p class="section-lead">Jails activos y baneos automaticos aplicados ante intentos de fuerza bruta sobre SSH, autenticacion HTTP y reglas WAF.</p>
+                <div class="stats-grid" id="fail2ban-summary"></div>
+                <div class="panel">
+                    <h3>Jails configurados</h3>
+                    <table class="table" id="fail2ban-jails">
+                        <thead><tr><th>Jail</th><th>Filter</th><th>Maxretry</th><th>Findtime</th><th>Bantime</th><th>Activos</th><th>Total bans</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
                 <div class="panel">
-                    <h3>Mitigaciones activas</h3>
-                    <div class="security-list">
-                        <div class="sec-item sec-ok"><span>&#10003;</span> ModSecurity + OWASP CRS (WAF)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> Rate limiting (5r/s login, 2r/s admin)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> Fail2ban (3 jails: login, admin, SQLi)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> PostgreSQL 16 hardened (scram-sha-256, schema public revocado)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> Pod Security Standards (restricted)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> NetworkPolicies (deny-all default)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> TLS 1.2/1.3 (certificados autofirmados)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> 2FA obligatorio (TOTP via Keycloak)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> Security headers (CSP, HSTS, X-Frame)</div>
-                        <div class="sec-item sec-ok"><span>&#10003;</span> Non-root containers + read-only FS</div>
-                    </div>
+                    <h3>Bans recientes</h3>
+                    <table class="table" id="fail2ban-bans">
+                        <thead><tr><th>IP</th><th>Jail</th><th>Inicio</th><th>Pais</th><th>Intentos</th><th>Estado</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </section>
 
-            <!-- Auditoria (solo admin) -->
-            <section id="section-audit" class="section hidden admin-only">
-                <h2>Logs de Auditoria</h2>
-                <div class="log-viewer">
-                    <div class="log-line"><span class="log-time">2026-04-24 10:45:12</span> <span class="log-ok">[INFO]</span> Login exitoso: dsegura desde 192.168.1.10</div>
-                    <div class="log-line"><span class="log-time">2026-04-24 10:42:08</span> <span class="log-warn">[WARN]</span> Intento SQLi bloqueado: UNION SELECT desde 45.33.12.88 — baneado 24h</div>
-                    <div class="log-line"><span class="log-time">2026-04-24 03:00:15</span> <span class="log-ok">[INFO]</span> Backup completado: vaultwarden-20260424-030000.sql.gz</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 20:35:22</span> <span class="log-ok">[INFO]</span> Login exitoso: fparra desde 192.168.1.15</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 20:30:10</span> <span class="log-warn">[WARN]</span> 3 intentos fallidos desde 203.0.113.42 — baneado 1h</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 20:15:00</span> <span class="log-ok">[INFO]</span> Security audit completado: 0 vulnerabilidades criticas</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 18:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 15:22:33</span> <span class="log-ok">[INFO]</span> Usuario mgarcia añadido via OpenLDAP sync</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 12:00:01</span> <span class="log-ok">[INFO]</span> CronJob security-audit ejecutado</div>
-                    <div class="log-line"><span class="log-time">2026-04-23 03:00:15</span> <span class="log-ok">[INFO]</span> Backup diario completado</div>
-                </div>
-            </section>
-
-            <!-- Ajustes -->
-            <section id="section-settings" class="section hidden">
-                <h2>Ajustes</h2>
+            <!-- Acerca de -->
+            <section id="section-about" class="section hidden">
+                <h2>Acerca de este panel</h2>
                 <div class="panel">
-                    <h3>Mi cuenta</h3>
-                    <p><strong>Usuario:</strong> <span id="settings-user"></span></p>
-                    <p><strong>Rol:</strong> <span id="settings-role"></span></p>
-                    <p><strong>2FA:</strong> TOTP activo</p>
-                    <p><strong>Autenticacion:</strong> Keycloak OIDC + OpenLDAP (dc=corp,dc=local)</p>
+                    <h3>Proyecto</h3>
+                    <p><strong>PassProtect</strong> &mdash; Plataforma corporativa de gestion de contrasenas</p>
+                    <p>Trabajo intermodular ASIR 2025-2026</p>
+                    <p><strong>Autores:</strong> Francisco Parra Caparros &amp; David Segura Rodriguez</p>
                 </div>
-                <div class="panel admin-only">
+                <div class="panel">
+                    <h3>Herramientas de auditoria</h3>
+                    <ul class="about-list">
+                        <li><strong>Qualys SSL Labs</strong> &mdash; <a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener">www.ssllabs.com/ssltest/</a></li>
+                        <li><strong>Trivy</strong> &mdash; escaneo de CVEs en imagenes Docker (<a href="https://github.com/aquasecurity/trivy" target="_blank" rel="noopener">aquasecurity/trivy</a>)</li>
+                        <li><strong>Nikto</strong> &mdash; reconocimiento web (<a href="https://github.com/sullo/nikto" target="_blank" rel="noopener">sullo/nikto</a>)</li>
+                        <li><strong>SQLMap</strong> &mdash; pruebas de inyeccion SQL (<a href="https://sqlmap.org/" target="_blank" rel="noopener">sqlmap.org</a>)</li>
+                        <li><strong>ModSecurity + OWASP CRS</strong> &mdash; WAF (<a href="https://owasp.org/www-project-modsecurity-core-rule-set/" target="_blank" rel="noopener">OWASP CRS</a>)</li>
+                        <li><strong>Fail2ban</strong> &mdash; ban automatico (<a href="https://www.fail2ban.org/" target="_blank" rel="noopener">fail2ban.org</a>)</li>
+                    </ul>
+                </div>
+                <div class="panel">
                     <h3>Infraestructura</h3>
                     <p><strong>VPS:</strong> Contabo VPS S (4 vCPU, 8 GB RAM)</p>
                     <p><strong>Orquestador:</strong> MicroK8s 1.30</p>
                     <p><strong>Registry:</strong> Docker Hub (dsegura97)</p>
-                    <p><strong>Namespaces:</strong> vaultwarden, auth, monitoring</p>
+                    <p><strong>Namespaces:</strong> vaultwarden, auth, monitoring, ingress, cert-manager</p>
                 </div>
             </section>
         </main>

@@ -1,0 +1,26 @@
+{
+    "lastScan": "2026-05-07T10:00:00Z",
+    "platform": "PassProtect",
+    "endpoints": [
+        "https://vault.passprotect.es",
+        "https://auth.passprotect.es",
+        "https://dashboard.passprotect.es"
+    ],
+    "kpi": {
+        "sslGrade": { "value": "A+", "status": "ok" },
+        "criticalCves": { "value": 0, "status": "ok" },
+        "highCves": { "value": 0, "status": "ok" },
+        "niktoFindings": { "value": 0, "status": "ok" },
+        "wafBlocks": { "value": 0, "status": "ok" },
+        "fail2banBans": { "value": 0, "status": "ok" }
+    },
+    "tools": [
+        { "name": "Qualys SSL Labs",   "category": "TLS",          "status": "pending" },
+        { "name": "Trivy",             "category": "CVE scanner",  "status": "pending" },
+        { "name": "Nikto",             "category": "Web scanner",  "status": "pending" },
+        { "name": "SQLMap",            "category": "Inyeccion SQL","status": "pending" },
+        { "name": "ModSecurity / OWASP CRS", "category": "WAF",    "status": "pending" },
+        { "name": "Fail2ban",          "category": "Brute-force",  "status": "pending" }
+    ],
+    "note": "Datos placeholder. Se actualizan tras la ejecucion del pentesting (mar 07-05-2026)."
+}

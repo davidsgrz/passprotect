@@ -1,0 +1,45 @@
+{
+    "tool": "Fail2ban",
+    "version": "1.0.x",
+    "url": "https://www.fail2ban.org/",
+    "scanDate": null,
+    "summary": {
+        "totalBans": 0,
+        "activeBans": 0,
+        "totalAttempts": 0,
+        "jailsActive": 0
+    },
+    "jails": [
+        {
+            "name": "sshd",
+            "filter": "sshd",
+            "maxretry": 5,
+            "findtime": "10m",
+            "bantime": "1h",
+            "active": true,
+            "currentBans": 0,
+            "totalBans": 0
+        },
+        {
+            "name": "nginx-http-auth",
+            "filter": "nginx-http-auth",
+            "maxretry": 3,
+            "findtime": "10m",
+            "bantime": "1h",
+            "active": true,
+            "currentBans": 0,
+            "totalBans": 0
+        },
+        {
+            "name": "nginx-modsec",
+            "filter": "modsecurity",
+            "maxretry": 3,
+            "findtime": "5m",
+            "bantime": "24h",
+            "active": true,
+            "currentBans": 0,
+            "totalBans": 0
+        }
+    ],
+    "recentBans": []
+}
