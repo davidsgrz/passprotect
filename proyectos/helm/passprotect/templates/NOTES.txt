@@ -8,16 +8,16 @@ Keycloak:     https://{{ include "passprotect.kcDomain" . }}
 Pasos post-instalacion:
 
 1. Configurar Keycloak (realm, cliente OIDC, 2FA):
-   bash proyectos/passprotect/scripts/setup/configure-keycloak.sh
+   bash proyectos/scripts/setup/configure-keycloak.sh
 
 2. Configurar OpenLDAP (usuarios y grupos):
-   bash proyectos/passprotect/scripts/setup/configure-openldap.sh
+   bash proyectos/scripts/setup/configure-openldap.sh
 
 3. Verificar despliegue:
-   bash proyectos/passprotect/scripts/setup/verify-deployment.sh
+   bash proyectos/scripts/setup/verify-deployment.sh
 
 4. Ejecutar auditoria de seguridad:
-   bash proyectos/passprotect/scripts/setup/security-audit.sh
+   bash proyectos/scripts/setup/security-audit.sh
 
 Credenciales admin de Keycloak:
   Usuario: {{ .Values.keycloak.adminUser }}

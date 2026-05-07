@@ -75,12 +75,10 @@ microk8s kubectl wait --for=condition=Available deployment/cert-manager \
 microk8s kubectl wait --for=condition=Available deployment/cert-manager-webhook \
     -n cert-manager --timeout=120s 2>/dev/null || true
 
-# Aplicar ClusterIssuers con email real
-sed "s/CAMBIAR_EMAIL/${LETSENCRYPT_EMAIL}/g" \
-    "$PROJECT_DIR/proyectos/k8s/ingress/cert-manager.yaml" | \
-    microk8s kubectl apply -f -
-
-echo "ClusterIssuers Let's Encrypt creados"
+# Los ClusterIssuers de Let's Encrypt los gestiona el chart Helm
+# (proyectos/helm/passprotect/templates/...). Este script solo deja
+# cert-manager listo; el helm install/upgrade aplica los Issuers.
+echo "cert-manager listo (los ClusterIssuers los aplica el chart Helm)"
 
 # Firewall basico
 echo "[8/8] Configurando UFW..."

@@ -17,7 +17,6 @@ IMAGES=(
     "dsegura97/vaultwarden-corp:1.0.0"
     "dsegura97/keycloak-corp:1.0.0"
     "dsegura97/postgres-corp:1.0.0"
-    "dsegura97/nginx-proxy-corp:1.0.0"
 )
 
 for img in "${IMAGES[@]}"; do

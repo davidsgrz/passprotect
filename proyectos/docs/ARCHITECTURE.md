@@ -3,14 +3,14 @@
 ## Diagrama general
 
 ```
-Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ MariaDB-VW
+Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ Postgres-VW
                       │              │
                       └─▶ Keycloak ──┴─ OIDC (SSO)
                             │
                             └─▶ OpenLDAP (LDAP federation, READ-ONLY)
                             │       dc=corp,dc=local
                             │
-                            └─▶ MariaDB-KC
+                            └─▶ Postgres-KC
 ```
 
 ## Capas Docker
@@ -19,19 +19,21 @@ Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ MariaDB-VW
 ubuntu:24.04
   └── ubbase              (SSH hardening, gestion usuarios, sudo)
        └── ubseguridad    (auditoria puertos, log rotation, fail2ban-ready)
-            ├── vaultwarden-corp:1.0.0  (multi-stage: vaultwarden/server:1.32.5)
-            ├── keycloak-corp:1.0.0     (multi-stage: quay.io/keycloak/keycloak:24.0)
-            ├── mariadb-corp:1.0.0      (multi-stage: mariadb:11.2)
-            └── nginx-proxy-corp:1.0.0  (Nginx + ModSecurity + OWASP CRS)
+            ├── vaultwarden-corp:1.0.4  (multi-stage: vaultwarden/server:1.32.5)
+            ├── keycloak-corp:1.0.1     (multi-stage: quay.io/keycloak/keycloak:25.0)
+            ├── postgres-corp:1.0.1     (multi-stage: postgres:16-alpine)
+            ├── openldap-corp:1.0.0     (osixia/openldap:1.5.0)
+            └── dashboard-corp:1.0.5    (Nginx estatico, panel SOC)
 ```
 
 ## Namespaces Kubernetes
 
 | Namespace | Componentes | Pod Security |
 |---|---|---|
-| vaultwarden | Vaultwarden, MariaDB-VW | restricted |
-| auth | Keycloak, MariaDB-KC, OpenLDAP | baseline |
-| monitoring | CronJobs (audit, backup) | restricted |
+| vaultwarden | Vaultwarden, Postgres-VW | restricted |
+| auth | Keycloak, Postgres-KC, OpenLDAP | baseline |
+| monitoring | Dashboard, CronJobs (audit, backup) | restricted |
+| ingress | nginx-ingress + ModSecurity + OWASP CRS | baseline |
 
 ## Flujo de autenticacion
 
@@ -46,15 +48,15 @@ ubuntu:24.04
 
 - **frontend**: Nginx (unico punto de entrada)
 - **backend**: Vaultwarden, Keycloak (comunicacion interna)
-- **database**: MariaDB (internal: true, no accesible desde fuera)
+- **database**: PostgreSQL 16 (internal: true, no accesible desde fuera)
 
 ## Almacenamiento
 
 | PVC | Tamaño | Uso |
 |---|---|---|
 | vaultwarden-data | 5Gi | Datos y attachments |
-| mariadb-vw | 10Gi | Base de datos VW |
-| mariadb-kc | 5Gi | Base de datos KC |
+| postgres-vw | 10Gi | Base de datos VW |
+| postgres-kc | 5Gi | Base de datos KC |
 | openldap-data | 2Gi | Datos LDAP (DIT) |
 | openldap-config | 512Mi | Config slapd.d (cn=config) |
 | backup-storage | 20Gi | Backups diarios |

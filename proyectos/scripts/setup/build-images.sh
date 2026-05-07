@@ -78,7 +78,6 @@ SERVICES=(
     "vaultwarden-corp:dockerfiles/vaultwarden/Dockerfile"
     "keycloak-corp:dockerfiles/keycloak/Dockerfile"
     "postgres-corp:dockerfiles/postgres/Dockerfile"
-    "nginx-proxy-corp:dockerfiles/nginx-proxy/Dockerfile"
     "dashboard-corp:dockerfiles/dashboard/Dockerfile"
     "openldap-corp:dockerfiles/openldap/Dockerfile"
 )

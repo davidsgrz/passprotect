@@ -21,37 +21,37 @@ cd passprotect
 nano config.env  # Cambiar VPS_IP
 
 # Inicializar VPS (Docker, MicroK8s, UFW, certs)
-sudo bash proyectos/passprotect/scripts/setup/init-vps.sh
+sudo bash proyectos/scripts/setup/init-vps.sh
 ```
 
 ### 2. Generar secretos
 
 ```bash
-bash proyectos/passprotect/scripts/setup/generate-secrets.sh
+bash proyectos/scripts/setup/generate-secrets.sh
 ```
 
 ### 3. Construir y publicar imagenes
 
 ```bash
-bash proyectos/passprotect/scripts/setup/build-images.sh
+bash proyectos/scripts/setup/build-images.sh
 ```
 
 ### 4. Desplegar en Kubernetes
 
 ```bash
-bash proyectos/passprotect/scripts/setup/deploy.sh
+bash proyectos/scripts/setup/deploy.sh
 ```
 
 ### 5. Configurar Keycloak
 
 ```bash
-bash proyectos/passprotect/scripts/setup/configure-keycloak.sh
+bash proyectos/scripts/setup/configure-keycloak.sh
 ```
 
 ### 6. Configurar OpenLDAP
 
 ```bash
-bash proyectos/passprotect/scripts/setup/configure-openldap.sh
+bash proyectos/scripts/setup/configure-openldap.sh
 ```
 
 Este script carga los LDIFs de `dockerfiles/openldap/bootstrap/01-users.ldif`
@@ -63,7 +63,7 @@ Keycloak.
 ### 7. Verificar
 
 ```bash
-bash proyectos/passprotect/scripts/setup/verify-deployment.sh
+bash proyectos/scripts/setup/verify-deployment.sh
 ```
 
 ## URLs de acceso
@@ -74,10 +74,11 @@ bash proyectos/passprotect/scripts/setup/verify-deployment.sh
 ## Orden de build de imagenes Docker
 
 ```
-1. dsegura97/ubbase:latest          (docker/kube/base/)
-2. dsegura97/ubseguridad:latest     (docker/kube/seguridad/)
-3. dsegura97/vaultwarden-corp:1.0.0 (docker/kube/vaultwarden/)
-4. dsegura97/keycloak-corp:1.0.0    (docker/kube/keycloak/)
-5. dsegura97/mariadb-corp:1.0.0     (docker/kube/mariadb/)
-6. dsegura97/nginx-proxy-corp:1.0.0 (docker/kube/nginx-proxy/)
+1. dsegura97/ubbasse:latest         (dockerfiles/base/)
+2. dsegura97/ubseguridadd:latest    (dockerfiles/seguridad/)
+3. dsegura97/vaultwarden-corp:1.0.4 (dockerfiles/vaultwarden/)
+4. dsegura97/keycloak-corp:1.0.1    (dockerfiles/keycloak/)
+5. dsegura97/postgres-corp:1.0.1    (dockerfiles/postgres/)
+6. dsegura97/openldap-corp:1.0.0    (dockerfiles/openldap/)
+7. dsegura97/dashboard-corp:1.0.5   (dockerfiles/dashboard/)
 ```

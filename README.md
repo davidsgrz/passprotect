@@ -13,7 +13,7 @@ autenticacion centralizada (Keycloak + OpenLDAP), desplegada sobre Kubernetes
 ## Arquitectura
 
 ```
-Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ MariaDB
+Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ PostgreSQL
                       │              │
                       └─▶ Keycloak ──┴─ OIDC
                             │
@@ -27,12 +27,15 @@ Cliente ─HTTPS─▶ Ingress Nginx ─▶ Vaultwarden ─▶ MariaDB
 ubuntu:24.04
   └── ubbase              (SSH hardening, gestion usuarios, sudo)
        └── ubseguridad    (auditoria puertos, log rotation, fail2ban-ready)
-            ├── vaultwarden-corp:1.0.0
-            ├── keycloak-corp:1.0.0
-            ├── mariadb-corp:1.0.0   (hardened anti-SQLi)
-            ├── nginx-proxy-corp:1.0.0 (ModSecurity + OWASP CRS)
-            └── dashboard-corp:1.0.0   (panel de gestion)
+            ├── vaultwarden-corp:1.0.4
+            ├── keycloak-corp:1.0.1
+            ├── postgres-corp:1.0.1   (PostgreSQL 16 hardened, SCRAM-SHA-256)
+            ├── openldap-corp:1.0.0   (federacion LDAP read-only)
+            └── dashboard-corp:1.0.5  (panel SOC: SSL/Trivy/Nikto/WAF/Fail2ban)
 ```
+
+El WAF (ModSecurity + OWASP CRS) se aplica directamente en el
+nginx-ingress-controller del cluster, ya no como imagen separada.
 
 ## Estructura del repositorio
 
@@ -76,9 +79,9 @@ brute force, privilege escalation y mas.
 | Componente | Version |
 |---|---|
 | Vaultwarden | 1.32.5 |
-| Keycloak | 24.0 |
-| MariaDB | 11.2 |
+| Keycloak | 25.0 |
+| PostgreSQL | 16-alpine |
 | OpenLDAP | 1.5.0 (osixia) |
-| MicroK8s | 1.30 |
+| MicroK8s | 1.32 |
 | Ubuntu base | 24.04 |
 | VPS SO | Ubuntu 24.04 LTS |

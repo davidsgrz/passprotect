@@ -51,14 +51,9 @@ else
     echo "DASHBOARD_OAUTH2_COOKIE_SECRET=${DASHBOARD_OAUTH2_COOKIE_SECRET}" >> "$CONFIG_FILE"
 fi
 
-# Generar .env para docker-compose
-COMPOSE_DIR="$PROJECT_DIR/proyectos/docker-compose"
-cp "$CONFIG_FILE" "$COMPOSE_DIR/.env"
-
 echo ""
 echo "=== Secretos generados y escritos en ==="
 echo "  - $CONFIG_FILE"
-echo "  - $COMPOSE_DIR/.env"
 echo ""
-echo "IMPORTANTE: No commitear estos ficheros a git"
+echo "IMPORTANTE: No commitear este fichero a git"
 echo "Siguiente paso: bash $SCRIPT_DIR/build-images.sh"

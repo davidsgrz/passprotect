@@ -24,6 +24,10 @@ sqli-report.json
 .DS_Store
 Thumbs.db
 
+# SSH keys (paranoia extra)
+id_ed25519
+*.priv
+
 # IDE
 .vscode/
 .idea/

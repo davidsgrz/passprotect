@@ -4,14 +4,12 @@
 
 ### 1. SQL Injection
 **Mitigaciones**:
-- MariaDB en modo STRICT con sql_mode hardened
-- `local_infile=0` (bloquea file reads)
-- ModSecurity + OWASP CRS en Nginx
-- Detector Python (`sql-injection-detector.py`) analiza logs
-- Fail2ban jail que banea IPs con intentos SQLi (1 intento = 24h ban)
-- Privilegios minimos para usuarios de aplicacion (REVOKE FILE, SUPER, PROCESS)
-- Charset UTF8MB4 (evita bugs de encoding)
-- `skip_federated` en MariaDB (previene SSRF via SQL)
+- PostgreSQL 16 con `password_encryption=scram-sha-256`
+- `REVOKE ALL ON DATABASE postgres FROM PUBLIC` (init-security.sql)
+- `REVOKE CREATE ON SCHEMA public FROM PUBLIC` (privilegio minimo)
+- ModSecurity + OWASP CRS en nginx-ingress (reglas 942xxx)
+- Fail2ban jail planeado para nginx-modsec (24h ban tras 3 disparos)
+- Vaultwarden y Keycloak usan ORM/queries parametrizadas (no concatenacion)
 
 ### 2. XSS (Cross-Site Scripting)
 **Mitigaciones**:
@@ -29,7 +27,6 @@
 ### 4. SSRF (Server-Side Request Forgery)
 **Mitigaciones**:
 - NetworkPolicies K8s restringen egress
-- `skip_federated` en MariaDB
 - Nginx no permite `proxy_pass` dinamico
 
 ### 5. Path Traversal
@@ -61,7 +58,7 @@
 - ResourceQuotas K8s por namespace
 - LimitRanges en pods
 - Rate limiting Nginx
-- MariaDB max_connections limitado (200 global, 50 por usuario)
+- PostgreSQL max_connections=40 (postgresql.conf hardened para VPS 4GB)
 - JVM heap limitado en Keycloak (-Xmx1024m)
 - client_max_body_size 128M en Nginx
 
@@ -97,20 +94,19 @@ Capa 2 (WAF):      Nginx + ModSecurity + OWASP CRS
 Capa 3 (Rate):     Rate limiting Nginx + Fail2ban
 Capa 4 (Auth):     Keycloak OIDC + 2FA TOTP + OpenLDAP (READ-ONLY)
 Capa 5 (App):      Vaultwarden (signups disabled, admin token)
-Capa 6 (DB):       MariaDB hardened (STRICT mode, local_infile=0)
+Capa 6 (DB):       PostgreSQL 16 hardened (SCRAM-SHA-256, schema public revoked)
 Capa 7 (Container):Pod Security Standards + non-root + read-only FS
-Capa 8 (Audit):    Logs + audit.py + sql-injection-detector.py
+Capa 8 (Audit):    Logs + Keycloak Events (User+Admin) + dashboard SOC + Trivy
 ```
 
 ## Herramientas de auditoria incluidas
 
 | Herramienta | Proposito | Ubicacion |
 |---|---|---|
-| audit.py | Detecta brute force, credential stuffing, horarios anomalos | scripts/audit/ |
-| sql-injection-detector.py | Analiza logs MariaDB buscando patrones SQLi | scripts/audit/ |
 | security-audit.sh | Ejecuta Trivy, kube-bench y Polaris | scripts/setup/ |
-| Fail2ban | Banea IPs automaticamente | fail2ban/ |
-| ModSecurity | WAF con reglas OWASP CRS | docker/kube/nginx-proxy/modsec/ |
+| Fail2ban | Banea IPs automaticamente (jail sshd activo en host) | host VPS |
+| ModSecurity + OWASP CRS | WAF en nginx-ingress (modo DetectionOnly) | nginx-ingress controller |
+| Dashboard SOC | Panel consolidado de pentesting | dashboard.passprotect.es |
 
 ## Reduccion de superficie: migracion FreeIPA -> OpenLDAP
 
