@@ -25,6 +25,9 @@ spec:
               name: http
           resources:
             {{- toYaml .Values.dashboard.resources | nindent 12 }}
+          # emptyDir tmpfs en cada writable path: nginx escribe pid (/var/run),
+          # cache (/var/cache/nginx) y temp clientes (/tmp). Permite mantener
+          # readOnlyRootFilesystem en futuras iteraciones sin tocar nginx.conf
           volumeMounts:
             - name: tmp
               mountPath: /tmp

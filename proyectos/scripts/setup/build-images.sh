@@ -2,9 +2,13 @@
 # ============================================================
 # build-images.sh — Build y push capa por capa a Docker Hub
 # Orden: ubbasse -> ubseguridadd -> servicios
+# El orden es estricto: ubseguridadd FROM ubbasse, y los servicios derivan de uno u otro
+# Si se rompe el orden, los FROM fallan al pull (image not found en local)
 # ============================================================
 set -euo pipefail
 
+# Nombres ubbasse (doble s) y ubseguridadd (doble d) son intencionales:
+# evitan colisión con repos publicos existentes en Docker Hub
 REGISTRY="${REGISTRY:-dsegura97}"
 VERSION="${VERSION:-1.0.0}"
 
@@ -51,6 +55,8 @@ build_push() {
     fi
 
     log "Building ${REGISTRY}/${name}:${VERSION}..."
+    # Doble tag versionado + latest. En produccion solo se referencia la version pinneada
+    # (los manifests Helm fijan tag); :latest queda como cortesia para pulls manuales
     docker build \
         -t "${REGISTRY}/${name}:${VERSION}" \
         -t "${REGISTRY}/${name}:latest" \

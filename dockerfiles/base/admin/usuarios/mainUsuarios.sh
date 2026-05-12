@@ -21,13 +21,17 @@ check_home() {
 
 newUser() {
     local USUARIO="${USUARIO:-david}"
+    # Password aleatorio si no se inyecta por env: el login es por SSH key, asi
+    # que el password queda como "imposible de adivinar" pero presente para sudo
     local PASSWORD="${PASSWORD:-$(openssl rand -base64 16)}"
 
     if check_usuario && check_home; then
+        # -r = system user (UID < 1000). -m crea /home aunque sea system user
         useradd -rm -d "/home/${USUARIO}" -s /bin/bash "${USUARIO}"
         echo "${USUARIO}:${PASSWORD}" | chpasswd
 
         # Restricciones de permisos
+        # 750 (no 755): otros usuarios no pueden listar el home
         chmod 750 "/home/${USUARIO}"
         echo "Bienvenido ${USUARIO}" > "/home/${USUARIO}/bienvenida.txt"
 

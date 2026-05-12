@@ -1,3 +1,8 @@
+# Pod Security Standards (PSS) — sustituyen a las antiguas PodSecurityPolicies (deprecated en 1.25).
+# Modelo: enforce dicta lo permitido, audit/warn registran o avisan sin bloquear.
+# Mantenemos enforce en el nivel del values.yaml pero audit+warn=restricted siempre,
+# para detectar pods que NO cumplen restricted aunque baseline los acepte (defensa preventiva
+# antes de subir el enforce a restricted).
 {{- if .Values.security.podSecurityStandards }}
 apiVersion: v1
 kind: Namespace

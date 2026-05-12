@@ -70,6 +70,8 @@ spec:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
+            # $(DB_PASSWORD) usa expansion de Kubernetes (no shell): permite construir
+            # el connection string sin que el password se filtre en el manifest plano
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.postgresVw.user }}:$(DB_PASSWORD)@postgres-vw:5432/{{ .Values.postgresVw.database }}"
             - name: SSO_CLIENT_SECRET
@@ -178,6 +180,9 @@ spec:
                 secretKeyRef:
                   name: vaultwarden-secrets
                   key: db-password
+            # PGDATA apunta a un subdirectorio (no a la raiz del volumen) porque algunos
+            # drivers (como hostpath de MicroK8s) crean lost+found en la raiz que rompe
+            # initdb con "data directory is not empty"
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           securityContext:

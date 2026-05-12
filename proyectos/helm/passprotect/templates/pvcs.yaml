@@ -1,3 +1,8 @@
+# PVCs "huerfanos" (no creados via volumeClaimTemplates):
+#  - vaultwarden-data: app stateful pero corre en Deployment (no StatefulSet) porque
+#    1 sola replica + Recreate basta y simplifica la rotacion del pod
+#  - openldap-data/-config: idem
+#  - backup-storage: usado por el CronJob de backup
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

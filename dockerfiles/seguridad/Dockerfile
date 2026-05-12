@@ -1,3 +1,6 @@
+# FROM ubbasse: la capa seguridad hereda el hardening SSH/usuarios/sudo de la base
+# y le anade herramientas de auditoria. Cualquier servicio (vaultwarden, keycloak)
+# que herede de ubseguridadd recibe ambos hardenings sin redefinir
 FROM dsegura97/ubbasse:latest
 
 LABEL maintainer="David Segura & Francisco Parra"
@@ -17,6 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Configuracion de logrotate para logs de seguridad
+# size 5M: rotacion por tamano (no diaria). Bug arreglado: el escaneo cada 30s
+# generaba logs infinitos hasta llenar /root. Ahora cada 5 min + rotacion <5M
 RUN cat > /etc/logrotate.d/security <<'EOF'
 /root/logs/*.log {
     size 5M

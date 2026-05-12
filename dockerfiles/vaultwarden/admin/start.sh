@@ -18,5 +18,8 @@ sleep 2
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Domain: ${DOMAIN}" >> "$LOG"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] SSO enabled: ${SSO_ENABLED:-false}" >> "$LOG"
 
-# Ejecutar como usuario no-root
+# Ejecutar como usuario no-root.
+# 'su' droppea CAP_NET_BIND_SERVICE -> el binario NO puede bindear a <1024
+# aunque el container tenga la cap. Por eso ROCKET_PORT=8080 en el manifest helm.
+# exec reemplaza el shell -> vaultwarden recibe SIGTERM directamente del kubelet
 exec su -s /bin/bash vaultwarden -c "/usr/local/bin/vaultwarden"

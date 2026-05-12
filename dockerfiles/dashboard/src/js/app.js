@@ -6,7 +6,12 @@
     var currentUser = null;
     var pentestData = null; // cache de los 6 JSONs
 
-    /* === Login decorativo (demo manual) === */
+    /* === Login decorativo (demo manual) ==============================
+     * Solo "admin" o "usuario" sin validar password real. Es un fallback
+     * para demos sin SSO. La auth real va por oauth2-proxy + Keycloak
+     * (tryAutoSSO mas abajo). Este form NUNCA es la unica capa: en prod,
+     * oauth2-proxy intercepta cualquier peticion ANTES de servir el HTML.
+     * ============================================================ */
     document.getElementById('login-form').addEventListener('submit', function (e) {
         e.preventDefault();
         var username = document.getElementById('username').value.trim().toLowerCase();
@@ -94,6 +99,9 @@
                               ? email.split('@')[0]
                               : email);
             var groups = data.groups || [];
+            // Keycloak emite los groups con o sin "/" prefijo segun el mapper
+            // (tree path vs nombre). Aceptamos las dos formas para no depender
+            // de cual mapper este activo en el realm
             var isAdmin = groups.some(function (g) {
                 return g === 'vw-admins' || g === '/vw-admins' ||
                        g === 'it-dept'   || g === '/it-dept';
@@ -412,6 +420,10 @@
     }
 
     /* === Helpers === */
+    // escapeHtml en TODA interpolacion de datos del JSON: los .json son fuentes
+    // de datos confiables hoy, pero si maniana se generan desde herramientas
+    // externas (trivy json, nikto json), un payload XSS en una descripcion CVE
+    // podria ejecutarse en el browser sin esto
     function escapeHtml(s) {
         if (s == null) return '';
         return String(s)

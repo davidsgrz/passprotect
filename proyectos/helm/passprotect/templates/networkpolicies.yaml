@@ -1,4 +1,8 @@
 {{- if .Values.security.networkPolicies.enabled }}
+# Modelo: default-deny-all en cada namespace + allows explicitos por flujo.
+# podSelector: {} matchea TODOS los pods del namespace.
+# Sin allows posteriores, ningun pod puede recibir/emitir trafico (ni siquiera DNS).
+# Cada allow-* abre un flujo concreto con minimo privilegio.
 # Deny-all en vaultwarden
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -63,6 +67,8 @@ spec:
               app: postgres-vw
       ports:
         - port: 5432
+    # DNS al CoreDNS de kube-system: necesario porque el deny-all bloquea
+    # incluso el 53/udp, sin esto fallan TODOS los lookups (postgres, keycloak)
     - ports:
         - port: 53
           protocol: UDP

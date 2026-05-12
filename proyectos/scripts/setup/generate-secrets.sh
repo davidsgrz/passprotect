@@ -14,12 +14,14 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # Generar passwords seguros
+# VW_ADMIN_TOKEN: 48 bytes (no 32) porque Vaultwarden lo hashea con argon2 y se usa como token bearer del panel /admin
 VW_ADMIN_TOKEN=$(openssl rand -base64 48)
 DB_VW_ROOT_PASSWORD=$(openssl rand -base64 32)
 DB_VW_PASSWORD=$(openssl rand -base64 32)
 KC_ADMIN_PASSWORD=$(openssl rand -base64 32)
 DB_KC_ROOT_PASSWORD=$(openssl rand -base64 32)
 DB_KC_PASSWORD=$(openssl rand -base64 32)
+# SSO_CLIENT_SECRET: hex (no base64) porque Keycloak rechaza secretos con caracteres no ASCII-safe en algunos endpoints
 SSO_CLIENT_SECRET=$(openssl rand -hex 32)
 LDAP_ADMIN_PASSWORD=$(openssl rand -base64 24)
 LDAP_CONFIG_PASSWORD=$(openssl rand -base64 24)
@@ -30,6 +32,7 @@ DASHBOARD_SSO_CLIENT_SECRET=$(openssl rand -hex 32)
 DASHBOARD_OAUTH2_COOKIE_SECRET=$(openssl rand -base64 32 | tr -d '\n=' | head -c 32)
 
 # Reemplazar placeholders en config.env
+# Delimitador | en sed (no /) porque base64 contiene /, que rompe la expresion
 sed -i "s|VW_ADMIN_TOKEN=.*|VW_ADMIN_TOKEN=${VW_ADMIN_TOKEN}|" "$CONFIG_FILE"
 sed -i "s|DB_VW_ROOT_PASSWORD=.*|DB_VW_ROOT_PASSWORD=${DB_VW_ROOT_PASSWORD}|" "$CONFIG_FILE"
 sed -i "s|DB_VW_PASSWORD=.*|DB_VW_PASSWORD=${DB_VW_PASSWORD}|" "$CONFIG_FILE"

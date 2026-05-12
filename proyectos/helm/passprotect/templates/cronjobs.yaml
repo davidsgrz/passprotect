@@ -50,6 +50,9 @@ spec:
           containers:
             - name: backup
               image: "{{ .Values.postgresVw.image.repository }}:{{ .Values.postgresVw.image.tag }}"
+              # Backup logico: pg_dump | gzip directo al PVC, sin staging en disco
+              # --no-owner --no-privileges: el dump es restaurable en cualquier instancia
+              # sin depender del rol/usuario original. Necesario si se restaura en otro cluster
               command:
                 - /bin/sh
                 - -c

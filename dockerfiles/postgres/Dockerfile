@@ -1,3 +1,6 @@
+# postgres:16-alpine (no debian): imagen ~80 MB vs 240 MB. Menos paquetes = menos CVEs.
+# NO hereda de ubseguridadd porque el entrypoint oficial de postgres maneja
+# initdb/permisos del data dir; envolverlo romperia el bootstrap
 FROM postgres:16-alpine
 
 LABEL maintainer="David Segura & Francisco Parra"
@@ -16,6 +19,8 @@ RUN chmod +x /usr/local/bin/corp-start.sh
 
 # scram-sha-256 es el default en Postgres 14+, forzamos explicito
 ENV POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+# PGDATA en subdirectorio (no en raiz del volumen): algunos drivers de almacenamiento
+# crean lost+found en la raiz que rompe initdb con "data directory is not empty"
 ENV PGDATA=/var/lib/postgresql/data/pgdata
 
 EXPOSE 5432

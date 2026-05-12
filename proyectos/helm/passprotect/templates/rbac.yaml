@@ -1,3 +1,8 @@
+# automountServiceAccountToken=false en TODAS las SAs: vaultwarden/keycloak/openldap
+# no necesitan llamar a la API de Kubernetes. Sin esto, K8s monta el JWT en
+# /var/run/secrets/kubernetes.io/serviceaccount/token y un attacker dentro del pod
+# podria llamar a la API. Reduce la superficie de ataque post-compromiso.
+# monitoring-sa SI necesita la API (lee pods/logs) -> Role + RoleBinding mas abajo.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -24,6 +29,7 @@ kind: Role
 metadata:
   name: monitoring-reader
   namespace: vaultwarden
+# Solo get+list, NO watch ni create. El dashboard / cronjobs solo necesitan leer estado puntual
 rules:
   - apiGroups: [""]
     resources: ["pods", "pods/log", "services", "endpoints"]

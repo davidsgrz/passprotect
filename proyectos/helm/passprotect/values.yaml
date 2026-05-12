@@ -6,6 +6,9 @@ global:
   imageRegistry: "dsegura97"
 
 # ── Vaultwarden ──
+# La imagen vaultwarden-corp deriva del fork Timshel/vaultwarden:1.34.1-6
+# (no del upstream oficial dani-garcia/vaultwarden) porque el upstream NO ha
+# mergeado el SSO/OIDC. El fork Timshel tiene el flow OIDC funcional.
 vaultwarden:
   image:
     repository: dsegura97/vaultwarden-corp
@@ -68,6 +71,8 @@ keycloak:
     vendor: "postgres"
     database: "keycloak"
     user: "keycloak"
+  # Limits altos vs el resto: Keycloak es Quarkus/JVM, ~600 MB heap minimo
+  # con el realm corporativo + sync LDAP. Limit 1280Mi deja margen para GC
   resources:
     requests:
       cpu: 200m
@@ -176,6 +181,10 @@ monitoring:
       size: 20Gi
 
 # ── Security ──
+# enforce=baseline (no restricted) porque vaultwarden corre como root al inicio
+# (el wrapper hace 'su vaultwarden' al final) y openldap-corp necesita SETUID/KILL.
+# audit/warn=restricted en la plantilla -> avisa de pods que NO cumplen restricted
+# como senal previa para futuros endurecimientos
 security:
   podSecurityStandards:
     vaultwarden: "baseline"

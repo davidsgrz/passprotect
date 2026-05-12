@@ -22,6 +22,10 @@ spec:
         - name: keycloak
           image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          # --optimized: salta la fase 'augment' (que regenera providers + cache).
+          # Funciona porque la imagen ya hizo 'kc.sh build --db=postgres' en build-time.
+          # Sin --optimized arrancaria con augment cada vez (~30s extra) Y necesitaria
+          # escribir en filesystem -> incompatible con readOnlyRootFilesystem
           args: ["start", "--optimized"]
           ports:
             - containerPort: 8080
@@ -49,10 +53,15 @@ spec:
                   key: db-password
             - name: KC_HOSTNAME
               value: {{ include "passprotect.keycloakHost" . | quote }}
+            # HOSTNAME_STRICT=false: permite que Keycloak responda a las health probes
+            # via IP del pod, no solo al hostname publico
             - name: KC_HOSTNAME_STRICT
               value: "false"
+            # xforwarded: confia en X-Forwarded-* del ingress nginx para construir URLs absolutas
+            # Sin esto, los redirects OIDC saldrian con http://pod-ip:8080 en lugar de https://auth.passprotect.es
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
+            # HTTP_ENABLED=true: TLS se termina en el ingress, intra-cluster va plano
             - name: KC_HTTP_ENABLED
               value: "true"
           securityContext:

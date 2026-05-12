@@ -5,6 +5,7 @@ LOG_FILE="/root/logs/informe.log"
 mkdir -p /root/logs
 touch "$LOG_FILE"
 
+# source (no exec) para que las funciones newUser/make_ssh/make_sudo queden en este shell
 source /root/admin/base/usuarios/mainUsuarios.sh
 source /root/admin/base/ssh/mainSsh.sh
 source /root/admin/base/sudo/mainSudo.sh

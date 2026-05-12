@@ -34,6 +34,7 @@ if ! command -v docker &>/dev/null; then
 fi
 
 # Instalar MicroK8s
+# OJO: aqui se instala 1.30 pero el README menciona 1.32 (inconsistencia documental, no se toca)
 echo "[4/8] Instalando MicroK8s 1.30..."
 if ! command -v microk8s &>/dev/null; then
     snap install microk8s --classic --channel=1.30/stable
@@ -42,6 +43,7 @@ if ! command -v microk8s &>/dev/null; then
 fi
 
 # Habilitar addons
+# Orden importa: dns antes que ingress (resolucion interna), cert-manager el ultimo (depende de ingress para HTTP-01)
 echo "[5/8] Habilitando addons de MicroK8s..."
 microk8s enable dns
 microk8s enable ingress
@@ -81,12 +83,14 @@ microk8s kubectl wait --for=condition=Available deployment/cert-manager-webhook 
 echo "cert-manager listo (los ClusterIssuers los aplica el chart Helm)"
 
 # Firewall basico
+# Default deny incoming + allow outgoing es la postura minima esperable en un VPS expuesto a internet
 echo "[8/8] Configurando UFW..."
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp
 ufw allow 80/tcp
 ufw allow 443/tcp
+# Puerto 45678 = SSH de los contenedores admin (mainSsh.sh). No es seguridad real, reduce ruido de bots vs el 22
 ufw allow 45678/tcp  # SSH custom de contenedores
 ufw allow 16443/tcp  # MicroK8s API
 ufw --force enable

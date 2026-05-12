@@ -5,6 +5,8 @@
 
 -- Revoca permisos de creacion en el schema public al rol PUBLIC.
 -- Solo el owner de la BD (POSTGRES_USER) podra crear tablas.
+-- Mitigacion post-compromiso: si un attacker captura credenciales de un usuario
+-- autenticado pero no admin, NO puede crear tablas para almacenar payloads/exfil.
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
 -- Revoca CONNECT por defecto; se concede explicitamente al usuario app.

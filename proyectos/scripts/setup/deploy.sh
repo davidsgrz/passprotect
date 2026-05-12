@@ -24,6 +24,8 @@ if [ "$VPS_IP" = "TU_IP_VPS" ]; then
 fi
 
 # Generar values-prod.yaml
+# Pipeline: config.env (secretos en texto plano, gitignored) -> values-prod.yaml -> helm install
+# El values-prod.yaml resultante tambien queda gitignored porque contiene los mismos secretos
 echo "[1/3] Generando values-prod.yaml..."
 cat > "$VALUES_PROD" <<EOF
 # Generado automaticamente por deploy.sh — NO commitear
@@ -61,6 +63,8 @@ dashboard:
 EOF
 
 echo "[2/3] Desplegando con Helm..."
+# upgrade --install = idempotente (instala si no existe, actualiza si si)
+# --wait + timeout 10m porque keycloak hace 'kc.sh start --optimized' que tarda ~60s en arrancar
 helm upgrade --install passprotect "$HELM_DIR" \
     -f "$VALUES_PROD" \
     --create-namespace \

@@ -10,6 +10,8 @@ echo "Fecha: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
 # Trivy scan de imagenes
+# Filtrado HIGH,CRITICAL: ignoramos LOW/MEDIUM porque la base Debian/Alpine
+# arrastra cientos de CVEs por libs no usadas, ruido informativo
 echo "=== [1/3] Trivy scan de imagenes ==="
 IMAGES=(
     "dsegura97/ubbasse:latest"

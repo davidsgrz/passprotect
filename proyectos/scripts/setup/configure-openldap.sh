@@ -1,6 +1,8 @@
 #!/bin/bash
 # configure-openldap.sh — Aplica los LDIFs de bootstrap y verifica el arbol LDAP
 # Sustituye a configure-freeipa.sh (ya no usamos ipa-* ni kinit/krb5)
+# Cambio de FreeIPA a OpenLDAP: FreeIPA exige privileged container + systemd + caps
+# (SYS_ADMIN, NET_ADMIN, SYS_TIME), incompatible con Pod Security Standards baseline
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -60,6 +62,8 @@ echo "[3/5] Copiando LDIF de bootstrap al pod..."
 # (via /container/service/slapd/assets/config/bootstrap/ldif/custom/),
 # ldapadd devolvera "Already exists" (codigo 68) — lo ignoramos.
 echo "[4/5] Aplicando LDIF de bootstrap..."
+# -c (continue on error) + grep -v 'Already exists': re-ejecucion idempotente
+# Sin esto, el primer "Already exists" abortaria todo el LDIF
 "$KUBECTL" exec -n "$NAMESPACE" "$POD" -- bash -c "
     ldapadd -x -H ldap://localhost:389 \
         -D '${BIND_DN}' \

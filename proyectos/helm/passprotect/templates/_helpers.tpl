@@ -31,6 +31,8 @@ app.kubernetes.io/instance: {{ .release }}
 
 {{/*
 Dominio Vaultwarden (configurable via .Values.vaultwarden.host, fallback nip.io)
+nip.io: DNS wildcard publico que devuelve la IP embebida en el subdominio.
+Util en demos/CI sin DNS propio. En prod usamos vault.passprotect.es (Cloudflare).
 */}}
 {{- define "passprotect.vwDomain" -}}
 {{- .Values.vaultwarden.host | default (printf "vault.%s.nip.io" .Values.global.vpsIp) -}}
@@ -70,6 +72,9 @@ seccompProfile:
 
 {{/*
 Security context comun para containers
+Default seguro: drop ALL caps + readOnlyRootFilesystem + no priv escalation.
+Componentes con necesidades especiales (vaultwarden, openldap) NO usan este helper
+y declaran su propio securityContext con caps minimas explicitas.
 */}}
 {{- define "passprotect.containerSecurityContext" -}}
 allowPrivilegeEscalation: false

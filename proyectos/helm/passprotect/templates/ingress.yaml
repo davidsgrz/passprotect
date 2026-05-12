@@ -1,4 +1,10 @@
 {{- if .Values.ingress.enabled }}
+{{- /*
+  ssl-redirect=false cuando cert-manager esta activo: el HTTP-01 challenge necesita
+  servir /.well-known/acme-challenge/* en HTTP plano. Si forzamos redirect a HTTPS,
+  Let's Encrypt recibe un 308 en lugar de la respuesta del solver y falla la emision.
+  Tras emitir el cert, lo dejamos en false (cert-manager renueva cada 60d y debe seguir funcionando).
+*/}}
 {{- $sslRedirect := ternary "false" "true" .Values.certManager.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -9,8 +15,10 @@ metadata:
     {{- include "passprotect.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: {{ $sslRedirect | quote }}
+    # body-size 128m: Vaultwarden permite adjuntos de hasta 128 MB por entrada
     nginx.ingress.kubernetes.io/proxy-body-size: "128m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    # limit-rps 20: rate limiting por IP, mitigacion basica anti-bruteforce a /admin
     nginx.ingress.kubernetes.io/limit-rps: "20"
     # Buffers ampliados: Vaultwarden + Keycloak SSO meten cookies grandes y
     # algunas respuestas (login, callback OIDC) exceden el default 4k -> 502.
@@ -38,6 +46,8 @@ spec:
                 name: vaultwarden
                 port:
                   number: 80
+          # /notifications/hub -> 3012: WebSocket de Vaultwarden para sync push
+          # entre clientes (cambios en una vault aparecen en tiempo real en otros dispositivos)
           - path: /notifications/hub
             pathType: Prefix
             backend:

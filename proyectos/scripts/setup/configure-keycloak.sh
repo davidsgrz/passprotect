@@ -83,6 +83,9 @@ create_realm() {
   local code
   code=$(api_status GET "/realms/${REALM}")
   local payload
+  # bruteForceProtected + failureFactor=5 + maxFailureWaitSeconds=900 (15 min):
+  # mismo tipo de bloqueo que aplicamos via fail2ban a SSH, pero a nivel aplicacion
+  # passwordPolicy: alineado con ENS Medio (longitud 12 + complejidad + historico 3)
   payload=$(cat <<JSON
 {
   "realm": "${REALM}",
@@ -262,6 +265,9 @@ JSON
 
 # === 3. LDAP federation ===
 # Devuelve el ID del componente de federation por stdout.
+# editMode=READ_ONLY: Keycloak NO escribe en LDAP, fuente de verdad = OpenLDAP
+# importEnabled=true: importa usuarios al store local de Keycloak para sesion/auditoria
+# fullSyncPeriod=3600 + changedSyncPeriod=300: sync completo cada hora, delta cada 5 min
 create_ldap_federation() {
   # IMPORTANTE: TODOS los logs aqui van a stderr (>&2) porque el stdout
   # de esta funcion captura el UUID del componente para el caller.

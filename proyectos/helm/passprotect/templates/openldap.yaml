@@ -36,6 +36,7 @@ spec:
         - name: openldap
           image: "{{ .Values.openldap.image.repository }}:{{ .Values.openldap.image.tag }}"
           imagePullPolicy: {{ .Values.openldap.image.pullPolicy }}
+          # --copy-service: el init de osixia copia LDIFs custom (bootstrap) al iniciar
           args: ["--copy-service", "--loglevel", "debug"]
           env:
             - name: LDAP_ORGANISATION
@@ -54,6 +55,8 @@ spec:
                 secretKeyRef:
                   name: openldap-secrets
                   key: config-password
+            # LDAP_TLS=false: la conexion Keycloak->OpenLDAP es intra-cluster
+            # (NetworkPolicy restringe el flujo). TLS se termina en el ingress nginx
             - name: LDAP_TLS
               value: "false"
             - name: LDAP_TLS_VERIFY_CLIENT

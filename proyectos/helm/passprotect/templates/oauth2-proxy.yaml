@@ -38,6 +38,11 @@ spec:
           image: "{{ .Values.dashboard.oauth2Proxy.image.repository }}:{{ .Values.dashboard.oauth2Proxy.image.tag }}"
           imagePullPolicy: {{ .Values.dashboard.oauth2Proxy.image.pullPolicy }}
           args:
+            # provider=keycloak-oidc usa el discovery del realm (no oidc generic) para auto-config endpoints
+            # CRITICO: requiere audience mapper en el cliente "dashboard" de Keycloak.
+            # Sin el mapper, Keycloak emite aud=[account] por defecto pero oauth2-proxy
+            # valida aud == client_id ("dashboard") y devuelve HTTP 500 en /oauth2/callback
+            # con "audience from claim aud does not match"
             - --provider=keycloak-oidc
             - --oidc-issuer-url={{ .Values.dashboard.oauth2Proxy.issuerUrl }}
             - --redirect-url={{ printf "https://%s/oauth2/callback" (include "passprotect.dashboardDomain" .) }}
@@ -47,7 +52,10 @@ spec:
             - --cookie-secure=true
             - --cookie-domain={{ include "passprotect.dashboardDomain" . }}
             - --whitelist-domain={{ include "passprotect.dashboardDomain" . }}
+            # email-domain=*: cualquier email del IdP es aceptado. Sin esto, oauth2-proxy
+            # solo dejaria pasar emails @<email-domain> -> 403 silencioso
             - --email-domain=*
+            # skip-provider-button: salta la pantalla "Sign in with Keycloak", redirige directo
             - --skip-provider-button=true
             - --pass-access-token=true
             - --pass-authorization-header=true
