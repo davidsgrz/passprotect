@@ -14,6 +14,9 @@ Nombre del chart
 
 {{/*
 Labels comunes
+Set de labels estandar de Kubernetes que se inyecta en TODOS los recursos.
+Permite filtrar facilmente: 'kubectl get all -l app.kubernetes.io/part-of=passprotect'
+muestra todo el stack a la vez. helm.sh/chart cambia con cada bump de version
 */}}
 {{- define "passprotect.labels" -}}
 helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -61,6 +64,11 @@ Dominio Keycloak (configurable via .Values.keycloak.host, fallback nip.io)
 
 {{/*
 Security context comun para pods
+Plantilla por defecto a nivel POD (no a nivel container):
+ - runAsNonRoot: kubelet rechaza arrancar el container si la imagen tiene USER root
+ - runAsUser/fsGroup 1000: UID/GID del usuario aplicacion (no root)
+ - seccompProfile RuntimeDefault: filtra syscalls peligrosas con el perfil del runtime
+   (containerd/CRI-O), exigido por Pod Security Standard "restricted"
 */}}
 {{- define "passprotect.podSecurityContext" -}}
 runAsNonRoot: true

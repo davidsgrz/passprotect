@@ -28,13 +28,17 @@ metadata:
     cert-manager.io/cluster-issuer: {{ .Values.certManager.issuer | quote }}
     {{- end }}
 spec:
+  # ingressClassName apunta al controlador nginx (otros: traefik, haproxy, etc.)
   ingressClassName: {{ .Values.ingress.className }}
   {{- if .Values.ingress.tls.enabled }}
+  # tls.secretName: nombre del Secret con cert+key. cert-manager lo crea
+  # automaticamente al detectar la annotation cluster-issuer en este Ingress
   tls:
     - hosts:
         - {{ include "passprotect.vwDomain" . }}
       secretName: vaultwarden-tls
   {{- end }}
+  # rules: por cada host externo, lista de paths -> backend service
   rules:
     - host: {{ include "passprotect.vwDomain" . }}
       http:

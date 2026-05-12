@@ -33,6 +33,9 @@ echo "Base DN: ${BASE_DN}"
 echo "Bind DN: ${BIND_DN}"
 
 # Comprobar kubectl (acepta kubectl o microk8s.kubectl)
+# command -v devuelve la ruta completa del binario o nada si no existe.
+# Probamos primero kubectl (alias instalado por init-vps.sh), luego el original
+# microk8s.kubectl, y guardamos la ruta encontrada para usarla en el resto del script
 KUBECTL=$(command -v kubectl || command -v microk8s.kubectl || true)
 if [ -z "$KUBECTL" ]; then
     echo "ERROR: No se encuentra kubectl ni microk8s.kubectl"
@@ -40,6 +43,9 @@ if [ -z "$KUBECTL" ]; then
 fi
 
 # Localizar el pod de OpenLDAP
+# Filtramos por la label app=openldap y extraemos el nombre del primer pod
+# encontrado con jsonpath. Solo hay 1 replica (Deployment con strategy=Recreate)
+# asi que .items[0] siempre es el pod correcto
 echo "[1/5] Buscando pod de OpenLDAP..."
 POD=$("$KUBECTL" get pods -n "$NAMESPACE" -l app=openldap -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
 if [ -z "$POD" ]; then
@@ -72,6 +78,11 @@ echo "[4/5] Aplicando LDIF de bootstrap..."
 "
 
 # Verificar con ldapsearch
+# Tres queries para confirmar que el LDIF se cargo correctamente:
+#  - usuarios bajo ou=people (humanos)
+#  - grupos bajo ou=groups (vw-admins, vw-users, it-dept)
+#  - cuentas de servicio bajo ou=services (svc-keycloak-bind)
+# El grep -E filtra solo los atributos relevantes para no inundar la salida
 echo "[5/5] Verificando arbol LDAP..."
 echo ""
 echo "─── Usuarios en ou=people ───"

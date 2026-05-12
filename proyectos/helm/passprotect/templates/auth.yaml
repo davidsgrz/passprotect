@@ -27,6 +27,8 @@ spec:
           # Sin --optimized arrancaria con augment cada vez (~30s extra) Y necesitaria
           # escribir en filesystem -> incompatible con readOnlyRootFilesystem
           args: ["start", "--optimized"]
+          # Dos puertos: 8080 servicio HTTP de Keycloak (login, OIDC, API admin)
+          # y 9000 metricas (Prometheus). El puerto 9000 NO esta expuesto al ingress
           ports:
             - containerPort: 8080
               name: http
@@ -75,6 +77,12 @@ spec:
               mountPath: /opt/keycloak/logs
             - name: kc-data
               mountPath: /opt/keycloak/data
+          # Keycloak expone tres endpoints de salud separados (Quarkus health):
+          #  /health/started -> el contexto Quarkus arranco
+          #  /health/live    -> la JVM esta viva, responde al loop principal
+          #  /health/ready   -> ya conecto a la BD y el realm esta cargado
+          # startupProbe gives 10 minutos (60 * 10s) porque el primer arranque con
+          # JVM "frio" + migracion de schema puede tardar bastante en VPS modesto
           startupProbe:
             httpGet:
               path: /health/started

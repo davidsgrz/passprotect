@@ -46,10 +46,17 @@ spec:
             - --provider=keycloak-oidc
             - --oidc-issuer-url={{ .Values.dashboard.oauth2Proxy.issuerUrl }}
             - --redirect-url={{ printf "https://%s/oauth2/callback" (include "passprotect.dashboardDomain" .) }}
+            # upstream: el dashboard real al que oauth2-proxy reenvia tras validar
             - --upstream=http://dashboard.monitoring.svc.cluster.local:3000
+            # http-address: bindeo del propio oauth2-proxy. 0.0.0.0 para que el
+            # ingress pueda alcanzarlo desde otra IP (no solo localhost del pod)
             - --http-address=0.0.0.0:4180
+            # reverse-proxy=true: confiar en X-Forwarded-* del ingress nginx
             - --reverse-proxy=true
+            # cookie-secure: la cookie de sesion solo viaja sobre HTTPS
             - --cookie-secure=true
+            # cookie-domain + whitelist-domain: limita la cookie y los redirects al
+            # dominio del dashboard, asi no se puede usar como open-redirect
             - --cookie-domain={{ include "passprotect.dashboardDomain" . }}
             - --whitelist-domain={{ include "passprotect.dashboardDomain" . }}
             # email-domain=*: cualquier email del IdP es aceptado. Sin esto, oauth2-proxy
@@ -57,11 +64,17 @@ spec:
             - --email-domain=*
             # skip-provider-button: salta la pantalla "Sign in with Keycloak", redirige directo
             - --skip-provider-button=true
+            # pass-* / set-*: oauth2-proxy reinyecta el JWT (Authorization: Bearer)
+            # y otros headers (X-Auth-*) hacia el upstream. Asi el dashboard puede
+            # leer email/groups del usuario via /oauth2/userinfo (ver app.js)
             - --pass-access-token=true
             - --pass-authorization-header=true
             - --set-authorization-header=true
             - --set-xauthrequest=true
+            # PKCE S256 (Proof Key for Code Exchange): mitigacion estandar contra
+            # interceptacion del authorization code en el flow OIDC
             - --code-challenge-method=S256
+            # scopes pedidos al issuer: openid (obligatorio), email + profile (claims)
             - --scope=openid email profile
           env:
             - name: OAUTH2_PROXY_CLIENT_ID

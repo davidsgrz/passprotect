@@ -1,6 +1,9 @@
 #!/bin/bash
 # Configuracion sudo — privilegios limitados (principio de minimo privilegio)
 
+# Crea un fichero en /etc/sudoers.d/<usuario> con los comandos permitidos via sudo.
+# La gracia de /etc/sudoers.d/ frente a editar /etc/sudoers directamente: cada
+# usuario tiene su fichero propio, mas facil de auditar/quitar
 make_sudo() {
     local USUARIO="${USUARIO:-david}"
     # NOPASSWD limitado a 3 comandos concretos, NO 'ALL'.

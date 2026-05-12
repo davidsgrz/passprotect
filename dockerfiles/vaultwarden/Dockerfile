@@ -1,3 +1,10 @@
+# Multi-stage build:
+#  Stage 1 (vw-source): solo nos sirve para extraer el binario y el web-vault
+#                       de la imagen oficial Timshel. No se publica.
+#  Stage 2 (final):     parte de ubseguridadd (con nuestro hardening) y le
+#                       inyecta los binarios del stage 1 con COPY --from
+# Asi conseguimos vaultwarden+SSO encima de NUESTRA capa segura, sin perder
+# las garantias del fork Timshel
 FROM timshel/vaultwarden:1.34.1-6 AS vw-source
 
 FROM dsegura97/ubseguridadd:latest
@@ -30,6 +37,8 @@ COPY --from=vw-source /vaultwarden /usr/local/bin/vaultwarden
 COPY --from=vw-source /web-vault_button /web-vault
 
 # Hardening: usuario no root para ejecutar Vaultwarden
+# -r = system user (UID < 1000), -d /data fija el home al directorio de datos.
+# El binario corre con este UID tras el 'su vaultwarden' del start.sh wrapper
 RUN groupadd -r vaultwarden && useradd -r -g vaultwarden -d /data vaultwarden
 RUN mkdir -p /data && chown vaultwarden:vaultwarden /data
 

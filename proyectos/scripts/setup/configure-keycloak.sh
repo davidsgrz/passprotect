@@ -35,7 +35,12 @@ VW_REDIRECT="${VW_DOMAIN}/identity/connect/oidc-signin"
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 err() { echo "ERROR: $*" >&2; exit 1; }
 
+# Variable global donde guardamos el bearer token JWT del admin de Keycloak.
+# Lo rellena get_token() y lo consumen api()/api_status() en cada llamada
 TOKEN=""
+# Pide un token al endpoint OIDC de Keycloak con grant_type=password (Resource
+# Owner Password Credentials). Se autentica como el admin del realm 'master'
+# usando el cliente built-in 'admin-cli', y guarda el access_token en $TOKEN
 get_token() {
   # IMPORTANTE: --data-urlencode (no -d) porque el password puede contener
   # caracteres como '+' o '=' (base64) que en application/x-www-form-urlencoded
@@ -50,6 +55,10 @@ get_token() {
 }
 
 # api METHOD PATH [JSON_BODY]
+# Wrapper sobre curl para llamar al endpoint admin de Keycloak.
+# Recibe metodo HTTP (GET/POST/PUT), path (ej: /realms/corporativo) y body opcional
+# en JSON. Inyecta el bearer token en cada llamada para no repetirlo manualmente.
+# Devuelve el cuerpo de la respuesta por stdout
 api() {
   local method="$1" path="$2" body="${3:-}"
   if [ -n "$body" ]; then
@@ -64,6 +73,9 @@ api() {
 }
 
 # api_status METHOD PATH [JSON_BODY] -> imprime HTTP status code
+# Variante de api() que descarta el cuerpo (-o /dev/null) y solo imprime el codigo
+# HTTP de respuesta. Util para checkear si un recurso existe (200) o no (404)
+# antes de decidir entre POST (crear) o PUT (actualizar)
 api_status() {
   local method="$1" path="$2" body="${3:-}"
   if [ -n "$body" ]; then
@@ -129,6 +141,10 @@ JSON
 }
 
 # === 2. Cliente OIDC vaultwarden ===
+# Crea (o actualiza) el cliente OIDC que usara Vaultwarden para el flow SSO.
+# Confidential client (publicClient=false) con secret + PKCE S256, redirect a
+# /identity/connect/oidc-signin de Vaultwarden. Idempotente: comprueba si existe
+# por clientId y hace PUT en lugar de POST si ya esta dado de alta
 create_client() {
   log "[2/6] Cliente OIDC '${SSO_CLIENT_ID}'"
   local existing
@@ -181,6 +197,9 @@ create_dashboard_client() {
   fi
   local DASH_DOMAIN="${DASHBOARD_DOMAIN:-https://dashboard.passprotect.es}"
   # Asegurar prefijo https://
+  # Si el DOMAIN viene "pelado" (ej: dashboard.passprotect.es) le anadimos https://
+  # Si ya tiene esquema (http o https) lo dejamos como esta. Sin esquema, Keycloak
+  # rechaza el redirectUri con "Invalid redirect_uri"
   case "$DASH_DOMAIN" in
     https://*) ;;
     http://*) ;;
@@ -367,6 +386,11 @@ JSON
 }
 
 # === 5. Sync usuarios + grupos ===
+# Dispara dos sincronizaciones manuales contra OpenLDAP:
+#  1) triggerFullSync: importa todos los usuarios del subarbol ou=people al store de Keycloak
+#  2) Sync del group-mapper (fedToKeycloak): trae los grupos de ou=groups
+# El sleep 2 es una cortesia para que el job async termine antes de seguir.
+# Al final imprime el contador para verificar que la importacion fue OK
 sync_ldap() {
   local fed_id="$1"
   log "[5/6] Sync LDAP"
@@ -427,6 +451,10 @@ enforce_2fa() {
   fi
 }
 
+# Punto de entrada del script.
+# Verifica conectividad contra Keycloak (well-known discovery), pide token admin,
+# y orquesta las 6 fases en orden: realm -> cliente vw -> cliente dashboard ->
+# federation LDAP -> group mapper -> sync -> 2FA obligatorio
 main() {
   log "=== configure-keycloak.sh ==="
   log "URL    : $KC_URL"

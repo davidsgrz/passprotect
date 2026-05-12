@@ -1,3 +1,7 @@
+# CronJob: como el cron clasico de Linux pero gestionado por K8s.
+# Por cada disparo del schedule, lanza un Job que crea un Pod efimero, lo
+# ejecuta hasta completion, y lo borra al terminar. RestartPolicy=OnFailure
+# significa que si el container falla, K8s lo reintenta hasta backoffLimit
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -6,6 +10,7 @@ metadata:
   labels:
     {{- include "passprotect.labels" . | nindent 4 }}
 spec:
+  # schedule en formato cron clasico: '0 */6 * * *' = cada 6h en minuto 0
   schedule: {{ .Values.monitoring.audit.schedule | quote }}
   jobTemplate:
     spec:

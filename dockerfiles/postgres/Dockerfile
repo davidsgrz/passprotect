@@ -11,6 +11,10 @@ LABEL version="1.0.0"
 COPY dockerfiles/postgres/hardening/postgresql.conf /etc/postgresql/postgresql.conf
 
 # Inicializacion de seguridad
+# Cualquier .sql, .sh o .sql.gz colocado en /docker-entrypoint-initdb.d/ se
+# ejecuta UNA VEZ al inicializar el cluster (cuando $PGDATA esta vacio).
+# Los ficheros se ejecutan en orden alfabetico, por eso usamos prefijo "99-"
+# para que se ejecute despues de las inits oficiales de la imagen
 COPY dockerfiles/postgres/hardening/init-security.sql /docker-entrypoint-initdb.d/99-security.sql
 
 # Wrapper con log corporativo (mantiene el patron de start.sh de ubseguridadd)
@@ -25,5 +29,9 @@ ENV PGDATA=/var/lib/postgresql/data/pgdata
 
 EXPOSE 5432
 
+# ENTRYPOINT corp-start.sh = nuestro wrapper de logging.
+# CMD = comando que recibe el wrapper como $@. El wrapper hace exec hacia
+# docker-entrypoint.sh con esos args, que termina lanzando 'postgres -c ...'
+# Asi mantenemos el flow oficial de la imagen pero con un log de arranque propio
 ENTRYPOINT ["/usr/local/bin/corp-start.sh"]
 CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

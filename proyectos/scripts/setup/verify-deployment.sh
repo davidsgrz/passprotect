@@ -13,9 +13,13 @@ fi
 
 source "$CONFIG_FILE"
 
+# Contadores para el resumen final
 PASS=0
 FAIL=0
 
+# Funcion generica de check: recibe un nombre legible y un comando bash a ejecutar.
+# Imprime el nombre con padding fijo, ejecuta el comando silenciado (&>/dev/null)
+# y pinta OK/FAIL segun el exit code. Asi cada check es una linea limpia
 check() {
     local name="$1"
     local cmd="$2"
@@ -33,6 +37,8 @@ echo "=== PassProtect — Verificacion de despliegue ==="
 echo ""
 
 # Kubernetes pods
+# Para cada componente sacamos el .status.phase del primer pod con la label app=<nombre>
+# y comprobamos que sea "Running". Si esta Pending/CrashLoopBackOff/Error -> FAIL
 echo "[Kubernetes Pods]"
 check "Vaultwarden pod" "kubectl get pods -n vaultwarden -l app=vaultwarden -o jsonpath='{.items[0].status.phase}' | grep -q Running"
 check "Postgres-VW pod" "kubectl get pods -n vaultwarden -l app=postgres-vw -o jsonpath='{.items[0].status.phase}' | grep -q Running"
@@ -57,12 +63,18 @@ check "Keycloak ingress" "kubectl get ingress -n auth keycloak-ingress"
 echo ""
 
 # HTTP healthchecks
+# Verificamos los endpoints publicos a traves del ingress (no del ClusterIP).
+# /alive es el liveness propio de Vaultwarden, /health/ready el de Keycloak (Quarkus).
+# Esto valida toda la cadena: ingress nginx -> service -> pod -> app responde 200
 echo "[HTTP Healthchecks]"
 check "Vaultwarden /alive" "curl -sk https://vault.passprotect.es/alive"
 check "Keycloak /health/ready" "curl -sk https://auth.passprotect.es/health/ready"
 echo ""
 
 # PVCs (StatefulSet PVCs tienen formato data-<sts>-<ordinal>)
+# Comprobamos que cada PVC esta Bound (ligado a un PV concreto). Si esta Pending,
+# el storageClass no esta funcionando y el pod no podra arrancar.
+# Los PVC de StatefulSet (postgres) se llaman data-<sts>-0 (volumeClaimTemplate)
 echo "[Persistent Volumes]"
 check "vaultwarden-data PVC" "kubectl get pvc -n vaultwarden vaultwarden-data -o jsonpath='{.status.phase}' | grep -q Bound"
 check "postgres-vw PVC" "kubectl get pvc -n vaultwarden data-postgres-vw-0 -o jsonpath='{.status.phase}' | grep -q Bound"

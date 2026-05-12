@@ -10,6 +10,9 @@ metadata:
   namespace: vaultwarden
   labels:
     {{- include "passprotect.labels" . | nindent 4 }}
+# accessModes ReadWriteOnce: el volumen lo monta UN solo nodo a la vez.
+# Es el modo soportado por hostpath storage de MicroK8s. Suficiente porque tenemos
+# 1 sola replica de cada componente. Para multi-pod necesitariamos ReadWriteMany (NFS/Ceph)
 spec:
   accessModes: [ReadWriteOnce]
   resources:

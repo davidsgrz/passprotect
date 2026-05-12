@@ -9,6 +9,12 @@ LABEL version="1.0.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Herramientas de auditoria que se anaden a la capa base:
+#  tcpdump/nmap: trafico y descubrimiento de puertos
+#  lynis: auditoria sistema (politicas, kernel, ssh, sudo, etc.)
+#  rkhunter: rootkit hunter, busca firmas de rootkits conocidos
+#  aide: integridad de ficheros (detecta cambios en binarios criticos)
+#  logrotate: rotacion automatica de logs (evita que crezcan sin limite)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tcpdump \
     nmap \

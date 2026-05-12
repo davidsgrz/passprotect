@@ -45,6 +45,10 @@ rules:
     resources: ["pods", "pods/log", "services", "endpoints"]
     verbs: ["get", "list"]
 ---
+# RoleBinding: enlaza una ServiceAccount con un Role.
+# Aqui damos a la SA "monitoring-sa" (que vive en namespace monitoring) los
+# permisos del Role "monitoring-reader" pero EN EL NAMESPACE vaultwarden.
+# Asi monitoring puede leer pods/logs de vaultwarden sin ser admin de ese ns
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:

@@ -12,7 +12,10 @@ set -euo pipefail
 REGISTRY="${REGISTRY:-dsegura97}"
 VERSION="${VERSION:-1.0.0}"
 
+# Codigos ANSI para colorear la salida en terminal: NC = "no color" (reset)
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
+# Helpers de log: log() info, ok() exito, err() aborta, warn() advertencia.
+# Mantienen consistencia visual durante todo el build sin repetir formato
 log()  { echo -e "${CYAN}[*]${NC} $1"; }
 ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
 err()  { echo -e "${RED}[!]${NC} $1"; exit 1; }
@@ -34,6 +37,9 @@ echo ""
 command -v docker >/dev/null || err "Docker no esta instalado"
 docker info >/dev/null 2>&1 || err "Docker daemon no esta corriendo"
 
+# Comprobamos que hay sesion activa en Docker Hub buscando 'Username:' en
+# 'docker info'. Si no la hay, ofrecemos lanzar 'docker login' de forma interactiva.
+# Sin login el push fallara con "denied: requested access to the resource is denied"
 if ! docker info 2>/dev/null | grep -q "Username:"; then
     warn "No hay sesion activa en Docker Hub"
     log "Ejecuta: docker login"
@@ -46,6 +52,9 @@ if ! docker info 2>/dev/null | grep -q "Username:"; then
 fi
 ok "Docker listo, sesion activa"
 
+# Funcion reutilizable: dado un nombre de imagen y un Dockerfile,
+# hace el build local y el push a Docker Hub (con dos tags: version y latest).
+# Se usa para las 2 capas base + las 5 imagenes de servicio
 build_push() {
     local name="$1"
     local dockerfile="$2"
@@ -80,6 +89,10 @@ build_push "ubseguridadd" "dockerfiles/seguridad/Dockerfile"
 echo ""
 log "==== FASE 3/3: Servicios custom ===="
 
+# Array de servicios en formato "nombre-imagen:ruta-dockerfile".
+# El bucle de abajo separa cada entrada por ':' usando expansion de bash:
+#   ${svc%%:*} = todo antes del primer ':'  -> nombre
+#   ${svc##*:} = todo despues del ultimo ':' -> ruta
 SERVICES=(
     "vaultwarden-corp:dockerfiles/vaultwarden/Dockerfile"
     "keycloak-corp:dockerfiles/keycloak/Dockerfile"

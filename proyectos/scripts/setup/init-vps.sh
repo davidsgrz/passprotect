@@ -20,6 +20,8 @@ echo "[1/8] Actualizando sistema..."
 apt-get update && apt-get upgrade -y
 
 # Instalar dependencias base
+# curl/wget para descargas, git para clonar repos, jq para parsear JSON de la API
+# de Keycloak, openssl para generar secretos, fail2ban + ufw para hardening de red
 echo "[2/8] Instalando dependencias..."
 apt-get install -y \
     curl wget git jq openssl \
@@ -27,6 +29,9 @@ apt-get install -y \
     gnupg lsb-release fail2ban ufw
 
 # Instalar Docker
+# Docker se usa para construir las imagenes del proyecto antes de subirlas a
+# Docker Hub. Se instala via el script oficial get.docker.com (ultima version)
+# y se anade el usuario al grupo docker para no necesitar sudo en cada comando
 echo "[3/8] Instalando Docker..."
 if ! command -v docker &>/dev/null; then
     curl -fsSL https://get.docker.com | sh
@@ -53,6 +58,8 @@ microk8s enable metrics-server
 microk8s enable cert-manager
 
 # Alias kubectl y helm
+# MicroK8s mete sus binarios bajo el namespace microk8s.* para no chocar con
+# instalaciones nativas. Creamos aliases para escribir 'kubectl' y 'helm' a secas
 echo "[6/8] Configurando aliases..."
 snap alias microk8s.kubectl kubectl
 snap alias microk8s.helm3 helm
@@ -66,6 +73,10 @@ fi
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-admin@passprotect.es}"
 
 # Crear namespaces
+# Tres namespaces para separar dominios: vaultwarden (app password manager),
+# auth (Keycloak + OpenLDAP) y monitoring (dashboard + cronjobs).
+# Truco --dry-run=client | apply: idempotente. Si el namespace ya existe no falla,
+# si no existe lo crea. Equivalente a 'create namespace ... --if-not-exists'
 microk8s kubectl create namespace vaultwarden --dry-run=client -o yaml | microk8s kubectl apply -f -
 microk8s kubectl create namespace auth --dry-run=client -o yaml | microk8s kubectl apply -f -
 microk8s kubectl create namespace monitoring --dry-run=client -o yaml | microk8s kubectl apply -f -

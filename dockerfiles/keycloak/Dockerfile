@@ -1,3 +1,6 @@
+# Multi-stage build identico al de vaultwarden: extraemos /opt/keycloak de la
+# imagen oficial y lo copiamos sobre nuestra capa de seguridad.
+# Permite tener Keycloak con NUESTRO hardening base sin mantener un fork del binario
 FROM quay.io/keycloak/keycloak:24.0 AS kc-source
 
 FROM dsegura97/ubseguridadd:latest
@@ -7,6 +10,9 @@ LABEL version="1.0.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Keycloak corre sobre Quarkus + GraalVM nativo, pero en esta imagen usamos la
+# version JVM tradicional (mas simple). Necesita JRE 17 instalado en el sistema.
+# -headless: no incluye libs de GUI (X11, awt) que no usamos en server
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jre-headless \
     && apt-get clean \
@@ -17,6 +23,9 @@ COPY --from=kc-source /opt/keycloak /opt/keycloak
 # Tema corporativo PassProtect (login + 2FA) alineado con paleta del dashboard
 COPY dockerfiles/keycloak/themes/passprotect /opt/keycloak/themes/passprotect
 
+# Crea usuario sistema 'keycloak' y le da ownership de /opt/keycloak.
+# Quarkus puede arrancar como root pero las best practices dicen que NO,
+# y K8s ademas lo enforce con runAsNonRoot del podSecurityContext
 RUN groupadd -r keycloak && useradd -r -g keycloak -d /opt/keycloak keycloak \
     && chown -R keycloak:keycloak /opt/keycloak
 

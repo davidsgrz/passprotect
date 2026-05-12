@@ -4,6 +4,10 @@
 # para detectar pods que NO cumplen restricted aunque baseline los acepte (defensa preventiva
 # antes de subir el enforce a restricted).
 {{- if .Values.security.podSecurityStandards }}
+# Las labels pod-security.kubernetes.io/* aplicadas al Namespace activan PSS.
+# Tres niveles disponibles: privileged (sin restricciones), baseline (sin caps
+# peligrosas, sin hostPath), restricted (todo lo de baseline + runAsNonRoot,
+# readOnlyRootFilesystem, drop ALL caps, seccompProfile)
 apiVersion: v1
 kind: Namespace
 metadata:

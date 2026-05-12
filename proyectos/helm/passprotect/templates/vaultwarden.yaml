@@ -118,6 +118,10 @@ spec:
           emptyDir:
             sizeLimit: 100Mi
 ---
+# Service ClusterIP (default): expone el pod dentro del cluster con DNS estable
+# 'vaultwarden.vaultwarden.svc.cluster.local'. Hace port-mapping: el ingress
+# habla al puerto 80 del Service, que reenvia al puerto 8080 del pod (donde
+# vaultwarden bindea tras el 'su' que dropea NET_BIND_SERVICE)
 apiVersion: v1
 kind: Service
 metadata:
@@ -137,6 +141,11 @@ spec:
       targetPort: 3012
 ---
 # ── PostgreSQL Vaultwarden — StatefulSet (sustituye a mariadb-vw) ──
+# StatefulSet (no Deployment) por dos razones:
+#  1) El pod recibe un nombre estable (postgres-vw-0) y un PVC dedicado por replica
+#     via volumeClaimTemplates. Si rota, el nuevo pod se reconecta a su mismo PVC
+#  2) Si en el futuro escalamos a HA, los pods se crean en orden (0, 1, 2) con
+#     identidad fija (necesario para replicacion master-slave)
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -194,6 +203,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+          # pg_isready es el utility oficial de Postgres para checkear si acepta
+          # conexiones. Mejor que un simple TCP check porque comprueba que el
+          # backend responde a queries (no solo que el puerto esta abierto)
           livenessProbe:
             exec:
               command: ["pg_isready", "-U", "{{ .Values.postgresVw.user }}", "-d", "{{ .Values.postgresVw.database }}"]
@@ -208,6 +220,8 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 3
             failureThreshold: 2
+  # volumeClaimTemplates: el StatefulSet crea un PVC por replica con nombre
+  # data-postgres-vw-<n>. Si el pod se reemplaza, el PVC sobrevive y se reconecta
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -217,6 +231,11 @@ spec:
           requests:
             storage: {{ .Values.postgresVw.persistence.size }}
 ---
+# Service "headless" (clusterIP: None): no asigna IP virtual al Service.
+# En lugar de balancear, expone DNS A-records para cada pod del StatefulSet:
+# postgres-vw-0.postgres-vw.vaultwarden.svc.cluster.local
+# Es el patron requerido para StatefulSets cuando las replicas necesitan
+# direccionarse individualmente (replicacion master/slave, sharding, etc.)
 apiVersion: v1
 kind: Service
 metadata:

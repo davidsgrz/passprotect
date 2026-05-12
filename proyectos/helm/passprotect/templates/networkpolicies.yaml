@@ -13,6 +13,10 @@ spec:
   podSelector: {}
   policyTypes: [Ingress, Egress]
 ---
+# Abre la entrada al pod vaultwarden SOLO desde pods del namespace "ingress"
+# (donde corre nginx-ingress de MicroK8s). Los puertos abiertos son 8080 (HTTP
+# de la app) y 3012 (WebSocket para sync push). Cualquier otro origen rebota
+# contra el default-deny-all
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -32,6 +36,10 @@ spec:
         - port: 8080  # vaultwarden bind unprivileged tras 'su' droppea NET_BIND_SERVICE
         - port: 3012
 ---
+# Postgres-vw: SOLO acepta conexiones del pod vaultwarden (mismo namespace).
+# El podSelector matchea por label, no por nombre de pod, asi que sigue
+# funcionando aunque el pod se reemplace. Otros pods en el ns vaultwarden
+# (ej: si un dia metemos algo de monitoring aqui) NO podrian leer la BD
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -125,6 +133,11 @@ spec:
       ports:
         - port: 8080
 ---
+# Egress de Keycloak: 3 destinos permitidos.
+#  1) postgres-kc:5432 para almacenar realms/usuarios/sesiones
+#  2) openldap:389 (LDAP plano) y :636 (LDAPS) para LDAP federation
+#  3) DNS al CoreDNS de kube-system (53/udp+tcp)
+# Cualquier otro destino (internet, otros namespaces) queda bloqueado por deny-all
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

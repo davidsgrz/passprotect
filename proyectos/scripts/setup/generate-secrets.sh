@@ -2,6 +2,9 @@
 # generate-secrets.sh — Genera todos los passwords con openssl rand
 set -euo pipefail
 
+# Resolvemos rutas absolutas: SCRIPT_DIR es la carpeta donde esta este .sh,
+# PROJECT_DIR sube 3 niveles hasta la raiz del repo (donde esta config.env).
+# Asi el script funciona aunque se invoque desde cualquier sitio.
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 CONFIG_FILE="$PROJECT_DIR/config.env"
@@ -43,6 +46,8 @@ sed -i "s|SSO_CLIENT_SECRET=.*|SSO_CLIENT_SECRET=${SSO_CLIENT_SECRET}|" "$CONFIG
 sed -i "s|LDAP_ADMIN_PASSWORD=.*|LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}|" "$CONFIG_FILE"
 sed -i "s|LDAP_CONFIG_PASSWORD=.*|LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD}|" "$CONFIG_FILE"
 # Append-or-replace para las nuevas vars (compatibilidad con config.env preexistente)
+# Si la variable ya existe en config.env la actualizamos con sed; si no, la
+# agregamos al final con echo. Asi soportamos config.env antiguos que no la tenian
 if grep -q "^DASHBOARD_SSO_CLIENT_SECRET=" "$CONFIG_FILE"; then
     sed -i "s|DASHBOARD_SSO_CLIENT_SECRET=.*|DASHBOARD_SSO_CLIENT_SECRET=${DASHBOARD_SSO_CLIENT_SECRET}|" "$CONFIG_FILE"
 else

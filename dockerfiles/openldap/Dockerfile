@@ -33,6 +33,9 @@ COPY dockerfiles/openldap/bootstrap/01-users.ldif \
 
 # ---------- Variables por defecto ----------
 # Estas se sobreescriben en docker-compose y en el Deployment de K8s.
+# LDAP_BACKEND=mdb: backend Memory-Mapped Database (sucesor de hdb/bdb).
+# Mas rapido en lecturas, menos consumo de RAM, default recomendado en OpenLDAP 2.4+.
+# LDAP_LOG_LEVEL=256: stats (loguea conexiones + operaciones, sin trace verbose)
 ENV LDAP_ORGANISATION="PassProtect Corp" \
     LDAP_DOMAIN="corp.local" \
     LDAP_BASE_DN="dc=corp,dc=local" \

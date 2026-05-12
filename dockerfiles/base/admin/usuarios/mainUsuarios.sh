@@ -1,6 +1,9 @@
 #!/bin/bash
 # Gestion de usuarios — creacion con permisos restringidos
 
+# Devuelve 0 (success) si el usuario NO existe en /etc/passwd (-> se puede crear),
+# 1 (fail) si ya existe (evita pisar uno preexistente). El "^" del grep ancla al
+# inicio de linea para no matchear nombres similares (ej: "david2")
 check_usuario() {
     local USUARIO="${USUARIO:-david}"
     if grep -q "^${USUARIO}:" /etc/passwd; then
@@ -10,6 +13,8 @@ check_usuario() {
     return 0
 }
 
+# Idem para /home/<usuario>: 0 si no existe, 1 si ya hay un home preexistente.
+# Combinado con check_usuario, garantiza que solo creamos usuarios "limpios"
 check_home() {
     local USUARIO="${USUARIO:-david}"
     if [ -d "/home/${USUARIO}" ]; then

@@ -16,8 +16,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 1
 fi
 
+# 'source' carga las variables de config.env como si las exportara aqui mismo
+# (VPS_IP, VW_ADMIN_TOKEN, etc.) para usarlas en la generacion del YAML
 source "$CONFIG_FILE"
 
+# Sanity check: la IP placeholder por defecto es "TU_IP_VPS" en el config.env
+# del repo. Si el usuario olvido editarla, abortamos antes de generar manifests rotos
 if [ "$VPS_IP" = "TU_IP_VPS" ]; then
     echo "ERROR: Configura VPS_IP en $CONFIG_FILE"
     exit 1
@@ -71,6 +75,8 @@ helm upgrade --install passprotect "$HELM_DIR" \
     --wait --timeout 10m
 
 echo "[3/3] Verificando pods..."
+# Snapshot rapido del estado de los pods en los 3 namespaces.
+# Comprobacion mas exhaustiva en verify-deployment.sh (siguiente paso del flujo)
 kubectl get pods -n vaultwarden
 kubectl get pods -n auth
 kubectl get pods -n monitoring

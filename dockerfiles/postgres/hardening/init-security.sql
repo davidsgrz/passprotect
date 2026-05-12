@@ -11,4 +11,6 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
 -- Revoca CONNECT por defecto; se concede explicitamente al usuario app.
 -- (El entrypoint oficial ya ha creado POSTGRES_USER y su BD)
+-- PostgreSQL por defecto deja a PUBLIC con permisos para conectar a la BD postgres.
+-- Quitarlos significa que solo roles explicitamente autorizados pueden hacerlo
 REVOKE ALL ON DATABASE postgres FROM PUBLIC;

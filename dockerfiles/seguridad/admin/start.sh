@@ -11,10 +11,15 @@ SCAN_INTERVAL=300     # 5 minutos (no 30s)
 mkdir -p /root/logs
 touch "$LOG_FILE"
 
+# Ejecuta el start.sh de la capa base (que crea usuario, configura SSH y sudo)
+# antes de iniciar la auditoria propia de la capa seguridad
 load_base_layer() {
     bash /root/admin/base/start.sh
 }
 
+# Rotacion manual del log: si supera MAX_LOG_SIZE, renombra a .old y empieza
+# uno nuevo. logrotate del Dockerfile tambien lo rota, pero esto es la red de
+# seguridad por si logrotate no se ejecuta a tiempo entre escaneos
 rotate_log_if_needed() {
     if [ -f "$LOG_FILE" ]; then
         local size
@@ -26,6 +31,9 @@ rotate_log_if_needed() {
     fi
 }
 
+# Snapshot puntual de seguridad: puertos abiertos, conexiones, top consumidores
+# de RAM, espacio en disco y intentos fallidos de login. Todo el bloque dentro
+# de { ... } >> "$LOG_FILE" para escribir en una sola operacion al fichero
 security_audit() {
     {
         echo "=== SECURITY AUDIT $(date '+%Y-%m-%d %H:%M:%S') ==="

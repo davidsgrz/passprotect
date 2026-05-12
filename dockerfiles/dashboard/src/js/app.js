@@ -29,6 +29,8 @@
     });
 
     /* === Init Dashboard === */
+    // Llamado tras un login (manual o SSO). Oculta la pantalla de login,
+    // muestra el dashboard, pinta el nombre + badge de rol y carga los datos
     function initDashboard() {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('dashboard-screen').classList.remove('hidden');
@@ -51,6 +53,9 @@
         });
     }
 
+    // SPA sin router: muestra/oculta secciones cambiando classList. Cualquier
+    // .section pasa a 'hidden' y solo la pedida (#section-<name>) se queda visible.
+    // Tambien actualiza el item activo del nav para resaltar la seccion actual
     function showSection(name) {
         var sections = document.querySelectorAll('.section');
         for (var i = 0; i < sections.length; i++) sections[i].classList.add('hidden');
@@ -69,11 +74,17 @@
      * Keycloak emitió. Si no, redirige a /oauth2/sign_in.
      * ========================================================= */
 
+    // Inicia el flow SSO: redirige a /oauth2/sign_in (lo intercepta oauth2-proxy)
+    // pasando 'rd' (return destination) para volver a la URL actual tras el login
     function ssoLogin() {
         window.location.href = '/oauth2/sign_in?rd=' +
             encodeURIComponent(window.location.pathname);
     }
 
+    // Logout en cascada: primero pide a oauth2-proxy que limpie su cookie de
+    // sesion, y luego le pide a Keycloak que cierre la sesion en el IdP.
+    // Sin este segundo paso, un re-login pediria credenciales pero como Keycloak
+    // sigue teniendo sesion activa, el usuario NUNCA verias la pantalla de login
     function ssoLogout() {
         var kcLogout = 'https://auth.passprotect.es/realms/corporativo/protocol/openid-connect/logout' +
                        '?post_logout_redirect_uri=' + encodeURIComponent('https://dashboard.passprotect.es/');
@@ -83,6 +94,9 @@
     var ssoBtn = document.getElementById('sso-btn');
     if (ssoBtn) ssoBtn.addEventListener('click', ssoLogin);
 
+    // Al cargar la pagina, intenta detectar si ya hay sesion SSO activa.
+    // /oauth2/userinfo lo expone oauth2-proxy: si hay cookie valida -> 200 con
+    // {email, groups, ...}; si no -> 401 -> caemos al login manual de demo
     function tryAutoSSO() {
         fetch('/oauth2/userinfo', {
             headers: { 'Accept': 'application/json' },
@@ -137,6 +151,9 @@
      * Pentesting: carga y render de los 6 JSONs en src/data/
      * =========================================================== */
 
+    // Carga los 6 JSON con resultados del pentest en paralelo (Promise.all)
+    // y luego dispara los renderers de cada seccion. Si cualquiera falla,
+    // toda la cadena rebota al catch (toast de error)
     function loadAndRenderPentest() {
         var files = ['summary', 'ssl', 'trivy', 'nikto', 'waf', 'fail2ban'];
         Promise.all(files.map(function (f) {
@@ -169,6 +186,8 @@
     }
 
     /* === Overview === */
+    // Pinta la tarjeta de KPIs (calificacion SSL, CVEs, hallazgos, etc.) y la
+    // tabla de herramientas pentest con su estado (OK/aviso/fallo/pendiente)
     function renderOverview(data) {
         if (!data) return;
         var kpis = data.kpi || {};
@@ -201,6 +220,8 @@
         }
     }
 
+    // Helper: genera el HTML de una tarjeta KPI (numero grande + etiqueta).
+    // El color de fondo depende del status (ok=verde, warn=amarillo, resto=rojo)
     function kpiCard(label, kpi) {
         if (!kpi) return '';
         var status = kpi.status || 'ok';
@@ -211,6 +232,7 @@
         '</div>';
     }
 
+    // Helper: convierte un string de status en un span con la clase CSS correspondiente
     function statusBadge(status) {
         if (status === 'ok')      return '<span class="status-ok">OK</span>';
         if (status === 'warn')    return '<span class="status-warn">Aviso</span>';
@@ -220,6 +242,9 @@
     }
 
     /* === SSL / TLS === */
+    // Pinta una tarjeta por endpoint analizado en SSL Labs.
+    // Cada tarjeta muestra: grade (A+/A/B/...), info del cert, protocolos
+    // habilitados/deshabilitados y tabla de vulnerabilidades probadas (HEARTBLEED, etc.)
     function renderSsl(data) {
         if (!data) return;
         var container = document.getElementById('ssl-cards');
@@ -267,6 +292,8 @@
     }
 
     /* === Trivy === */
+    // Renderiza el resumen del scan Trivy (CVEs por severidad) y la tabla de
+    // imagenes con conteo de vulnerabilidades. Critical en rojo, High en amarillo
     function renderTrivy(data) {
         if (!data) return;
         var summary = data.summary || {};
@@ -306,6 +333,8 @@
     }
 
     /* === Nikto === */
+    // Una tarjeta por host escaneado con Nikto. Muestra hallazgos en tabla y
+    // los headers de seguridad presentes (HSTS, X-Frame-Options, CSP, etc.) como chips
     function renderNikto(data) {
         if (!data) return;
         var container = document.getElementById('nikto-cards');
@@ -338,6 +367,8 @@
     }
 
     /* === WAF === */
+    // ModSecurity + OWASP CRS. KPIs: total peticiones, bloqueadas, y desglose
+    // por tipo de ataque (SQLi, XSS, scanner). Log con los ultimos bloqueos
     function renderWaf(data) {
         if (!data) return;
         var s = data.summary || {};
@@ -373,6 +404,8 @@
     }
 
     /* === Fail2ban === */
+    // KPIs de baneos + tabla de jails configurados (sshd, nginx, etc.) y
+    // listado de baneos recientes con IP, jail, fecha y pais (geolookup)
     function renderFail2ban(data) {
         if (!data) return;
         var s = data.summary || {};
@@ -434,6 +467,8 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Notificacion flotante temporal (estilo "snackbar"). Crea el contenedor
+    // si no existe, lanza el toast con animacion fade-in y lo retira a los 2.4s
     function toast(msg, kind) {
         var container = document.querySelector('.toast-container');
         if (!container) {
